@@ -8,7 +8,7 @@
     {
       "name": "zachy-frontend",
       "runtimeExecutable": "python3",
-      "runtimeArgs": ["-m", "http.server", "5500", "--directory", "/Users/danielmejia/PycharmProjects/zachy/frontend"],
+      "runtimeArgs": ["-m", "http.server", "5500", "--directory", "frontend"],
       "port": 5500
     }
   ]
