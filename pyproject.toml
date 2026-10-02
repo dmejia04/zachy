@@ -21,6 +21,7 @@ scipy = "^1.18.1"
 garminconnect = "^0.3.16"
 selenium = "^4.49.0"
 webdriver-manager = "^4.1.2"
+garmin-auth = "^0.4.1"
 
 [tool.poetry.group.dev.dependencies]
 pytest = "^9.1.1"

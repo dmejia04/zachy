@@ -1,0 +1,1234 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Zachy</title>
+<style>
+  :root {
+    --ink: #1f1d18;
+    --paper: #ffffff;
+    --line: #e6e6e6;
+    --line-soft: #f1f1f1;
+    --moss: #4a5d3a;
+    --clay: #a8542e;
+    --muted: #7a7263;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--paper);
+    color: var(--ink);
+    font-family: -apple-system, "Helvetica Neue", Arial, sans-serif;
+    line-height: 1.5;
+  }
+  html { background: var(--paper); }
+  header {
+    padding: 32px 24px 20px;
+    border-bottom: 1px solid var(--line);
+  }
+  .header-inner {
+    max-width: 812px;
+    margin: 0 auto;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    gap: 16px;
+    flex-wrap: wrap;
+  }
+  .sync { display: flex; align-items: center; gap: 12px; }
+  .sync-info { text-align: right; font-size: 12px; color: var(--muted); line-height: 1.4; }
+  .sync-info strong { color: var(--ink); font-weight: 500; }
+  .sync-info .err { color: var(--clay); }
+  .sync-btn {
+    font: inherit;
+    font-size: 13px;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 14px;
+    border: 1px solid var(--ink);
+    border-radius: 999px;
+    background: var(--ink);
+    color: white;
+    cursor: pointer;
+  }
+  .sync-btn:hover:not(:disabled) { background: #3a372f; }
+  .sync-btn:disabled { opacity: 0.6; cursor: default; }
+  .sync-btn svg { width: 14px; height: 14px; }
+  .sync-btn.busy svg { animation: spin 0.9s linear infinite; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  header h1 {
+    margin: 0;
+    font-size: 22px;
+    font-weight: 500;
+    letter-spacing: -0.01em;
+  }
+  header p {
+    margin: 4px 0 0;
+    color: var(--muted);
+    font-size: 14px;
+  }
+  main {
+    max-width: 860px;
+    margin: 0 auto;
+    padding: 24px;
+  }
+  .list-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 14px 0;
+    border-bottom: 1px solid var(--line);
+    cursor: pointer;
+  }
+  .list-item:hover { background: #fafafa; }
+  .li-left { display: flex; flex-direction: column; gap: 2px; }
+  .li-date { font-size: 12px; color: var(--muted); }
+  .li-name { font-size: 15px; font-weight: 500; }
+  .li-right { text-align: right; font-size: 13px; color: var(--muted); }
+  .li-right strong { color: var(--ink); font-weight: 500; }
+  .tag {
+    display: inline-block;
+    font-size: 11px;
+    color: var(--moss);
+    border: 1px solid var(--moss);
+    border-radius: 3px;
+    padding: 1px 6px;
+    margin-right: 8px;
+  }
+  #detail { display: none; }
+  #detail.active { display: block; }
+  #list-view.hidden { display: none; }
+  .back {
+    color: var(--clay);
+    cursor: pointer;
+    font-size: 13px;
+    margin-bottom: 16px;
+    display: inline-block;
+  }
+  .stat-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+    margin: 20px 0;
+  }
+  .stat {
+    background: white;
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    padding: 14px;
+  }
+  .stat-label { font-size: 11px; color: var(--muted); text-transform: lowercase; }
+  .stat-value { font-size: 20px; font-weight: 500; margin-top: 2px; }
+  .detail-title { font-size: 20px; font-weight: 500; margin: 0 0 4px; }
+  .detail-date { color: var(--muted); font-size: 13px; }
+  .loading, .error { color: var(--muted); padding: 40px 0; text-align: center; }
+  .section-title {
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--muted);
+    margin: 28px 0 10px;
+  }
+  .card {
+    background: white;
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    padding: 14px;
+  }
+  table.laps {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+    font-variant-numeric: tabular-nums;
+  }
+  table.laps th {
+    text-align: right;
+    font-weight: 500;
+    font-size: 11px;
+    color: var(--muted);
+    padding: 6px 8px;
+    border-bottom: 1px solid var(--line);
+  }
+  table.laps td {
+    text-align: right;
+    padding: 6px 8px;
+    border-bottom: 1px solid var(--line-soft);
+  }
+  table.laps th:first-child, table.laps td:first-child { text-align: left; }
+  table.laps tr.hard td { background: rgba(168,84,46,0.08); }
+  .laps-wrap { max-height: 320px; overflow-y: auto; }
+  #route-svg { width: 100%; height: auto; display: block; }
+  .muted-note { color: var(--muted); font-size: 12px; margin-top: 6px; }
+  .tabs {
+    display: flex;
+    gap: 4px;
+    border-bottom: 1px solid var(--line);
+    margin: 0 0 20px;
+  }
+  .tab {
+    background: none;
+    border: none;
+    border-bottom: 2px solid transparent;
+    padding: 10px 16px;
+    margin-bottom: -1px;
+    font: inherit;
+    font-size: 14px;
+    color: var(--muted);
+    cursor: pointer;
+  }
+  .tab:hover { color: var(--ink); }
+  .tab.active { color: var(--ink); font-weight: 500; border-bottom-color: var(--clay); }
+  .panel { display: none; }
+  .panel.active { display: block; }
+  .yearly-head { display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 4px; }
+  .yearly-total { font-size: 13px; color: var(--muted); }
+  .yearly-total strong { color: var(--ink); font-weight: 500; }
+  /* One row each; scrolls sideways on narrow screens instead of wrapping. */
+  .picker { display: flex; flex-wrap: nowrap; gap: 6px; margin: 0 0 8px; overflow-x: auto; scrollbar-width: none; }
+  .picker::-webkit-scrollbar { display: none; }
+  .pick {
+    font: inherit;
+    font-size: 13px;
+    padding: 4px 9px;
+    flex: 0 0 auto;
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    background: white;
+    color: var(--ink);
+    cursor: pointer;
+    font-variant-numeric: tabular-nums;
+  }
+  .pick:hover:not(:disabled) { border-color: var(--muted); }
+  .pick.on { background: var(--ink); border-color: var(--ink); color: white; }
+  .pick:disabled { color: #c8c8c8; border-color: var(--line-soft); cursor: default; }
+  .month-summary { font-size: 13px; color: var(--muted); margin: 14px 0 4px; }
+  .month-summary strong { color: var(--ink); font-weight: 500; }
+  .compare-row { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin: 0 0 14px; }
+  .compare-label { font-size: 12px; color: var(--muted); margin-right: 4px; }
+  .chip {
+    font: inherit;
+    font-size: 12px;
+    padding: 3px 10px;
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    background: white;
+    color: var(--muted);
+    cursor: pointer;
+  }
+  .chip:hover { border-color: var(--muted); color: var(--ink); }
+  .chip.on { color: white; border-color: transparent; }
+  .chip.clear { background: none; border-style: dashed; }
+  table.compare { width: 100%; border-collapse: collapse; font-size: 13px; font-variant-numeric: tabular-nums; }
+  table.compare th { text-align: right; font-weight: 500; font-size: 11px; color: var(--muted); padding: 6px 8px; border-bottom: 1px solid var(--line); }
+  table.compare td { text-align: right; padding: 6px 8px; border-bottom: 1px solid var(--line-soft); }
+  table.compare th:first-child, table.compare td:first-child { text-align: left; }
+  .swatch { display: inline-block; width: 10px; height: 10px; border-radius: 2px; margin-right: 6px; vertical-align: -1px; }
+  .up { color: var(--moss); }
+  .down { color: var(--clay); }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-inner">
+    <div>
+      <h1>Zachy</h1>
+      <p>Running performance tracker</p>
+    </div>
+    <div class="sync">
+      <div class="sync-info" id="sync-info">&nbsp;</div>
+      <button class="sync-btn" id="sync-btn" onclick="startSync()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M21 12a9 9 0 1 1-2.64-6.36"/><path d="M21 3v6h-6"/>
+        </svg>
+        <span id="sync-label">Sync</span>
+      </button>
+    </div>
+  </div>
+</header>
+
+<main>
+  <div class="tabs">
+    <button class="tab active" data-tab="activities" onclick="switchTab('activities')">Activities</button>
+    <button class="tab" data-tab="yearly" onclick="switchTab('yearly')">Yearly</button>
+  </div>
+
+  <div id="panel-activities" class="panel active">
+  <div id="list-view">
+    <div class="picker" id="year-picker"></div>
+    <div class="picker" id="month-picker"></div>
+    <div class="month-summary" id="month-summary"></div>
+    <div id="list-content" class="loading">Loading activities…</div>
+  </div>
+
+  <div id="detail">
+    <span class="back" onclick="showList()">&larr; back to activities</span>
+    <div id="detail-content"></div>
+  </div>
+  </div>
+
+  <div id="panel-yearly" class="panel">
+
+    <div id="yearly-view">
+      <div class="yearly-head">
+        <div class="section-title" style="margin:0;">Distance per year (km)</div>
+        <div class="yearly-total" id="yearly-total-km"></div>
+      </div>
+      <div class="card" style="margin-top:10px;">
+        <div id="yearly-status" class="loading" style="padding:20px 0;">Loading…</div>
+        <canvas id="yearly-chart-km" height="100" style="display:none;"></canvas>
+      </div>
+
+      <div class="yearly-head" style="margin-top:24px;">
+        <div class="section-title" style="margin:0;">Time per year (hours)</div>
+        <div class="yearly-total" id="yearly-total-hours"></div>
+      </div>
+      <div class="card" style="margin-top:10px;">
+        <canvas id="yearly-chart-hours" height="100"></canvas>
+      </div>
+
+      <div class="yearly-head" style="margin-top:24px;">
+        <div class="section-title" style="margin:0;">Elevation gain per year (m)</div>
+        <div class="yearly-total" id="yearly-total-elev"></div>
+      </div>
+      <div class="card" style="margin-top:10px;">
+        <canvas id="yearly-chart-elev" height="100"></canvas>
+      </div>
+
+      <div class="muted-note">Running, trail, track, treadmill and ultra runs combined. The current year is partial. Click a bar to see that year by month.</div>
+    </div>
+
+    <div id="monthly-view" style="display:none;">
+      <span class="back" onclick="showYearlyOverview()">&larr; back to yearly</span>
+      <div class="section-title" id="monthly-title" style="margin-top:0;"></div>
+      <div class="compare-row" id="compare-row"></div>
+      <div class="card"><canvas id="monthly-chart" height="110"></canvas></div>
+      <div class="muted-note" id="monthly-note"></div>
+
+      <div class="section-title" style="margin-top:24px;">Cumulative progress through the year</div>
+      <div class="card"><canvas id="monthly-cumulative-chart" height="110"></canvas></div>
+
+      <div id="compare-summary" style="display:none;">
+        <div class="section-title" style="margin-top:24px;" id="compare-summary-title"></div>
+        <div class="card"><table class="compare" id="compare-table"></table></div>
+      </div>
+    </div>
+
+  </div>
+</main>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
+<script>
+const API = "http://localhost:8000";
+
+/* ---------- Chart theme: one shared look for every chart ---------- */
+const THEME = {
+  ink: "#1f1d18", muted: "#7a7263", line: "#e6e6e6", grid: "#efefef",
+  moss: "#4a5d3a", clay: "#a8542e", sage: "#b9c4a8",
+  font: '-apple-system, "Helvetica Neue", Arial, sans-serif',
+};
+
+Chart.defaults.font.family = THEME.font;
+Chart.defaults.font.size = 12;
+Chart.defaults.color = THEME.muted;
+Chart.defaults.animation.duration = 450;
+Chart.defaults.maintainAspectRatio = true;
+Chart.defaults.interaction.mode = "index";
+Chart.defaults.interaction.intersect = false;
+
+// Axes: no axis lines, soft dashed gridlines, a little breathing room on ticks.
+Object.assign(Chart.defaults.scale.border, { display: false, dash: [3, 4] });
+Chart.defaults.scale.grid.color = THEME.grid;
+Chart.defaults.scale.grid.tickLength = 0;
+Chart.defaults.scale.ticks.padding = 8;
+
+// Lines: smooth, markers only on hover. Bars: rounded tops.
+Object.assign(Chart.defaults.elements.line, { borderWidth: 2, tension: 0.3, borderCapStyle: "round" });
+Object.assign(Chart.defaults.elements.point, { radius: 0, hoverRadius: 5, hoverBorderWidth: 2, hitRadius: 8 });
+Object.assign(Chart.defaults.elements.bar, { borderRadius: 4, borderSkipped: "start" });
+
+// Legend: small square swatches, aligned right.
+Object.assign(Chart.defaults.plugins.legend, { align: "end" });
+Object.assign(Chart.defaults.plugins.legend.labels, { color: THEME.ink, boxWidth: 10, boxHeight: 10, padding: 14 });
+
+// Tooltip: light card instead of the default black box.
+Object.assign(Chart.defaults.plugins.tooltip, {
+  backgroundColor: "rgba(255,255,255,0.97)",
+  titleColor: THEME.ink,
+  bodyColor: THEME.ink,
+  footerColor: THEME.muted,
+  borderColor: THEME.line,
+  borderWidth: 1,
+  padding: 10,
+  cornerRadius: 6,
+  boxPadding: 4,
+  caretSize: 5,
+  titleFont: { weight: "600" },
+  footerFont: { weight: "400", size: 11 },
+});
+
+// 5,254 -> "5.3k" on axes; small numbers stay as-is.
+const compact = v => Math.abs(v) >= 1000
+  ? (v / 1000).toLocaleString(undefined, { maximumFractionDigits: 1 }) + "k"
+  : v.toLocaleString();
+
+// Vertical gradient under a line, strongest at the top.
+function gradientFill(rgb, alpha = 0.22) {
+  return ({ chart }) => {
+    const { ctx, chartArea } = chart;
+    if (!chartArea) return null;
+    const g = ctx.createLinearGradient(0, chartArea.top, 0, chartArea.bottom);
+    g.addColorStop(0, `rgba(${rgb},${alpha})`);
+    g.addColorStop(1, `rgba(${rgb},0)`);
+    return g;
+  };
+}
+
+// Writes each line's name (and optionally its last value) right at the end of the line,
+// nudging labels apart when lines finish close together.
+function endLabelsPlugin(formatValue) {
+  return {
+    id: "endLabels",
+    afterDatasetsDraw(chart) {
+      const { ctx } = chart;
+      const labels = [];
+      chart.data.datasets.forEach((ds, i) => {
+        const meta = chart.getDatasetMeta(i);
+        if (meta.hidden) return;
+        let j = ds.data.length - 1;
+        while (j >= 0 && ds.data[j] == null) j--;
+        if (j < 0) return;
+        const pt = meta.data[j];
+        const text = formatValue ? `${ds.label} · ${formatValue(ds.data[j])}` : ds.label;
+        labels.push({ x: pt.x + 8, y: pt.y, text, color: ds.borderColor, bold: ds.order === 0 });
+      });
+      labels.sort((a, b) => a.y - b.y);
+      for (let k = 1; k < labels.length; k++) {
+        if (labels[k].y - labels[k - 1].y < 15) labels[k].y = labels[k - 1].y + 15;
+      }
+      ctx.save();
+      ctx.textBaseline = "middle";
+      ctx.lineJoin = "round";
+      for (const l of labels) {
+        ctx.font = `${l.bold ? 600 : 500} 12px ${THEME.font}`;
+        ctx.strokeStyle = "white";
+        ctx.lineWidth = 4;
+        ctx.strokeText(l.text, l.x, l.y);
+        ctx.fillStyle = l.color;
+        ctx.fillText(l.text, l.x, l.y);
+      }
+      ctx.restore();
+    },
+  };
+}
+
+async function loadBodyChart() {
+  try {
+    const res = await fetch(`${API}/body-metrics/?limit=90`);
+    const data = (await res.json()).reverse();
+
+    const labels = data.map(d => d.date);
+    const hrv = data.map(d => d.hrv);
+    const rhr = data.map(d => d.resting_hr);
+
+    new Chart(document.getElementById("body-chart"), {
+      type: "line",
+      data: {
+        labels,
+        datasets: [
+          { label: "HRV (ms)", data: hrv, borderColor: THEME.moss, backgroundColor: THEME.moss, yAxisID: "y" },
+          { label: "Resting HR (bpm)", data: rhr, borderColor: THEME.clay, backgroundColor: THEME.clay, yAxisID: "y1" }
+        ]
+      },
+      options: {
+        responsive: true,
+        spanGaps: true,
+        scales: {
+          x: { ticks: { maxTicksLimit: 8, maxRotation: 0 }, grid: { display: false } },
+          // HRV and resting HR live on different scales, so each gets its own axis.
+          y: { position: "left", ticks: { color: THEME.moss } },
+          y1: { position: "right", ticks: { color: THEME.clay }, grid: { display: false } }
+        }
+      }
+    });
+  } catch (e) {
+    console.error("Could not load body metrics chart", e);
+  }
+}
+
+// Body metrics chart is hidden for now (its canvas was removed from the Activities page).
+// loadBodyChart();
+
+/* ---------- Activities: pick a year, then a month ---------- */
+const MONTH_LONG = ["January","February","March","April","May","June","July",
+                    "August","September","October","November","December"];
+const listState = { counts: [], year: null, month: null };   // counts: [{year, month, count}]
+
+function monthCount(year, month) {
+  const row = listState.counts.find(r => r.year === year && r.month === month);
+  return row ? row.count : 0;
+}
+
+function renderPickers() {
+  const years = [...new Set(listState.counts.map(r => r.year))].sort((a, b) => b - a);
+  document.getElementById("year-picker").innerHTML = years.map(y =>
+    `<button class="pick ${y === listState.year ? "on" : ""}" onclick="selectYear(${y})">${y}</button>`
+  ).join("");
+
+  document.getElementById("month-picker").innerHTML = MONTH_NAMES.map((m, i) => {
+    const n = monthCount(listState.year, i + 1);
+    const on = i + 1 === listState.month;
+    return `<button class="pick ${on ? "on" : ""}" ${n ? "" : "disabled"}
+              title="${n} activities" onclick="selectMonth(${i + 1})">${m}</button>`;
+  }).join("");
+
+  // On narrow screens the rows scroll sideways: keep the selected year and month visible.
+  document.querySelectorAll(".picker .pick.on").forEach(el =>
+    el.scrollIntoView({ block: "nearest", inline: "nearest" }));
+}
+
+function selectYear(year) {
+  listState.year = year;
+  // Keep the same month if it has activities in the new year, otherwise jump to its latest active month.
+  if (!monthCount(year, listState.month)) {
+    const latest = listState.counts.find(r => r.year === year);   // counts are newest first
+    listState.month = latest ? latest.month : 1;
+  }
+  renderPickers();
+  loadMonthActivities();
+}
+
+function selectMonth(month) {
+  listState.month = month;
+  renderPickers();
+  loadMonthActivities();
+}
+
+async function loadList() {
+  const container = document.getElementById("list-content");
+  try {
+    const res = await fetch(`${API}/activities/months`);
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    listState.counts = await res.json();
+    if (!listState.counts.length) {
+      container.innerHTML = `<div class="error">No activities found.</div>`;
+      return;
+    }
+    // Default: the most recent month that has activities.
+    listState.year = listState.counts[0].year;
+    listState.month = listState.counts[0].month;
+    renderPickers();
+    await loadMonthActivities();
+  } catch (e) {
+    container.innerHTML = `<div class="error">Could not reach the API. Is the server running on ${API}?</div>`;
+  }
+}
+
+async function loadMonthActivities() {
+  const { year, month } = listState;
+  const container = document.getElementById("list-content");
+  const summary = document.getElementById("month-summary");
+  container.className = "loading";
+  container.innerHTML = "Loading activities…";
+  try {
+    const res = await fetch(`${API}/activities/?year=${year}&month=${month}&limit=500`);
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const activities = await res.json();
+    if (listState.year !== year || listState.month !== month) return;   // a newer click won
+    container.className = "";
+
+    const km = activities.reduce((s, a) => s + (a.distance_km || 0), 0);
+    const secs = activities.reduce((s, a) => s + (a.duration_s || 0), 0);
+    summary.innerHTML = `<strong>${MONTH_LONG[month - 1]} ${year}</strong> &middot; ` +
+      `${activities.length} activities &middot; ${Math.round(km).toLocaleString()} km &middot; ` +
+      `${Math.round(secs / 3600)} h`;
+
+    if (!activities.length) {
+      container.innerHTML = `<div class="error">No activities in this month.</div>`;
+      return;
+    }
+
+    container.innerHTML = activities.map(a => `
+      <div class="list-item" onclick="showDetail(${a.id})">
+        <div class="li-left">
+          <span class="li-name">${a.name || "Activity"}</span>
+          <span class="li-date">${a.date} &middot; <span class="tag">${a.activity_type || "unknown"}</span></span>
+        </div>
+        <div class="li-right">
+          <strong>${a.distance_km ? a.distance_km.toFixed(2) + " km" : "—"}</strong><br>
+          ${fmtSpeedOrPace(a)}
+        </div>
+      </div>
+    `).join("");
+  } catch (e) {
+    container.className = "";
+    container.innerHTML = `<div class="error">Could not load activities (${e.message}).</div>`;
+  }
+}
+
+let detailCharts = [];
+
+function fmtPace(p) {
+  if (!p) return "—";
+  const m = Math.floor(p);
+  const s = Math.round((p - m) * 60);
+  return `${m}:${String(s).padStart(2, "0")}`;
+}
+
+// Rides read better as speed (km/h); everything else as pace (min/km).
+function fmtSpeedOrPace(a) {
+  const ride = /cycl|bik|ride/.test(a.activity_type || "");
+  if (ride && a.distance_km && a.duration_s) {
+    return `${(a.distance_km / (a.duration_s / 3600)).toFixed(1)} km/h`;
+  }
+  return a.avg_pace ? `${fmtPace(a.avg_pace)} /km` : "";
+}
+
+function fmtDuration(s) {
+  if (!s) return "—";
+  const h = Math.floor(s / 3600);
+  const m = Math.floor((s % 3600) / 60);
+  const sec = s % 60;
+  return h ? `${h}:${String(m).padStart(2, "0")}:${String(sec).padStart(2, "0")}`
+           : `${m}:${String(sec).padStart(2, "0")}`;
+}
+
+function renderRoute(points) {
+  const pts = points.filter(p => p.latitude != null && p.longitude != null);
+  if (pts.length < 2) {
+    return `<div class="muted-note">No GPS route for this activity.</div>`;
+  }
+  const lats = pts.map(p => p.latitude);
+  const lons = pts.map(p => p.longitude);
+  const minLat = Math.min(...lats), maxLat = Math.max(...lats);
+  const minLon = Math.min(...lons), maxLon = Math.max(...lons);
+
+  // Correct for longitude shrinking with latitude so the shape isn't stretched
+  const kx = Math.cos(((minLat + maxLat) / 2) * Math.PI / 180);
+  const w = Math.max((maxLon - minLon) * kx, 1e-6);
+  const h = Math.max(maxLat - minLat, 1e-6);
+  const W = 600, pad = 16;
+  const scale = (W - 2 * pad) / Math.max(w, h);
+  const width = w * scale + 2 * pad;
+  const height = h * scale + 2 * pad;
+
+  const xy = p => [
+    pad + (p.longitude - minLon) * kx * scale,
+    pad + (maxLat - p.latitude) * scale,
+  ];
+  const d = pts.map((p, i) => {
+    const [x, y] = xy(p);
+    return `${i ? "L" : "M"}${x.toFixed(1)},${y.toFixed(1)}`;
+  }).join(" ");
+  const [sx, sy] = xy(pts[0]);
+  const [ex, ey] = xy(pts[pts.length - 1]);
+
+  return `
+    <svg id="route-svg" viewBox="0 0 ${width.toFixed(0)} ${height.toFixed(0)}">
+      <path d="${d}" fill="none" stroke="#a8542e" stroke-width="2.5"
+            stroke-linejoin="round" stroke-linecap="round"/>
+      <circle cx="${sx}" cy="${sy}" r="5" fill="#4a5d3a"/>
+      <circle cx="${ex}" cy="${ey}" r="5" fill="#1f1d18"/>
+    </svg>
+    <div class="muted-note">Green = start, black = finish.</div>`;
+}
+
+function renderLaps(laps, avgHr) {
+  if (!laps.length) return `<div class="muted-note">No lap data.</div>`;
+  const rows = laps.map(l => {
+    const hard = avgHr && l.avg_hr && l.avg_hr > avgHr * 1.15;
+    return `<tr class="${hard ? "hard" : ""}">
+      <td>${l.lap_number ?? "—"}</td>
+      <td>${l.distance_km != null ? l.distance_km.toFixed(2) : "—"}</td>
+      <td>${fmtDuration(l.duration_s)}</td>
+      <td>${fmtPace(l.avg_pace)}</td>
+      <td>${l.avg_hr ? Math.round(l.avg_hr) : "—"}</td>
+      <td>${l.avg_cadence ? Math.round(l.avg_cadence) : "—"}</td>
+      <td>${l.elevation_gain != null ? Math.round(l.elevation_gain) : "—"}</td>
+    </tr>`;
+  }).join("");
+  return `
+    <div class="laps-wrap">
+      <table class="laps">
+        <thead><tr><th>lap</th><th>km</th><th>time</th><th>pace /km</th><th>hr</th><th>cadence</th><th>elev +m</th></tr></thead>
+        <tbody>${rows}</tbody>
+      </table>
+    </div>
+    <div class="muted-note">Shaded rows: heart rate more than 15% above the activity average.</div>`;
+}
+
+function drawTimeseriesCharts(points) {
+  detailCharts.forEach(c => c.destroy());
+  detailCharts = [];
+  if (!points.length) return;
+
+  const labels = points.map(p => (p.seconds_elapsed / 60).toFixed(0));
+  const base = {
+    responsive: true,
+    animation: false,
+    spanGaps: true,
+    plugins: { legend: { display: false } },
+    scales: {
+      x: { ticks: { maxTicksLimit: 8, maxRotation: 0 }, grid: { display: false },
+           title: { display: true, text: "minutes" } },
+      y: {}
+    }
+  };
+  // fmt formats values for the y-axis and the tooltip (e.g. pace as 5:24).
+  const line = (id, data, color, rgb, fmt, yOpts = {}) => {
+    const opts = JSON.parse(JSON.stringify(base));
+    Object.assign(opts.scales.y, yOpts);
+    opts.scales.y.ticks = { ...(yOpts.ticks || {}), callback: v => fmt(v) };
+    opts.plugins.tooltip = {
+      callbacks: { title: items => `${items[0].label} min`, label: ctx => fmt(ctx.parsed.y) }
+    };
+    detailCharts.push(new Chart(document.getElementById(id), {
+      type: "line",
+      data: { labels, datasets: [{
+        data, borderColor: color, borderWidth: 1.5, tension: 0.2,
+        fill: "start", backgroundColor: gradientFill(rgb, 0.18),
+      }] },
+      options: opts,
+    }));
+  };
+
+  line("ts-hr", points.map(p => p.hr), THEME.clay, "168,84,46", v => `${Math.round(v)} bpm`);
+  // Pace: clip absurd values (standing still) and flip the axis so faster is higher.
+  // Fit the axis to the real range (ignoring the slowest 2%) in whole minutes.
+  const pace = points.map(p => (p.pace && p.pace < 15) ? p.pace : null);
+  const sorted = pace.filter(v => v != null).sort((a, b) => a - b);
+  let paceAxis = { reverse: true };
+  if (sorted.length) {
+    const min = Math.floor(sorted[0]);
+    const max = Math.ceil(sorted[Math.floor(sorted.length * 0.98)]);
+    const step = max - min > 6 ? 2 : 1;
+    paceAxis = { reverse: true, min, max: min + Math.ceil((max - min) / step) * step, ticks: { stepSize: step } };
+  }
+  line("ts-pace", pace, THEME.moss, "74,93,58", v => `${fmtPace(v)} /km`, paceAxis);
+  line("ts-elev", points.map(p => p.elevation), THEME.muted, "122,114,99", v => `${Math.round(v)} m`);
+}
+
+async function showDetail(id) {
+  document.getElementById("list-view").classList.add("hidden");
+  document.getElementById("detail").classList.add("active");
+  const content = document.getElementById("detail-content");
+  content.innerHTML = `<div class="loading">Loading…</div>`;
+
+  try {
+    const res = await fetch(`${API}/activities/${id}/detail?downsample=5`);
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const a = await res.json();
+
+    content.innerHTML = `
+      <h2 class="detail-title">${a.name || "Activity"}</h2>
+      <div class="detail-date">${a.date} &middot; ${a.activity_type || ""}</div>
+      <div class="stat-grid">
+        <div class="stat"><div class="stat-label">distance</div><div class="stat-value">${a.distance_km ? a.distance_km.toFixed(2) + " km" : "—"}</div></div>
+        <div class="stat"><div class="stat-label">duration</div><div class="stat-value">${fmtDuration(a.duration_s)}</div></div>
+        <div class="stat"><div class="stat-label">avg pace</div><div class="stat-value">${fmtPace(a.avg_pace)} /km</div></div>
+        <div class="stat"><div class="stat-label">avg hr</div><div class="stat-value">${a.avg_hr ? Math.round(a.avg_hr) + " bpm" : "—"}</div></div>
+        <div class="stat"><div class="stat-label">elevation gain</div><div class="stat-value">${a.elevation_gain ? Math.round(a.elevation_gain) + " m" : "—"}</div></div>
+        <div class="stat"><div class="stat-label">calories</div><div class="stat-value">${a.calories || "—"}</div></div>
+      </div>
+
+      <div class="section-title">Laps (${a.laps.length})</div>
+      <div class="card">${renderLaps(a.laps, a.avg_hr)}</div>
+
+      <div class="section-title">Heart rate (bpm)</div>
+      <div class="card"><canvas id="ts-hr" height="90"></canvas></div>
+
+      <div class="section-title">Pace (min/km, faster is higher)</div>
+      <div class="card"><canvas id="ts-pace" height="90"></canvas></div>
+
+      <div class="section-title">Elevation (m)</div>
+      <div class="card"><canvas id="ts-elev" height="90"></canvas></div>
+
+      <div class="section-title">Route</div>
+      <div class="card">${renderRoute(a.timeseries)}</div>
+    `;
+
+    drawTimeseriesCharts(a.timeseries);
+  } catch (e) {
+    content.innerHTML = `<div class="error">Could not load this activity (${e.message}).</div>`;
+  }
+}
+
+function showList() {
+  detailCharts.forEach(c => c.destroy());
+  detailCharts = [];
+  document.getElementById("detail").classList.remove("active");
+  document.getElementById("list-view").classList.remove("hidden");
+}
+
+/* ---------- Tabs ---------- */
+let yearlyLoaded = false;
+let yearlyCharts = [];
+
+function switchTab(name) {
+  document.querySelectorAll(".tab").forEach(t =>
+    t.classList.toggle("active", t.dataset.tab === name));
+  document.querySelectorAll(".panel").forEach(p =>
+    p.classList.toggle("active", p.id === `panel-${name}`));
+  if (name === "yearly") {
+    showYearlyOverview();
+    if (!yearlyLoaded) loadYearly();
+  }
+}
+
+/* ---------- Yearly summary: three metrics, each clickable ---------- */
+const METRICS = {
+  km:   { key: "total_distance_km", label: "km",    fmt: v => Math.round(v).toLocaleString(),
+          value: r => r.total_distance_km },
+  hours:{ key: "total_duration_s",  label: "hours", fmt: v => Math.round(v).toLocaleString(),
+          value: r => r.total_duration_s / 3600 },
+  elev: { key: "total_elevation_gain", label: "m",  fmt: v => Math.round(v).toLocaleString(),
+          value: r => r.total_elevation_gain },
+};
+
+function buildYearlyChart(canvasId, totalId, rows, metric) {
+  const currentYear = new Date().getFullYear();
+  const labels = rows.map(r => String(r.year));
+  const values = rows.map(metric.value);
+  const peak = Math.max(...values);
+
+  const colors = rows.map((r, i) =>
+    r.year === currentYear ? THEME.sage
+    : values[i] === peak ? THEME.clay
+    : THEME.moss);
+
+  const total = values.reduce((s, v) => s + v, 0);
+  document.getElementById(totalId).innerHTML =
+    `<strong>${metric.fmt(total)}</strong> ${metric.label} all time`;
+
+  const chart = new Chart(document.getElementById(canvasId), {
+    type: "bar",
+    data: { labels, datasets: [{ data: values, backgroundColor: colors, maxBarThickness: 56 }] },
+    options: {
+      responsive: true,
+      layout: { padding: { top: 20 } },   // room for the value labels above the tallest bar
+      onClick: (evt, elements) => {
+        if (!elements.length) return;
+        const idx = elements[0].index;
+        openMonthly(rows[idx].year, metric.label === "km" ? "km" : metric.label === "hours" ? "hours" : "elev");
+      },
+      onHover: (evt, elements) => {
+        evt.native.target.style.cursor = elements.length ? "pointer" : "default";
+      },
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          displayColors: false,
+          callbacks: {
+            label: ctx => {
+              const r = rows[ctx.dataIndex];
+              return [`${metric.fmt(ctx.parsed.y)} ${metric.label}`, `${r.num_runs} runs`];
+            },
+            footer: () => "Click to see months",
+          }
+        }
+      },
+      scales: {
+        x: { grid: { display: false } },
+        y: { beginAtZero: true, ticks: { callback: compact, maxTicksLimit: 5 } }
+      }
+    },
+    plugins: [{
+      id: "barLabels-" + canvasId,
+      afterDatasetsDraw(chart) {
+        const { ctx } = chart;
+        ctx.save();
+        ctx.font = `500 11px ${THEME.font}`;
+        ctx.fillStyle = THEME.ink;
+        ctx.textAlign = "center";
+        chart.getDatasetMeta(0).data.forEach((bar, i) => {
+          ctx.fillText(metric.fmt(values[i]), bar.x, bar.y - 6);
+        });
+        ctx.restore();
+      }
+    }]
+  });
+  yearlyCharts.push(chart);
+}
+
+async function loadYearly() {
+  const status = document.getElementById("yearly-status");
+  try {
+    const res = await fetch(`${API}/reports/yearly`);
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    let rows = await res.json();
+    if (!rows.length) {
+      status.textContent = "No running data found.";
+      return;
+    }
+    rows.sort((a, b) => a.year - b.year);
+    window.__yearlyRows = rows; // cache for the monthly view's "year total" note
+
+    status.style.display = "none";
+    document.getElementById("yearly-chart-km").style.display = "block";
+
+    buildYearlyChart("yearly-chart-km", "yearly-total-km", rows, METRICS.km);
+    buildYearlyChart("yearly-chart-hours", "yearly-total-hours", rows, METRICS.hours);
+    buildYearlyChart("yearly-chart-elev", "yearly-total-elev", rows, METRICS.elev);
+
+    yearlyLoaded = true;
+  } catch (e) {
+    status.textContent = `Could not load yearly data (${e.message}). Is the API running?`;
+  }
+}
+
+/* ---------- Monthly drill-down (with year comparison) ---------- */
+let monthlyChart = null;
+let monthlyCumulativeChart = null;
+const MONTH_NAMES = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+const MAIN_COLOR = "#a8542e";
+const COMPARE_COLORS = ["#4a5d3a", "#3b6e8f", "#c29a3a", "#8a5a9e", "#7a7263", "#2f8a7a"];
+
+const monthlyCache = {};              // year -> rows (12 months, sorted)
+const monthlyState = { year: null, metricKey: "km", compare: [] };
+
+function showYearlyOverview() {
+  document.getElementById("monthly-view").style.display = "none";
+  document.getElementById("yearly-view").style.display = "block";
+}
+
+async function fetchMonthly(year) {
+  if (!monthlyCache[year]) {
+    const res = await fetch(`${API}/reports/monthly/${year}`);
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const rows = await res.json();
+    rows.sort((a, b) => a.month - b.month);
+    monthlyCache[year] = rows;
+  }
+  return monthlyCache[year];
+}
+
+function colorForYear(year) {
+  if (year === monthlyState.year) return MAIN_COLOR;
+  return COMPARE_COLORS[monthlyState.compare.indexOf(year) % COMPARE_COLORS.length];
+}
+
+// Months that have actually happened: the current year stops at the current month,
+// so its cumulative line doesn't flatline into the future.
+function monthsElapsed(year) {
+  const now = new Date();
+  return year === now.getFullYear() ? now.getMonth() + 1 : 12;
+}
+
+function renderCompareChips() {
+  const allYears = (window.__yearlyRows || []).map(r => r.year);
+  const others = allYears.filter(y => y !== monthlyState.year).reverse();
+  const row = document.getElementById("compare-row");
+  if (!others.length) { row.innerHTML = ""; return; }
+
+  row.innerHTML =
+    `<span class="compare-label">Compare with</span>` +
+    others.map(y => {
+      const on = monthlyState.compare.includes(y);
+      const style = on ? `style="background:${colorForYear(y)}"` : "";
+      return `<button class="chip ${on ? "on" : ""}" ${style} onclick="toggleCompareYear(${y})">${y}</button>`;
+    }).join("") +
+    (monthlyState.compare.length
+      ? `<button class="chip clear" onclick="clearCompare()">clear</button>` : "");
+}
+
+function toggleCompareYear(year) {
+  const i = monthlyState.compare.indexOf(year);
+  if (i >= 0) monthlyState.compare.splice(i, 1);
+  else monthlyState.compare.push(year);
+  renderCompareChips();
+  renderMonthly();
+}
+
+function clearCompare() {
+  monthlyState.compare = [];
+  renderCompareChips();
+  renderMonthly();
+}
+
+async function openMonthly(year, metricKey) {
+  document.getElementById("yearly-view").style.display = "none";
+  document.getElementById("monthly-view").style.display = "block";
+
+  // Keep the compared years when drilling into another year, minus the year itself.
+  monthlyState.compare = monthlyState.compare.filter(y => y !== year);
+  monthlyState.year = year;
+  monthlyState.metricKey = metricKey;
+
+  renderCompareChips();
+  await renderMonthly();
+}
+
+async function renderMonthly() {
+  const { year, metricKey, compare } = monthlyState;
+  const metric = METRICS[metricKey];
+  const years = [year, ...compare];
+
+  document.getElementById("monthly-title").textContent = compare.length
+    ? `${year} vs ${compare.join(", ")} — ${metric.label} by month`
+    : `${year} — ${metric.label} by month`;
+  document.getElementById("monthly-note").textContent = "Loading…";
+
+  let rowsByYear;
+  try {
+    const all = await Promise.all(years.map(fetchMonthly));
+    rowsByYear = Object.fromEntries(years.map((y, i) => [y, all[i]]));
+  } catch (e) {
+    document.getElementById("monthly-note").textContent = `Could not load monthly data (${e.message}).`;
+    return;
+  }
+  // A newer click may have changed the selection while we were fetching.
+  if (monthlyState.year !== year || monthlyState.compare.join() !== compare.join()) return;
+
+  if (monthlyChart) { monthlyChart.destroy(); monthlyChart = null; }
+  if (monthlyCumulativeChart) { monthlyCumulativeChart.destroy(); monthlyCumulativeChart = null; }
+
+  const comparing = compare.length > 0;
+  const labels = MONTH_NAMES;
+  const valuesByYear = {};
+  const cumulativeByYear = {};
+  for (const y of years) {
+    const values = rowsByYear[y].map(metric.value);
+    valuesByYear[y] = values;
+    const upTo = monthsElapsed(y);
+    let running = 0;
+    cumulativeByYear[y] = [0, ...values.map((v, i) => {
+      running += v;
+      return i < upTo ? running : null;
+    })];
+  }
+
+  const mainValues = valuesByYear[year];
+  const total = mainValues.reduce((s, v) => s + v, 0);
+  const runs = rowsByYear[year].reduce((s, r) => s + r.num_runs, 0);
+  document.getElementById("monthly-note").textContent =
+    `${metric.fmt(total)} ${metric.label} across ${runs} runs in ${year}.`;
+
+  // Bars: grouped by month, one color per year. Main year first.
+  monthlyChart = new Chart(document.getElementById("monthly-chart"), {
+    type: "bar",
+    data: {
+      labels,
+      datasets: years.map(y => ({
+        label: String(y),
+        data: valuesByYear[y],
+        backgroundColor: y === year && !comparing ? THEME.moss : colorForYear(y),
+        maxBarThickness: comparing ? 18 : 44,
+      })),
+    },
+    options: {
+      responsive: true,
+      plugins: {
+        legend: { display: comparing },
+        tooltip: {
+          displayColors: comparing,
+          callbacks: {
+            title: items => `${MONTH_NAMES[items[0].dataIndex]}`,
+            label: ctx => {
+              const y = years[ctx.datasetIndex];
+              const r = rowsByYear[y][ctx.dataIndex];
+              const prefix = comparing ? `${y}  ` : "";
+              return `${prefix}${metric.fmt(ctx.parsed.y)} ${metric.label} · ${r.num_runs} runs`;
+            }
+          }
+        }
+      },
+      scales: {
+        x: { grid: { display: false } },
+        y: { beginAtZero: true, ticks: { callback: compact, maxTicksLimit: 5 } }
+      }
+    }
+  });
+
+  // Cumulative lines: main year filled and bold, compared years thinner on top of the same Jan–Dec axis.
+  const cumLabels = ["", ...labels];   // blank first point = Jan 1 (zero)
+  monthlyCumulativeChart = new Chart(document.getElementById("monthly-cumulative-chart"), {
+    type: "line",
+    data: {
+      labels: cumLabels,
+      datasets: years.map(y => {
+        const main = y === year;
+        const c = colorForYear(y);
+        return {
+          label: String(y),
+          data: cumulativeByYear[y],
+          borderColor: c,
+          backgroundColor: main ? gradientFill("168,84,46") : c,
+          fill: main ? "origin" : false,
+          borderWidth: main ? 3 : 1.75,
+          pointBackgroundColor: "white",
+          pointBorderColor: c,
+          order: main ? 0 : 1,
+        };
+      }),
+    },
+    options: {
+      responsive: true,
+      layout: { padding: { right: 112 } },  // room for the end-of-line labels
+      plugins: {
+        legend: { display: false },          // lines are labelled directly instead
+        tooltip: {
+          itemSort: (a, b) => b.parsed.y - a.parsed.y,
+          callbacks: {
+            title: items => items[0].label === "" ? "Start of year" : `End of ${items[0].label}`,
+            label: ctx => `${ctx.dataset.label}  ${metric.fmt(ctx.parsed.y)} ${metric.label}`
+          }
+        }
+      },
+      scales: {
+        x: { grid: { display: false }, ticks: { maxRotation: 0, autoSkipPadding: 6 } },
+        y: {
+          beginAtZero: true,
+          grace: "5%",
+          ticks: { callback: compact, maxTicksLimit: 5 }
+        }
+      }
+    },
+    plugins: [endLabelsPlugin(v => `${metric.fmt(v)} ${metric.label}`)],
+  });
+
+  renderCompareSummary(years, cumulativeByYear, rowsByYear, metric);
+}
+
+// Table: each year's total at the same point in the year as the main year, and the gap to it.
+// If the main year is the current (partial) year, every year is cut at the current month.
+function renderCompareSummary(years, cumulativeByYear, rowsByYear, metric) {
+  const wrap = document.getElementById("compare-summary");
+  const { year } = monthlyState;
+  if (years.length < 2) { wrap.style.display = "none"; return; }
+  wrap.style.display = "block";
+
+  const upTo = monthsElapsed(year);
+  const partial = upTo < 12;
+  document.getElementById("compare-summary-title").textContent = partial
+    ? `Year to date — through end of ${MONTH_NAMES[upTo - 1]}`
+    : "Full year";
+
+  const at = y => cumulativeByYear[y][Math.min(upTo, monthsElapsed(y))] ?? 0;
+  const runsAt = y => rowsByYear[y].slice(0, upTo).reduce((s, r) => s + r.num_runs, 0);
+  const mainVal = at(year);
+
+  const rows = years.map(y => {
+    const v = at(y);
+    let diff = "—";
+    if (y !== year) {
+      const d = mainVal - v;
+      const pct = v ? ` (${d >= 0 ? "+" : "−"}${Math.abs(Math.round((d / v) * 100))}%)` : "";
+      diff = `<span class="${d >= 0 ? "up" : "down"}">${d >= 0 ? "+" : "−"}${metric.fmt(Math.abs(d))}${pct}</span>`;
+    }
+    return `<tr>
+      <td><span class="swatch" style="background:${colorForYear(y)}"></span>${y}${y === year ? " (selected)" : ""}</td>
+      <td>${metric.fmt(v)}</td>
+      <td>${runsAt(y)}</td>
+      <td>${diff}</td>
+    </tr>`;
+  }).join("");
+
+  document.getElementById("compare-table").innerHTML = `
+    <thead><tr><th>year</th><th>${metric.label}</th><th>runs</th><th>${year} vs this year</th></tr></thead>
+    <tbody>${rows}</tbody>`;
+}
+
+
+/* ---------- Garmin sync: last sync time + button ---------- */
+let syncPoll = null;
+
+function timeAgo(iso) {
+  const secs = (Date.now() - new Date(iso).getTime()) / 1000;
+  if (secs < 60) return "just now";
+  const mins = secs / 60, hours = mins / 60, days = hours / 24;
+  if (mins < 60) return `${Math.floor(mins)} min ago`;
+  if (hours < 24) return `${Math.floor(hours)} h ago`;
+  if (days < 2) return "yesterday";
+  return `${Math.floor(days)} days ago`;
+}
+
+function fmtDateTime(iso) {
+  return new Date(iso).toLocaleString(undefined, { dateStyle: "medium", timeStyle: "short" });
+}
+
+function setSyncBusy(busy) {
+  const btn = document.getElementById("sync-btn");
+  btn.disabled = busy;
+  btn.classList.toggle("busy", busy);
+  document.getElementById("sync-label").textContent = busy ? "Syncing…" : "Sync";
+}
+
+function renderSyncInfo(status) {
+  const info = document.getElementById("sync-info");
+  const { last_run: last, last_success: ok, latest_activity_date: latest } = status;
+  const latestLine = latest ? `<br>Latest activity ${latest}` : "";
+
+  if (last && last.status === "running") {
+    info.innerHTML = `<strong>Syncing with Garmin…</strong><br>started ${timeAgo(last.started_at)}`;
+  } else if (last && last.status === "error") {
+    info.innerHTML = `<span class="err" title="${(last.error || "").replace(/"/g, "&quot;")}">Last sync failed ${timeAgo(last.finished_at)}</span>` +
+      (ok ? `<br>Last successful: ${fmtDateTime(ok.finished_at)}` : latestLine);
+  } else if (ok) {
+    info.innerHTML = `Last sync <strong title="${fmtDateTime(ok.finished_at)}">${timeAgo(ok.finished_at)}</strong>` +
+      `<br>${fmtDateTime(ok.finished_at)}`;
+  } else {
+    info.innerHTML = `Never synced from here${latestLine}`;
+  }
+}
+
+async function loadSyncStatus() {
+  try {
+    const res = await fetch(`${API}/sync/status`);
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const status = await res.json();
+    renderSyncInfo(status);
+    const running = status.last_run && status.last_run.status === "running";
+    setSyncBusy(running);
+    if (running && !syncPoll) syncPoll = setInterval(pollSync, 2000);
+    return status;
+  } catch (e) {
+    document.getElementById("sync-info").textContent = "Sync status unavailable";
+    return null;
+  }
+}
+
+async function startSync() {
+  setSyncBusy(true);
+  try {
+    const res = await fetch(`${API}/sync/`, { method: "POST" });
+    if (!res.ok && res.status !== 409) throw new Error(`HTTP ${res.status}`);
+  } catch (e) {
+    setSyncBusy(false);
+    document.getElementById("sync-info").innerHTML = `<span class="err">Could not start sync (${e.message})</span>`;
+    return;
+  }
+  await loadSyncStatus();
+  if (!syncPoll) syncPoll = setInterval(pollSync, 2000);
+}
+
+async function pollSync() {
+  const status = await loadSyncStatus();
+  if (!status || status.last_run?.status === "running") return;
+  clearInterval(syncPoll);
+  syncPoll = null;
+
+  const run = status.last_run;
+  if (run && run.status === "ok") {
+    const n = run.new_activities;
+    document.getElementById("sync-info").insertAdjacentHTML("beforeend",
+      `<br><strong>${n ? `${n} new ${n === 1 ? "activity" : "activities"}` : "Already up to date"}</strong>`);
+    if (n) {
+      // Refresh what's on screen: the month list, and the yearly charts next time they're opened.
+      await loadList();
+      yearlyCharts.forEach(c => c.destroy());
+      yearlyCharts = [];
+      yearlyLoaded = false;
+      Object.keys(monthlyCache).forEach(k => delete monthlyCache[k]);
+      if (document.getElementById("panel-yearly").classList.contains("active")) loadYearly();
+    }
+  }
+}
+
+loadSyncStatus();
+setInterval(() => { if (!syncPoll) loadSyncStatus(); }, 60000);   // keep "x min ago" fresh
+
+loadList();
+</script>
+
+</body>
+</html>

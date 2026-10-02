@@ -1,0 +1,15 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "zachy-api",
+      "url": "http://localhost:8000"
+    },
+    {
+      "name": "zachy-frontend",
+      "runtimeExecutable": "python3",
+      "runtimeArgs": ["-m", "http.server", "5500", "--directory", "/Users/danielmejia/PycharmProjects/zachy/frontend"],
+      "port": 5500
+    }
+  ]
+}

@@ -712,6 +712,27 @@ unicode = ["unicodedata2 (>=18.0.0)"]
 woff = ["brotli (>=1.0.1)", "brotlicffi (>=0.8.0)", "zopfli (>=0.1.4)"]
 
 [[package]]
+name = "garmin-auth"
+version = "0.4.1"
+description = "Self-healing Garmin Connect authentication with 2FA/MFA support, token refresh, and rate limit recovery"
+optional = false
+python-versions = ">=3.10"
+files = [
+    {file = "garmin_auth-0.4.1-py3-none-any.whl", hash = "sha256:4f0c6245738905afabca6a03f87197e5b94a106f975d295fb375a52bd832d6bf"},
+    {file = "garmin_auth-0.4.1.tar.gz", hash = "sha256:f835adf76e25c4bb53f2990544fb546c2122fb2d39dff434791b9c6c6a039ae7"},
+]
+
+[package.dependencies]
+curl-cffi = ">=0.6"
+garminconnect = ">=0.3.0,<0.4.0"
+requests = ">=2.31"
+ua-generator = ">=1.0"
+
+[package.extras]
+db = ["psycopg2-binary (>=2.9)"]
+dev = ["pytest (>=8.0)", "pytest-mock (>=3.12)"]
+
+[[package]]
 name = "garminconnect"
 version = "0.3.16"
 description = "Python 3 API wrapper for Garmin Connect"
@@ -2912,4 +2933,4 @@ h11 = ">=0.16.0,<1"
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.12"
-content-hash = "8850020f3d80e07975881c5b8d81181f974d83b8eaf4d218e4cb5e3266520a84"
+content-hash = "a7e2e0dcb60af6fd3c504714adf810db92710c32806c3e9bfa45652c83dab80e"
