@@ -165,7 +165,9 @@
   table.laps th:first-child, table.laps td:first-child { text-align: left; }
   table.laps tr.hard td { background: rgba(74,93,58,0.08); }
   .laps-wrap { max-height: 320px; overflow-y: auto; }
-  #route-svg { width: 100%; height: auto; display: block; }
+  #route-map { height: 380px; border-radius: 4px; z-index: 0; }
+  @media (max-width: 600px) { #route-map { height: 300px; } }
+  .leaflet-control-layers { font: inherit; font-size: 12px; }
   .muted-note { color: var(--muted); font-size: 12px; margin-top: 6px; }
   .tabs {
     display: flex;
@@ -219,6 +221,27 @@
   .seg button.on { background: var(--ink); color: white; }
   .seg button:disabled { color: #c8c8c8; cursor: default; }
   .section-sub { font-weight: 400; color: var(--muted); margin-left: 8px; font-size: 12px; }
+  .zones-bar { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; }
+  .zones-date { font-size: 13px; color: var(--muted); display: flex; align-items: center; gap: 8px; }
+  .zones-bar input[type=date], .zone-card input {
+    font: inherit; font-size: 13px; color: var(--ink);
+    border: 1px solid var(--line); border-radius: 6px; padding: 4px 8px; background: white;
+  }
+  .zone-card input:focus, .zones-bar input:focus { outline: none; border-color: var(--ink); }
+  .zone-card input.bad { border-color: var(--clay); background: #fdf3ef; }
+  .zones-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 18px; }
+  @media (max-width: 720px) { .zones-grid { grid-template-columns: 1fr; } }
+  .zc-head { display: flex; justify-content: space-between; align-items: center; gap: 8px; margin-bottom: 10px; }
+  .zc-title { font-weight: 500; font-size: 15px; }
+  .zc-thr { font-size: 12px; color: var(--muted); display: flex; align-items: center; gap: 6px; }
+  .zc-thr input { width: 72px; text-align: right; }
+  table.zone-table { width: 100%; border-collapse: collapse; font-size: 13px; font-variant-numeric: tabular-nums; }
+  table.zone-table th { text-align: left; font-weight: 500; font-size: 11px; color: var(--muted); padding: 4px 6px; border-bottom: 1px solid var(--line); }
+  table.zone-table td { padding: 5px 6px; border-bottom: 1px solid var(--line-soft); white-space: nowrap; }
+  table.zone-table td.range { text-align: right; color: var(--muted); }
+  table.zone-table td.range input { width: 64px; text-align: right; padding: 2px 6px; margin-left: 4px; }
+  table.zone-table .zr-prev { color: var(--ink); }
+  .zone-dot { display: inline-block; width: 10px; height: 10px; border-radius: 2px; margin-right: 6px; vertical-align: -1px; }
   .month-summary { font-size: 13px; color: var(--muted); margin: 14px 0 4px; }
   .month-summary strong { color: var(--ink); font-weight: 500; }
   .compare-row { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin: 0 0 14px; }
@@ -244,6 +267,7 @@
   .up { color: var(--moss); }
   .down { color: var(--clay); }
 </style>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
 </head>
 <body>
 
@@ -269,6 +293,7 @@
   <div class="tabs">
     <button class="tab active" data-tab="activities" onclick="switchTab('activities')">Activities</button>
     <button class="tab" data-tab="yearly" onclick="switchTab('yearly')">Yearly</button>
+    <button class="tab" data-tab="zones" onclick="switchTab('zones')">Zones</button>
   </div>
 
   <div id="panel-activities" class="panel active">
@@ -333,9 +358,31 @@
     </div>
 
   </div>
+  <div id="panel-zones" class="panel">
+    <div class="section-title" style="margin-top:0;">Training zones</div>
+    <div class="muted-note" style="margin:0 0 14px;">
+      Enter where each zone ends; the next zone starts there. Leave a metric empty if you don't use it.
+      A set applies from its date until the next one, so older runs are analysed with the zones you
+      had at the time.
+    </div>
+
+    <div class="zones-bar">
+      <label class="zones-date">Effective from <input type="date" id="zones-date"></label>
+      <div class="seg" id="zones-model">
+        <button data-m="3" onclick="setZoneModel(3)">3 zones</button>
+        <button data-m="5" onclick="setZoneModel(5)">5 zones</button>
+      </div>
+      <button class="sync-btn" onclick="saveZones()">Save</button>
+    </div>
+    <div class="picker" id="zones-history" style="margin-top:12px;"></div>
+    <div class="muted-note" id="zones-msg"></div>
+
+    <div class="zones-grid" id="zones-cards"></div>
+  </div>
 </main>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
 <script>
 const API = "http://localhost:8000";
 
@@ -611,44 +658,102 @@ function fmtDuration(s) {
            : `${m}:${String(sec).padStart(2, "0")}`;
 }
 
-function renderRoute(points) {
-  const pts = points.filter(p => p.latitude != null && p.longitude != null);
-  if (pts.length < 2) {
-    return `<div class="muted-note">No GPS route for this activity.</div>`;
+/* ---------- Route map (Leaflet) ---------- */
+// Free tile layers: IGN (France, no key needed) and OpenTopoMap (worldwide, contour lines).
+const IGN_WMTS = "https://data.geopf.fr/wmts?SERVICE=WMTS&REQUEST=GetTile&VERSION=1.0.0&STYLE=normal" +
+  "&TILEMATRIXSET=PM&TILEMATRIX={z}&TILEROW={y}&TILECOL={x}";
+const IGN_ATTR = '&copy; <a href="https://www.ign.fr/">IGN</a>';
+const OSM_ATTR = '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>';
+// Mapbox styles need your own free public token (MAPBOX_TOKEN in .env); they are skipped without one.
+const MAPBOX_ATTR = '&copy; <a href="https://www.mapbox.com/about/maps/">Mapbox</a> ' + OSM_ATTR;
+const mapbox = (style, token) => L.tileLayer(
+  `https://api.mapbox.com/styles/v1/mapbox/${style}/tiles/512/{z}/{x}/{y}@2x?access_token=${token}`,
+  { tileSize: 512, zoomOffset: -1, maxZoom: 20, attribution: MAPBOX_ATTR });
+
+// Layer name -> factory. `token` is the Mapbox token or null.
+const MAP_LAYERS = {
+  "Mapbox Outdoors": token => token && mapbox("outdoors-v12", token),
+  "Mapbox Satellite": token => token && mapbox("satellite-streets-v12", token),
+  // Stadia Maps works without a key on localhost; a free account is needed if hosted elsewhere.
+  "Outdoors": () => L.tileLayer("https://tiles.stadiamaps.com/tiles/outdoors/{z}/{x}/{y}{r}.png",
+    { maxZoom: 20, attribution: '&copy; <a href="https://stadiamaps.com/">Stadia Maps</a> ' +
+      '&copy; <a href="https://openmaptiles.org/">OpenMapTiles</a> ' + OSM_ATTR }),
+  "Plan IGN": () => L.tileLayer(`${IGN_WMTS}&LAYER=GEOGRAPHICALGRIDSYSTEMS.PLANIGNV2&FORMAT=image/png`,
+    { maxZoom: 19, attribution: IGN_ATTR }),
+  "IGN aerial": () => L.tileLayer(`${IGN_WMTS}&LAYER=ORTHOIMAGERY.ORTHOPHOTOS&FORMAT=image/jpeg`,
+    { maxZoom: 19, attribution: IGN_ATTR }),
+  "OpenTopoMap": () => L.tileLayer("https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png",
+    { maxZoom: 17, subdomains: "abc", attribution: OSM_ATTR + ', <a href="https://opentopomap.org">OpenTopoMap</a>' }),
+  "OpenStreetMap": () => L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png",
+    { maxZoom: 19, attribution: OSM_ATTR }),
+};
+
+// Fetched once from the API (.env); null when not configured.
+let mapboxToken;
+async function getMapboxToken() {
+  if (mapboxToken === undefined) {
+    try { mapboxToken = (await (await fetch(`${API}/config/`)).json()).mapbox_token; }
+    catch (e) { mapboxToken = null; }
   }
-  const lats = pts.map(p => p.latitude);
-  const lons = pts.map(p => p.longitude);
-  const minLat = Math.min(...lats), maxLat = Math.max(...lats);
-  const minLon = Math.min(...lons), maxLon = Math.max(...lons);
+  return mapboxToken;
+}
+const FRANCE = { minLat: 41.2, maxLat: 51.2, minLon: -5.3, maxLon: 9.7 };   // mainland + Corsica
+let routeMap = null;
+let hoverMarker = null;
 
-  // Correct for longitude shrinking with latitude so the shape isn't stretched
-  const kx = Math.cos(((minLat + maxLat) / 2) * Math.PI / 180);
-  const w = Math.max((maxLon - minLon) * kx, 1e-6);
-  const h = Math.max(maxLat - minLat, 1e-6);
-  const W = 600, pad = 16;
-  const scale = (W - 2 * pad) / Math.max(w, h);
-  const width = w * scale + 2 * pad;
-  const height = h * scale + 2 * pad;
+async function drawRouteMap(points) {
+  if (routeMap) { routeMap.remove(); routeMap = null; hoverMarker = null; }
+  const el = document.getElementById("route-map");
+  const pts = points.filter(p => p.latitude != null && p.longitude != null)
+                    .map(p => [p.latitude, p.longitude]);
+  if (pts.length < 2) {
+    el.parentElement.style.display = "none";
+    document.getElementById("route-note").textContent = "No GPS route for this activity.";
+    return;
+  }
 
-  const xy = p => [
-    pad + (p.longitude - minLon) * kx * scale,
-    pad + (maxLat - p.latitude) * scale,
-  ];
-  const d = pts.map((p, i) => {
-    const [x, y] = xy(p);
-    return `${i ? "L" : "M"}${x.toFixed(1)},${y.toFixed(1)}`;
-  }).join(" ");
-  const [sx, sy] = xy(pts[0]);
-  const [ex, ey] = xy(pts[pts.length - 1]);
+  // Remember the viewer's last layer choice (IGN layers only for routes in France).
+  const mid = pts[Math.floor(pts.length / 2)];
+  const inFrance = mid[0] > FRANCE.minLat && mid[0] < FRANCE.maxLat &&
+                   mid[1] > FRANCE.minLon && mid[1] < FRANCE.maxLon;
+  let saved = null;
+  try { saved = localStorage.getItem("zachy.mapLayer"); } catch (e) {}
+  // Default: Mapbox Outdoors (Strava-like) when a token is set, else Stadia Outdoors.
+  const token = await getMapboxToken();
+  if (!document.body.contains(el)) return;   // the user left this activity while we waited
+  const layers = Object.fromEntries(Object.entries(MAP_LAYERS)
+    .map(([name, make]) => [name, make(token)]).filter(([, layer]) => layer));
+  let choice = saved && layers[saved] ? saved : (token ? "Mapbox Outdoors" : "Outdoors");
+  if (choice.includes("IGN") && !inFrance) choice = token ? "Mapbox Outdoors" : "Outdoors";   // IGN only covers France
 
-  return `
-    <svg id="route-svg" viewBox="0 0 ${width.toFixed(0)} ${height.toFixed(0)}">
-      <path d="${d}" fill="none" stroke="#4a5d3a" stroke-width="2.5"
-            stroke-linejoin="round" stroke-linecap="round"/>
-      <circle cx="${sx}" cy="${sy}" r="5" fill="#a8542e"/>
-      <circle cx="${ex}" cy="${ey}" r="5" fill="#1f1d18"/>
-    </svg>
-    <div class="muted-note">Brown = start, black = finish.</div>`;
+  routeMap = L.map(el, { scrollWheelZoom: false, layers: [layers[choice]] });
+  L.control.layers(layers, null, { position: "topright" }).addTo(routeMap);
+  L.control.scale({ imperial: false }).addTo(routeMap);
+  routeMap.on("baselayerchange", e => { try { localStorage.setItem("zachy.mapLayer", e.name); } catch (err) {} });
+  routeMap.on("click", () => routeMap.scrollWheelZoom.enable());   // wheel zoom after a click only
+
+  // White casing under the line keeps it readable on any background.
+  L.polyline(pts, { color: "white", weight: 6, opacity: 0.9 }).addTo(routeMap);
+  const line = L.polyline(pts, { color: THEME.clay, weight: 3.5, opacity: 1 }).addTo(routeMap);
+  const dot = (ll, color) => L.circleMarker(ll, { radius: 6, color: "white", weight: 2, fillColor: color, fillOpacity: 1 });
+  dot(pts[0], THEME.moss).bindTooltip("Start").addTo(routeMap);
+  dot(pts[pts.length - 1], THEME.ink).bindTooltip("Finish").addTo(routeMap);
+  routeMap.fitBounds(line.getBounds(), { padding: [20, 20] });
+
+  document.getElementById("route-note").textContent =
+    "Green = start, black = finish. Hover a chart to see where you were. Click the map to zoom with the scroll wheel.";
+}
+
+// Called from the charts: show the hovered point on the map.
+function showOnMap(p) {
+  if (!routeMap || !p || p.latitude == null) return;
+  const ll = [p.latitude, p.longitude];
+  if (!hoverMarker) {
+    hoverMarker = L.circleMarker(ll, { radius: 7, color: "white", weight: 2, fillColor: THEME.ink, fillOpacity: 1 })
+      .addTo(routeMap);
+  } else {
+    hoverMarker.setLatLng(ll);
+  }
 }
 
 function renderLaps(laps, avgHr) {
@@ -768,6 +873,9 @@ function drawTimeseriesCharts() {
         animation: false,
         spanGaps: true,
         interaction: { mode: "nearest", axis: "x", intersect: false },
+        onHover: (evt, els, chart) => {
+          if (els.length) showOnMap(chart.data.datasets[0].data[els[0].index].p);
+        },
         plugins: {
           legend: { display: false },
           tooltip: { displayColors: false, callbacks: { title, label: ctx => fmt(ctx.parsed.y) } },
@@ -861,16 +969,18 @@ async function showDetail(id) {
       <div class="card"><canvas id="ts-pace" height="80"></canvas></div>
       <div class="muted-note" id="ts-source"></div>
 
+      <div class="section-title">Route</div>
+      <div class="card" style="padding:0;"><div id="route-map"></div></div>
+      <div class="muted-note" id="route-note"></div>
+
       <div class="section-title">Laps (${a.laps.length})</div>
       <div class="card">${renderLaps(a.laps, a.avg_hr)}</div>
-
-      <div class="section-title">Route</div>
-      <div class="card">${renderRoute(a.timeseries)}</div>
     `;
 
     detailState.activity = a;
     detailState.points = a.timeseries;
     drawTimeseriesCharts();
+    drawRouteMap(a.timeseries);
   } catch (e) {
     content.innerHTML = `<div class="error">Could not load this activity (${e.message}).</div>`;
   }
@@ -879,6 +989,7 @@ async function showDetail(id) {
 function showList() {
   detailCharts.forEach(c => c.destroy());
   detailCharts = [];
+  if (routeMap) { routeMap.remove(); routeMap = null; hoverMarker = null; }
   document.getElementById("detail").classList.remove("active");
   document.getElementById("list-view").classList.remove("hidden");
 }
@@ -896,6 +1007,7 @@ function switchTab(name) {
     showYearlyOverview();
     if (!yearlyLoaded) loadYearly();
   }
+  if (name === "zones" && !zonesState.loaded) loadZones();
 }
 
 /* ---------- Yearly summary: three metrics, each clickable ---------- */
@@ -1349,6 +1461,212 @@ async function pollSync() {
 
 loadSyncStatus();
 setInterval(() => { if (!syncPoll) loadSyncStatus(); }, 60000);   // keep "x min ago" fresh
+
+
+/* ---------- Zones: manual limits per metric, 3/5-zone model, saved per "effective from" date ---------- */
+// Limits are entered in each metric's unit. Pace (min/km) gets faster — smaller — as zones go up.
+const ZONE_METRICS = [
+  { key: "hr",      title: "Heart rate", unit: "bpm", hint: { 3: [145, 170], 5: [135, 150, 160, 170] } },
+  { key: "pace",    title: "Pace",       unit: "/km", hint: { 3: ["5:00", "4:15"], 5: ["5:30", "4:50", "4:25", "4:05"] } },
+  { key: "power",   title: "Power",      unit: "W",   hint: { 3: [270, 330], 5: [240, 280, 320, 360] } },
+  { key: "cadence", title: "Cadence",    unit: "spm", hint: { 3: [170, 185], 5: [160, 170, 180, 190] } },
+];
+const ZONE_COLORS = {
+  3: ["#4a9d5b", "#e0a43a", "#c8553d"],
+  5: ["#9aa5b1", "#4a8fc2", "#4a9d5b", "#e0a43a", "#c8553d"],
+};
+const zonesState = { loaded: false, sets: [], defaults: null, edit: null, savedDate: null };
+
+function todayISO() {
+  const d = new Date();
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+}
+
+// "4:15" or "4.25" -> 4.25 (min/km); null if unreadable.
+function parsePace(text) {
+  const t = String(text).trim();
+  if (!t) return null;
+  const m = t.match(/^(\d{1,2}):([0-5]?\d)$/);
+  if (m) return +m[1] + +m[2] / 60;
+  const v = parseFloat(t.replace(",", "."));
+  return isFinite(v) && v > 0 ? v : null;
+}
+
+function fmtZoneValue(metric, v) {
+  if (v == null || !isFinite(v)) return "?";
+  return metric === "pace" ? fmtPace(v) : String(Math.round(v * 10) / 10);
+}
+
+function emptyBoundaries() {
+  return Object.fromEntries(ZONE_METRICS.map(m => [m.key, { 3: [null, null], 5: [null, null, null, null] }]));
+}
+
+// Saved sets store [] for metrics that aren't set; the editor wants n-1 slots.
+function editableBoundaries(saved) {
+  const b = emptyBoundaries();
+  for (const m of ZONE_METRICS) for (const n of [3, 5]) {
+    const v = saved?.[m.key]?.[String(n)];
+    if (v && v.length === n - 1) b[m.key][n] = [...v];
+  }
+  return b;
+}
+
+async function loadZones(selectDate) {
+  const msg = document.getElementById("zones-msg");
+  try {
+    const res = await fetch(`${API}/zones/`);
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const data = await res.json();
+    zonesState.sets = data.sets;
+    zonesState.defaults = data.defaults;
+    zonesState.loaded = true;
+    const pick = data.sets.find(s => s.valid_from === selectDate) || data.sets[0];
+    if (pick) editZoneSet(pick);
+    else {
+      zonesState.edit = { valid_from: todayISO(), zone_model: 5, boundaries: emptyBoundaries() };
+      zonesState.savedDate = null;
+      renderZones();
+    }
+    msg.textContent = data.sets.length ? "" : "No zones saved yet — enter your limits and save.";
+  } catch (e) {
+    msg.textContent = `Could not load zones (${e.message}).`;
+  }
+}
+
+function editZoneSet(set) {
+  zonesState.edit = { valid_from: set.valid_from, zone_model: set.zone_model,
+                      boundaries: editableBoundaries(set.boundaries) };
+  zonesState.savedDate = set.valid_from;
+  document.getElementById("zones-msg").textContent = "";
+  renderZones();
+}
+
+function startNewZoneSet() {
+  // Start from the values on screen, dated today; the set being viewed is left untouched.
+  zonesState.edit = { ...zonesState.edit, valid_from: todayISO(),
+                      boundaries: JSON.parse(JSON.stringify(zonesState.edit.boundaries)) };
+  zonesState.savedDate = null;
+  document.getElementById("zones-msg").textContent =
+    "New set: adjust the date and limits, then save. Earlier sets stay as they are.";
+  renderZones();
+}
+
+function setZoneModel(n) {
+  zonesState.edit.zone_model = n;
+  renderZones();
+}
+
+function renderZones() {
+  const e = zonesState.edit;
+  document.getElementById("zones-date").value = e.valid_from;
+  document.querySelectorAll("#zones-model button").forEach(b =>
+    b.classList.toggle("on", +b.dataset.m === e.zone_model));
+
+  document.getElementById("zones-history").innerHTML =
+    zonesState.sets.map(s => {
+      const on = s.valid_from === zonesState.savedDate;
+      return `<button class="pick ${on ? "on" : ""}" onclick="editZoneSet(zonesState.sets.find(x => x.valid_from === '${s.valid_from}'))">
+                since ${s.valid_from} · ${s.zone_model} zones</button>`;
+    }).join("") +
+    `<button class="pick" onclick="startNewZoneSet()">+ New set</button>` +
+    (zonesState.savedDate ? `<button class="pick" onclick="deleteZoneSet()" title="Delete this set">Delete</button>` : "");
+
+  const n = e.zone_model;
+  document.getElementById("zones-cards").innerHTML = ZONE_METRICS.map(m => {
+    const names = zonesState.defaults.zone_names[m.key][String(n)];
+    const rows = names.map((name, i) => `<tr>
+        <td><span class="zone-dot" style="background:${ZONE_COLORS[n][i]}"></span>Z${i + 1} ${name}</td>
+        <td class="range" id="zr-${m.key}-${i}"></td>
+      </tr>`).join("");
+    return `<div class="card zone-card">
+      <div class="zc-head"><span class="zc-title">${m.title}</span><span class="zc-thr">${m.unit}</span></div>
+      <table class="zone-table">
+        <thead><tr><th>zone</th><th style="text-align:right">range</th></tr></thead>
+        <tbody>${rows}</tbody>
+      </table>
+    </div>`;
+  }).join("");
+  ZONE_METRICS.forEach(m => renderZoneRanges(m.key));
+}
+
+// Each row: the previous limit (read-only) and an input for this zone's limit.
+function renderZoneRanges(metric) {
+  const n = zonesState.edit.zone_model;
+  const cuts = zonesState.edit.boundaries[metric][n];
+  const hint = ZONE_METRICS.find(m => m.key === metric).hint[n];
+  const pace = metric === "pace";
+  for (let i = 0; i < n; i++) {
+    const cell = document.getElementById(`zr-${metric}-${i}`);
+    const input = i < n - 1
+      ? `<input data-metric="${metric}" data-i="${i}" placeholder="${hint[i]}"
+                value="${cuts[i] == null ? "" : fmtZoneValue(metric, cuts[i])}" oninput="onZoneLimit(this)">`
+      : "";
+    const prev = i > 0 ? `<span class="zr-prev" data-metric="${metric}" data-i="${i - 1}"></span>` : "";
+    cell.innerHTML =
+      i === 0     ? `${pace ? "slower than" : "below"} ${input}` :
+      i === n - 1 ? `${pace ? "faster than" : "from"} ${prev}` :
+                    `${prev} – ${input}`;
+  }
+  refreshZonePrev(metric);
+}
+
+function onZoneLimit(input) {
+  const { metric, i } = input.dataset;
+  const v = metric === "pace" ? parsePace(input.value) : parseFloat(input.value.replace(",", "."));
+  zonesState.edit.boundaries[metric][zonesState.edit.zone_model][+i] =
+    input.value.trim() && v > 0 ? v : (input.value.trim() ? NaN : null);
+  refreshZonePrev(metric);
+}
+
+// Show each previous limit next to the following zone, and flag inputs that are out of order.
+function refreshZonePrev(metric) {
+  const n = zonesState.edit.zone_model;
+  const cuts = zonesState.edit.boundaries[metric][n];
+  const descending = metric === "pace";
+  document.querySelectorAll(`.zr-prev[data-metric="${metric}"]`).forEach(span => {
+    span.textContent = fmtZoneValue(metric, cuts[+span.dataset.i]);
+  });
+  const blank = cuts.every(v => v == null);
+  document.querySelectorAll(`.zone-card input[data-metric="${metric}"]`).forEach(inp => {
+    const i = +inp.dataset.i, v = cuts[i], p = cuts[i - 1];
+    let bad = !blank && (v == null || !isFinite(v));
+    if (!bad && i > 0 && v != null && p != null && isFinite(p)) bad = descending ? v >= p : v <= p;
+    inp.classList.toggle("bad", bad);
+  });
+}
+
+async function saveZones() {
+  const e = zonesState.edit;
+  const msg = document.getElementById("zones-msg");
+  const date = document.getElementById("zones-date").value;
+  if (!date) { msg.textContent = "Pick the date these zones start applying."; return; }
+  if (document.querySelector("#zones-cards input.bad")) {
+    msg.textContent = "Fix the highlighted limits first: fill them all (or none) and keep them in order.";
+    return;
+  }
+  const replacing = zonesState.sets.some(s => s.valid_from === date) && date !== zonesState.savedDate;
+  if (replacing && !confirm(`A set starting ${date} already exists. Replace it?`)) return;
+  try {
+    const res = await fetch(`${API}/zones/${date}`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ zone_model: e.zone_model, boundaries: e.boundaries }),
+    });
+    const body = await res.json();
+    if (!res.ok) throw new Error(body.detail || `HTTP ${res.status}`);
+    await loadZones(date);
+    msg.textContent = `Saved — applies from ${date}.`;
+  } catch (err) {
+    msg.textContent = `Could not save (${err.message}).`;
+  }
+}
+
+async function deleteZoneSet() {
+  const date = zonesState.savedDate;
+  if (!date || !confirm(`Delete the zones starting ${date}?`)) return;
+  const res = await fetch(`${API}/zones/${date}`, { method: "DELETE" });
+  if (res.ok) { await loadZones(); document.getElementById("zones-msg").textContent = `Deleted the set from ${date}.`; }
+}
 
 loadList();
 </script>
