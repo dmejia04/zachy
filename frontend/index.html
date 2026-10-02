@@ -3,6 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <title>Zachy</title>
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cpath fill='%231e4d2b' fill-rule='evenodd' d='M8 2h16a6 6 0 0 1 6 6v16a6 6 0 0 1-6 6H8a6 6 0 0 1-6-6V8a6 6 0 0 1 6-6Z M9 8.5h14v3.4L14.2 20.1H23v3.4H9v-3.4l8.8-8.2H9Z'/%3E%3C/svg%3E">
 <style>
   :root {
     --ink: #1f1d18;
@@ -12,6 +13,8 @@
     --moss: #4a5d3a;
     --clay: #a8542e;
     --muted: #7a7263;
+    --forest: #1e4d2b;        /* logo */
+    --forest-light: #7fb08a;  /* logo on dark surfaces */
   }
   * { box-sizing: border-box; }
   body {
@@ -59,10 +62,15 @@
   @keyframes spin { to { transform: rotate(360deg); } }
   header h1 {
     margin: 0;
-    font-size: 22px;
+    font-size: 44px;
     font-weight: 500;
+    line-height: 1.1;
     letter-spacing: -0.01em;
+    display: flex;
+    align-items: center;
+    gap: 14px;
   }
+  header h1 .logo { width: 1em; height: 1em; flex: none; color: var(--forest); }
   header p {
     margin: 4px 0 0;
     color: var(--muted);
@@ -100,7 +108,7 @@
   #detail.active { display: block; }
   #list-view.hidden { display: none; }
   .back {
-    color: var(--clay);
+    color: var(--moss);
     cursor: pointer;
     font-size: 13px;
     margin-bottom: 16px;
@@ -155,7 +163,7 @@
     border-bottom: 1px solid var(--line-soft);
   }
   table.laps th:first-child, table.laps td:first-child { text-align: left; }
-  table.laps tr.hard td { background: rgba(168,84,46,0.08); }
+  table.laps tr.hard td { background: rgba(74,93,58,0.08); }
   .laps-wrap { max-height: 320px; overflow-y: auto; }
   #route-svg { width: 100%; height: auto; display: block; }
   .muted-note { color: var(--muted); font-size: 12px; margin-top: 6px; }
@@ -177,7 +185,7 @@
     cursor: pointer;
   }
   .tab:hover { color: var(--ink); }
-  .tab.active { color: var(--ink); font-weight: 500; border-bottom-color: var(--clay); }
+  .tab.active { color: var(--ink); font-weight: 500; border-bottom-color: var(--moss); }
   .panel { display: none; }
   .panel.active { display: block; }
   .yearly-head { display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 4px; }
@@ -201,6 +209,16 @@
   .pick:hover:not(:disabled) { border-color: var(--muted); }
   .pick.on { background: var(--ink); border-color: var(--ink); color: white; }
   .pick:disabled { color: #c8c8c8; border-color: var(--line-soft); cursor: default; }
+  .chart-bar { display: flex; justify-content: space-between; align-items: center; margin: 28px 0 0; }
+  .chart-bar .section-title { margin: 0; }
+  .seg { display: inline-flex; border: 1px solid var(--line); border-radius: 999px; padding: 2px; }
+  .seg button {
+    font: inherit; font-size: 12px; border: none; background: none; color: var(--muted);
+    padding: 3px 12px; border-radius: 999px; cursor: pointer;
+  }
+  .seg button.on { background: var(--ink); color: white; }
+  .seg button:disabled { color: #c8c8c8; cursor: default; }
+  .section-sub { font-weight: 400; color: var(--muted); margin-left: 8px; font-size: 12px; }
   .month-summary { font-size: 13px; color: var(--muted); margin: 14px 0 4px; }
   .month-summary strong { color: var(--ink); font-weight: 500; }
   .compare-row { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin: 0 0 14px; }
@@ -232,7 +250,7 @@
 <header>
   <div class="header-inner">
     <div>
-      <h1>Zachy</h1>
+      <h1><svg class="logo" viewBox="0 0 32 32" aria-hidden="true"><path fill="currentColor" fill-rule="evenodd" d="M8 2h16a6 6 0 0 1 6 6v16a6 6 0 0 1-6 6H8a6 6 0 0 1-6-6V8a6 6 0 0 1 6-6Z M9 8.5h14v3.4L14.2 20.1H23v3.4H9v-3.4l8.8-8.2H9Z"/></svg>Zachy</h1>
       <p>Running performance tracker</p>
     </div>
     <div class="sync">
@@ -324,7 +342,7 @@ const API = "http://localhost:8000";
 /* ---------- Chart theme: one shared look for every chart ---------- */
 const THEME = {
   ink: "#1f1d18", muted: "#7a7263", line: "#e6e6e6", grid: "#efefef",
-  moss: "#4a5d3a", clay: "#a8542e", sage: "#b9c4a8",
+  moss: "#4a5d3a", clay: "#a8542e", sage: "#b9c4a8", mossMid: "#86957a",
   font: '-apple-system, "Helvetica Neue", Arial, sans-serif',
 };
 
@@ -436,8 +454,8 @@ async function loadBodyChart() {
       data: {
         labels,
         datasets: [
-          { label: "HRV (ms)", data: hrv, borderColor: THEME.moss, backgroundColor: THEME.moss, yAxisID: "y" },
-          { label: "Resting HR (bpm)", data: rhr, borderColor: THEME.clay, backgroundColor: THEME.clay, yAxisID: "y1" }
+          { label: "HRV (ms)", data: hrv, borderColor: THEME.clay, backgroundColor: THEME.clay, yAxisID: "y" },
+          { label: "Resting HR (bpm)", data: rhr, borderColor: THEME.moss, backgroundColor: THEME.moss, yAxisID: "y1" }
         ]
       },
       options: {
@@ -446,8 +464,8 @@ async function loadBodyChart() {
         scales: {
           x: { ticks: { maxTicksLimit: 8, maxRotation: 0 }, grid: { display: false } },
           // HRV and resting HR live on different scales, so each gets its own axis.
-          y: { position: "left", ticks: { color: THEME.moss } },
-          y1: { position: "right", ticks: { color: THEME.clay }, grid: { display: false } }
+          y: { position: "left", ticks: { color: THEME.clay } },
+          y1: { position: "right", ticks: { color: THEME.moss }, grid: { display: false } }
         }
       }
     });
@@ -625,12 +643,12 @@ function renderRoute(points) {
 
   return `
     <svg id="route-svg" viewBox="0 0 ${width.toFixed(0)} ${height.toFixed(0)}">
-      <path d="${d}" fill="none" stroke="#a8542e" stroke-width="2.5"
+      <path d="${d}" fill="none" stroke="#4a5d3a" stroke-width="2.5"
             stroke-linejoin="round" stroke-linecap="round"/>
-      <circle cx="${sx}" cy="${sy}" r="5" fill="#4a5d3a"/>
+      <circle cx="${sx}" cy="${sy}" r="5" fill="#a8542e"/>
       <circle cx="${ex}" cy="${ey}" r="5" fill="#1f1d18"/>
     </svg>
-    <div class="muted-note">Green = start, black = finish.</div>`;
+    <div class="muted-note">Brown = start, black = finish.</div>`;
 }
 
 function renderLaps(laps, avgHr) {
@@ -657,45 +675,137 @@ function renderLaps(laps, avgHr) {
     <div class="muted-note">Shaded rows: heart rate more than 15% above the activity average.</div>`;
 }
 
-function drawTimeseriesCharts(points) {
+// The activity being shown, and which x-axis its charts use ("distance" or "time").
+const detailState = { activity: null, points: [], xMode: "distance" };
+
+function setXMode(mode) {
+  detailState.xMode = mode;
+  drawTimeseriesCharts();
+}
+
+// Axis labels for moving time: "45 min", "1:30", "10 h".
+function fmtHM(s) {
+  const h = Math.floor(s / 3600), m = Math.floor((s % 3600) / 60);
+  if (!h) return `${m} min`;
+  return m ? `${h}:${String(m).padStart(2, "0")}` : `${h} h`;
+}
+
+// 1, 2, 2.5 or 5 × 10^k: the round step closest above `raw`.
+function niceStep(raw) {
+  const pow = 10 ** Math.floor(Math.log10(raw));
+  return [1, 2, 2.5, 5, 10].map(m => m * pow).find(s => s >= raw);
+}
+
+// Chart.js tick objects at every multiple of `step` between min and max.
+function roundTicks(min, max, step) {
+  const ticks = [];
+  for (let v = Math.ceil(min / step) * step; v <= max + 1e-9; v += step) ticks.push({ value: v });
+  return ticks;
+}
+
+// Centered moving average (ignores gaps) — 1 Hz pace from speed is noisy.
+function smooth(values, window) {
+  const half = Math.floor(window / 2);
+  return values.map((_, i) => {
+    let sum = 0, n = 0;
+    for (let j = Math.max(0, i - half); j <= Math.min(values.length - 1, i + half); j++) {
+      if (values[j] != null) { sum += values[j]; n++; }
+    }
+    return values[i] == null || !n ? null : sum / n;
+  });
+}
+
+function drawTimeseriesCharts() {
   detailCharts.forEach(c => c.destroy());
   detailCharts = [];
-  if (!points.length) return;
+  const { points, activity } = detailState;
+  if (!points.length) {
+    document.getElementById("ts-source").textContent = "No recorded data for this activity.";
+    return;
+  }
 
-  const labels = points.map(p => (p.seconds_elapsed / 60).toFixed(0));
-  const base = {
-    responsive: true,
-    animation: false,
-    spanGaps: true,
-    plugins: { legend: { display: false } },
-    scales: {
-      x: { ticks: { maxTicksLimit: 8, maxRotation: 0 }, grid: { display: false },
-           title: { display: true, text: "minutes" } },
-      y: {}
-    }
+  // Distance axis only makes sense when the activity covered distance (not strength, yoga…).
+  const hasDistance = points[points.length - 1].distance_km > 0.05;
+  const mode = hasDistance ? detailState.xMode : "time";
+  document.querySelectorAll("#x-toggle button").forEach(b => {
+    b.classList.toggle("on", b.dataset.x === mode);
+    b.disabled = b.dataset.x === "distance" && !hasDistance;
+  });
+
+  const xOf = mode === "distance" ? p => p.distance_km : p => p.seconds_elapsed;
+  const xMax = xOf(points[points.length - 1]);
+  // Time ticks on round steps (15 min, 1 h, 5 h…). With a fixed min/max Chart.js would split
+  // the axis evenly (8:46, 17:32…), so the tick positions are set explicitly.
+  const TIME_STEPS = [300, 600, 900, 1800, 3600, 7200, 10800, 18000, 36000, 86400];
+  const xAxis = {
+    type: "linear", min: 0, max: xMax, grid: { display: false },
+    ticks: {
+      maxTicksLimit: 8, maxRotation: 0,
+      callback: mode === "distance" ? v => `${Number(v.toFixed(1))} km` : v => fmtHM(v),
+    },
+    ...(mode === "time" ? { afterBuildTicks: axis => {
+      axis.ticks = roundTicks(0, xMax, TIME_STEPS.find(s => xMax / s <= 7) || 86400);
+    } } : {}),
   };
+  // Tooltip title shows both: "10.73 km · 1:02:15"
+  const title = items => {
+    const p = items[0].raw.p;
+    const km = p.distance_km != null && hasDistance ? `${p.distance_km.toFixed(2)} km · ` : "";
+    return km + fmtDuration(Math.round(p.seconds_elapsed));
+  };
+
   // fmt formats values for the y-axis and the tooltip (e.g. pace as 5:24).
-  const line = (id, data, color, rgb, fmt, yOpts = {}) => {
-    const opts = JSON.parse(JSON.stringify(base));
-    Object.assign(opts.scales.y, yOpts);
-    opts.scales.y.ticks = { ...(yOpts.ticks || {}), callback: v => fmt(v) };
-    opts.plugins.tooltip = {
-      callbacks: { title: items => `${items[0].label} min`, label: ctx => fmt(ctx.parsed.y) }
-    };
+  const line = (id, values, color, rgb, fmt, yOpts = {}, alpha = 0.18) => {
+    const data = points.map((p, i) => ({ x: xOf(p), y: values[i], p })).filter(d => d.x != null);
     detailCharts.push(new Chart(document.getElementById(id), {
       type: "line",
-      data: { labels, datasets: [{
+      data: { datasets: [{
         data, borderColor: color, borderWidth: 1.5, tension: 0.2,
-        fill: "start", backgroundColor: gradientFill(rgb, 0.18),
+        fill: "start", backgroundColor: gradientFill(rgb, alpha),
       }] },
-      options: opts,
+      options: {
+        responsive: true,
+        animation: false,
+        spanGaps: true,
+        interaction: { mode: "nearest", axis: "x", intersect: false },
+        plugins: {
+          legend: { display: false },
+          tooltip: { displayColors: false, callbacks: { title, label: ctx => fmt(ctx.parsed.y) } },
+        },
+        scales: {
+          x: xAxis,
+          y: { ...yOpts, ticks: { ...(yOpts.ticks || {}), callback: v => fmt(v) } },
+        },
+      },
     }));
   };
 
+  // Elevation profile: axis hugs the real altitude range so climbs are visible.
+  const elev = points.map(p => p.elevation);
+  const known = elev.filter(v => v != null);
+  if (known.length) {
+    const lo = Math.min(...known), hi = Math.max(...known);
+    // Not from zero: hug the real altitude range, on round steps (10, 50, 500 m…).
+    const step = niceStep(Math.max(hi - lo, 20) / 5);
+    const yMin = Math.floor(lo / step) * step, yMax = Math.ceil(hi / step) * step;
+    line("ts-elev", elev, "#6b5d45", "107,93,69", v => `${Math.round(v)} m`,
+         { min: yMin, max: yMax, afterBuildTicks: axis => { axis.ticks = roundTicks(yMin, yMax, step); } },
+         0.35);
+    const gain = activity.elevation_gain, loss = activity.elevation_loss;
+    document.getElementById("elev-sub").textContent =
+      (gain != null ? `+${Math.round(gain).toLocaleString()} m` : "") +
+      (loss != null ? ` / −${Math.round(loss).toLocaleString()} m` : "") +
+      ` · ${Math.round(lo).toLocaleString()}–${Math.round(hi).toLocaleString()} m`;
+  } else {
+    document.getElementById("elev-sub").textContent = "· no altitude data";
+  }
+
   line("ts-hr", points.map(p => p.hr), THEME.clay, "168,84,46", v => `${Math.round(v)} bpm`);
-  // Pace: clip absurd values (standing still) and flip the axis so faster is higher.
+
+  // Pace: smooth, clip standing-still values, and flip the axis so faster is higher.
   // Fit the axis to the real range (ignoring the slowest 2%) in whole minutes.
-  const pace = points.map(p => (p.pace && p.pace < 15) ? p.pace : null);
+  const pace = smooth(points.map(p => (p.pace && p.pace < 20) ? p.pace : null), 5)
+    .map(v => (v != null && v < 15) ? v : null);
   const sorted = pace.filter(v => v != null).sort((a, b) => a - b);
   let paceAxis = { reverse: true };
   if (sorted.length) {
@@ -705,7 +815,11 @@ function drawTimeseriesCharts(points) {
     paceAxis = { reverse: true, min, max: min + Math.ceil((max - min) / step) * step, ticks: { stepSize: step } };
   }
   line("ts-pace", pace, THEME.moss, "74,93,58", v => `${fmtPace(v)} /km`, paceAxis);
-  line("ts-elev", points.map(p => p.elevation), THEME.muted, "122,114,99", v => `${Math.round(v)} m`);
+
+  document.getElementById("ts-source").textContent =
+    activity.timeseries_source === "fit"
+      ? `From the original FIT file · ${activity.timeseries_points.toLocaleString()} recorded points (${points.length.toLocaleString()} shown).`
+      : "From Garmin's chart data (about 2,000 points) — the original FIT file hasn't been downloaded for this activity yet.";
 }
 
 async function showDetail(id) {
@@ -715,7 +829,7 @@ async function showDetail(id) {
   content.innerHTML = `<div class="loading">Loading…</div>`;
 
   try {
-    const res = await fetch(`${API}/activities/${id}/detail?downsample=5`);
+    const res = await fetch(`${API}/activities/${id}/detail?max_points=2000`);
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
     const a = await res.json();
 
@@ -731,23 +845,32 @@ async function showDetail(id) {
         <div class="stat"><div class="stat-label">calories</div><div class="stat-value">${a.calories || "—"}</div></div>
       </div>
 
-      <div class="section-title">Laps (${a.laps.length})</div>
-      <div class="card">${renderLaps(a.laps, a.avg_hr)}</div>
+      <div class="chart-bar">
+        <div class="section-title">Elevation profile<span class="section-sub" id="elev-sub"></span></div>
+        <div class="seg" id="x-toggle">
+          <button data-x="distance" onclick="setXMode('distance')">Distance</button>
+          <button data-x="time" onclick="setXMode('time')">Time</button>
+        </div>
+      </div>
+      <div class="card" style="margin-top:10px;"><canvas id="ts-elev" height="80"></canvas></div>
 
       <div class="section-title">Heart rate (bpm)</div>
-      <div class="card"><canvas id="ts-hr" height="90"></canvas></div>
+      <div class="card"><canvas id="ts-hr" height="80"></canvas></div>
 
       <div class="section-title">Pace (min/km, faster is higher)</div>
-      <div class="card"><canvas id="ts-pace" height="90"></canvas></div>
+      <div class="card"><canvas id="ts-pace" height="80"></canvas></div>
+      <div class="muted-note" id="ts-source"></div>
 
-      <div class="section-title">Elevation (m)</div>
-      <div class="card"><canvas id="ts-elev" height="90"></canvas></div>
+      <div class="section-title">Laps (${a.laps.length})</div>
+      <div class="card">${renderLaps(a.laps, a.avg_hr)}</div>
 
       <div class="section-title">Route</div>
       <div class="card">${renderRoute(a.timeseries)}</div>
     `;
 
-    drawTimeseriesCharts(a.timeseries);
+    detailState.activity = a;
+    detailState.points = a.timeseries;
+    drawTimeseriesCharts();
   } catch (e) {
     content.innerHTML = `<div class="error">Could not load this activity (${e.message}).</div>`;
   }
@@ -793,8 +916,8 @@ function buildYearlyChart(canvasId, totalId, rows, metric) {
 
   const colors = rows.map((r, i) =>
     r.year === currentYear ? THEME.sage
-    : values[i] === peak ? THEME.clay
-    : THEME.moss);
+    : values[i] === peak ? THEME.moss
+    : THEME.mossMid);
 
   const total = values.reduce((s, v) => s + v, 0);
   document.getElementById(totalId).innerHTML =
@@ -880,8 +1003,8 @@ async function loadYearly() {
 let monthlyChart = null;
 let monthlyCumulativeChart = null;
 const MONTH_NAMES = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
-const MAIN_COLOR = "#a8542e";
-const COMPARE_COLORS = ["#4a5d3a", "#3b6e8f", "#c29a3a", "#8a5a9e", "#7a7263", "#2f8a7a"];
+const MAIN_COLOR = "#4a5d3a";
+const COMPARE_COLORS = ["#a8542e", "#3b6e8f", "#c29a3a", "#8a5a9e", "#7a7263", "#2f8a7a"];
 
 const monthlyCache = {};              // year -> rows (12 months, sorted)
 const monthlyState = { year: null, metricKey: "km", compare: [] };
@@ -1052,7 +1175,7 @@ async function renderMonthly() {
           label: String(y),
           data: cumulativeByYear[y],
           borderColor: c,
-          backgroundColor: main ? gradientFill("168,84,46") : c,
+          backgroundColor: main ? gradientFill("74,93,58") : c,
           fill: main ? "origin" : false,
           borderWidth: main ? 3 : 1.75,
           pointBackgroundColor: "white",
