@@ -58,14 +58,18 @@ class LapOut(BaseModel):
 
 
 class TimeseriesPointOut(BaseModel):
-    seconds_elapsed: int
-    hr: float | None
-    pace: float | None
-    cadence: float | None
-    elevation: float | None
-    latitude: float | None
-    longitude: float | None
-    power: float | None
+    seconds_elapsed: int                  # moving time (pauses removed when known)
+    elapsed_s: int | None = None          # clock time since start
+    distance_km: float | None = None      # cumulative
+    hr: float | None = None
+    pace: float | None = None             # min/km
+    speed_ms: float | None = None
+    cadence: float | None = None
+    elevation: float | None = None
+    latitude: float | None = None
+    longitude: float | None = None
+    power: float | None = None
+    temperature: float | None = None
 
     class Config:
         from_attributes = True
@@ -74,3 +78,5 @@ class TimeseriesPointOut(BaseModel):
 class ActivityDetailOut(ActivityOut):
     laps: list[LapOut]
     timeseries: list[TimeseriesPointOut]
+    timeseries_source: str                # "fit" (original file) | "chart" (old 2,000-point data) | "none"
+    timeseries_points: int                # points before downsampling

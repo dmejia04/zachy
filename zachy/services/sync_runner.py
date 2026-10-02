@@ -8,6 +8,7 @@ from sqlalchemy.orm import Session
 
 from zachy.database import SessionLocal
 from zachy.models import BodyMetric, SyncRun
+from zachy.services.fit import process_activity
 from zachy.services.sync import sync_new_activities
 from zachy.services.sync_body_metrics import sync_body_metrics
 from zachy.services.sync_laps_timeseries import RUNNING_TYPES, fetch_laps_and_timeseries
@@ -31,7 +32,7 @@ def body_metrics_days_to_sync(db: Session) -> int:
 
 
 def run_sync(run_id: int) -> None:
-    """New activities -> laps/timeseries for the new runs -> recent body metrics."""
+    """New activities -> original FIT file (+ laps for runs) -> recent body metrics."""
     db = SessionLocal()
     run = db.get(SyncRun, run_id)
     try:
@@ -43,7 +44,9 @@ def run_sync(run_id: int) -> None:
 
         for activity in new:
             if activity.activity_type in RUNNING_TYPES:
-                fetch_laps_and_timeseries(client, db, activity)
+                fetch_laps_and_timeseries(client, db, activity, include_timeseries=False)
+                db.commit()
+            if process_activity(client, db, activity).status == "ok":
                 run.new_details += 1
                 db.commit()
 

@@ -7,3 +7,6 @@ __pycache__/
 .garminconnect/
 .DS_Store
 dist/
+data/
+*.db-wal
+*.db-shm

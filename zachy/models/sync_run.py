@@ -11,6 +11,6 @@ class SyncRun(Base):
     finished_at      = Column(DateTime, nullable=True)    # naive UTC
     status           = Column(String, nullable=False)     # running | ok | error
     new_activities   = Column(Integer, default=0)
-    new_details      = Column(Integer, default=0)         # runs that got laps + timeseries
+    new_details      = Column(Integer, default=0)         # activities whose FIT file was stored
     new_body_metrics = Column(Integer, default=0)
     error            = Column(String, nullable=True)

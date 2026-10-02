@@ -37,7 +37,7 @@ def process_activity(raw: dict) -> dict:
         "max_power": raw.get("maxPower"),
         "training_effect_aerobic": raw.get("aerobicTrainingEffect"),
         "training_effect_anaerobic": raw.get("anaerobicTrainingEffect"),
-        "calories": raw.get("calories"),
+        "calories": round(raw["calories"]) if raw.get("calories") is not None else None,
         "steps": raw.get("steps"),
     }
 

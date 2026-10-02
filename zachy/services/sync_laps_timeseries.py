@@ -16,8 +16,11 @@ RUNNING_TYPES = [
 ]
 
 
-def fetch_laps_and_timeseries(client, db: Session, activity: Activity) -> tuple[int, int]:
-    """Download and store laps + timeseries for one activity. Returns (laps, points); caller commits."""
+def fetch_laps_and_timeseries(
+    client, db: Session, activity: Activity, include_timeseries: bool = True
+) -> tuple[int, int]:
+    """Download and store laps (+ the 2,000-point chart timeseries unless disabled — the FIT
+    file is the better source for that). Returns (laps, points); caller commits."""
     garmin_id = int(activity.garmin_id)
 
     laps = []
@@ -30,6 +33,8 @@ def fetch_laps_and_timeseries(client, db: Session, activity: Activity) -> tuple[
         print(f"  Laps error: {e}")
 
     timeseries = []
+    if not include_timeseries:
+        return len(laps), 0
     try:
         details = client.get_activity_details(garmin_id)
         if details is None:
