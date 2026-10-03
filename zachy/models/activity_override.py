@@ -8,4 +8,4 @@ class ActivityOverride(Base):
 
     activity_id = Column(Integer, ForeignKey("activities.id"), primary_key=True)
     surface     = Column(String, nullable=True)   # "trail" | "road" | None = automatic
-    category    = Column(String, nullable=True)   # "race" | "workout" | "easy" | None = automatic
+    category    = Column(String, nullable=True)   # "race" | "workout" | "long" | "easy" | None = automatic

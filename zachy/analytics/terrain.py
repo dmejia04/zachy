@@ -11,7 +11,10 @@
 
 FOOT_TYPES = {"running", "trail_running", "ultra_run", "track_running", "treadmill_running"}
 TRAIL_TYPES = {"trail_running", "ultra_run"}
-SURFACES = ("road", "trail", "track", "treadmill")
+SURFACES = ("road", "trail", "track", "treadmill", "cross")
+# Cross country: laps of a short loop in a park or field, so the whole course fits in a small area.
+CROSS_MAX_FOOTPRINT_KM = 1.2     # diagonal of the area the GPS track covers
+CROSS_DISTANCE_KM = (3.0, 15.0)
 ROLLING_M_PER_KM = 10
 MOUNTAIN_M_PER_KM = 30
 
@@ -46,7 +49,7 @@ def terrain_class(gain_per_km: float) -> str:
 
 
 def classify(activity_type: str | None, distance_km: float | None, elevation_gain: float | None,
-             override: str | None = None, detected_track: bool = False) -> dict | None:
+             override: str | None = None, detected_track: bool = False, detected_cross: bool = False) -> dict | None:
     """{"terrain", "gain_per_km", "km_effort", "surface", "surface_source", "auto_surface"}
     or None if not a run. auto_surface is what the rules decide, ignoring any override."""
     if activity_type not in FOOT_TYPES or not distance_km or distance_km < 0.5:
@@ -59,6 +62,8 @@ def classify(activity_type: str | None, distance_km: float | None, elevation_gai
         auto, auto_source = activity_type.split("_")[0], "garmin"    # treadmill / track
     elif detected_track:
         auto, auto_source = "track", "gps"
+    elif detected_cross and activity_type not in TRAIL_TYPES and terrain != "mountain":
+        auto, auto_source = "cross", "gps"
     elif activity_type in TRAIL_TYPES:
         auto, auto_source = "trail", "garmin"
     elif terrain == "mountain":
@@ -78,3 +83,33 @@ def classify(activity_type: str | None, distance_km: float | None, elevation_gai
         "surface_source": source,
         "auto_surface": auto,
     }
+
+
+def course_footprint(db, activity) -> float | None:
+    """Diagonal (km) of the area the GPS track covers, computed once and stored on the activity.
+    A cross country (laps of a 1.5-3 km loop) stays within ~1 km; a road 10 km spreads over
+    several. None without GPS."""
+    import math
+    from zachy.models import Record
+    if activity.footprint_km is None:
+        rows = (db.query(Record.latitude, Record.longitude)
+                .filter(Record.activity_id == activity.id, Record.latitude.isnot(None)).all())
+        if len(rows) < 20:
+            activity.footprint_km = -1
+        else:
+            lats, lons = [r[0] for r in rows], [r[1] for r in rows]
+            k = math.cos(math.radians(sum(lats) / len(lats)))
+            activity.footprint_km = round(math.hypot((max(lats) - min(lats)) * 110.57,
+                                                     (max(lons) - min(lons)) * 111.32 * k), 2)
+        db.commit()
+    return activity.footprint_km if activity.footprint_km >= 0 else None
+
+
+def looks_like_cross(db, activity, category: str | None) -> bool:
+    """A race of 3-15 km whose whole course fits in a small area (only races: an easy run looping
+    around a park isn't a cross country)."""
+    lo, hi = CROSS_DISTANCE_KM
+    if category != "race" or not activity.distance_km or not lo <= activity.distance_km <= hi:
+        return False
+    fp = course_footprint(db, activity)
+    return fp is not None and fp < CROSS_MAX_FOOTPRINT_KM

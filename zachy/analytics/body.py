@@ -2,21 +2,21 @@
 
 from sqlalchemy.orm import Session
 
-from zachy.analytics.gap import adjusted_paces, personal_model
+from zachy.analytics.gap import adjusted_paces
+from zachy.analytics.gap_race import race_model
 from zachy.analytics.races import FOOT_TYPES, category_status
-from zachy.analytics.terrain import classify, place_from_name
+from zachy.analytics.terrain import classify, looks_like_cross, place_from_name
 from zachy.models import Activity, ActivityOverride, CategoryCache
 
 EFFICIENCY_TYPES = {"running", "treadmill_running", "track_running", "trail_running"}
-EFFICIENCY_HR = 140   # every run is normalised to this heart rate
 OUTLIER_SHARE = 0.12   # more than 12% off the neighbouring runs' median
 
 def races(db: Session) -> list[dict]:
     """Every race (automatic guess or your choice) with surface, terrain, distance, time, actual pace
     and personal flat-equivalent pace — so road and trail races can be compared on one chart."""
     overrides = {o.activity_id: o for o in db.query(ActivityOverride)}
-    model = personal_model(db)
-    version = model and model["fitted_at"]
+    model = race_model(db)   # races: flat-equivalent pace from the race model (gap_race.py)
+    version = model and f"race {model['fitted_at']}"
     out = []
     for a in db.query(Activity).filter(Activity.activity_type.in_(FOOT_TYPES), Activity.distance_km >= 1,
                                        Activity.duration_s > 0).order_by(Activity.date):
@@ -24,12 +24,13 @@ def races(db: Session) -> list[dict]:
         status = category_status(db, a, getattr(o, "category", None))
         if not status or status["category"] != "race":
             continue
-        t = classify(a.activity_type, a.distance_km, a.elevation_gain, getattr(o, "surface", None))
+        t = classify(a.activity_type, a.distance_km, a.elevation_gain, getattr(o, "surface", None),
+                     detected_cross=looks_like_cross(db, a, "race"))
         # Flat-equivalent pace is slow to compute: stored with the category, per model version.
         cache = db.get(CategoryCache, a.id)
         if cache is not None and (cache.adjusted_pace is None or cache.model_version != version):
             gap = adjusted_paces(db, a) or {}
-            cache.adjusted_pace = gap.get("personal") or gap.get("minetti")
+            cache.adjusted_pace = gap.get("race") or gap.get("personal") or gap.get("minetti")
             cache.model_version = version
             db.commit()
         out.append({
@@ -45,8 +46,9 @@ def races(db: Session) -> list[dict]:
 def aerobic_efficiency(db: Session) -> tuple[int, list[dict]]:
     """Efficiency factor (metres per minute per heartbeat) of flat, easy, steady runs: same effort
     over time -> are you faster for the same heart rate? Every run (any HR in 105-165) is
-    normalised to 140 bpm with your own speed-vs-heart-rate slope: a run at 120 bpm is credited
-    with the extra speed you'd have had at 140. Returns (reference_hr, runs)."""
+    normalised to a reference heart rate (efficiency_reference) with your own speed-vs-heart-rate
+    slope: a run at 120 bpm is credited with the extra speed you'd have had at 130.
+    Returns (reference_hr, runs)."""
     overrides = {o.activity_id: o.category for o in db.query(ActivityOverride)}
     out = []
     runs = (db.query(Activity)
@@ -57,7 +59,7 @@ def aerobic_efficiency(db: Session) -> tuple[int, list[dict]]:
         if (a.elevation_gain or 0) / a.distance_km >= 10:          # flat runs only
             continue
         status = category_status(db, a, overrides.get(a.id))
-        if not status or status["category"] != "easy":            # steady easy efforts only
+        if not status or status["category"] not in ("easy", "long"):   # steady easy efforts only
             continue
         speed = a.distance_km * 1000 / (a.duration_s / 60)         # m/min
         ef = speed / a.avg_hr
@@ -65,7 +67,7 @@ def aerobic_efficiency(db: Session) -> tuple[int, list[dict]]:
                     "avg_hr": a.avg_hr,
                     "pace": round(a.duration_s / 60 / a.distance_km, 3), "distance_km": round(a.distance_km, 1)})
     if not out:
-        return EFFICIENCY_HR, out
+        return 0, out
     # Odd runs (HR strap glitch, snow, a run with a friend) sit far from their neighbours: flagged,
     # so the trend, best/worst and the fit below ignore them.
     ratios = [r["ef"] for r in out]
@@ -75,10 +77,26 @@ def aerobic_efficiency(db: Session) -> tuple[int, list[dict]]:
     # How much faster you run per extra beat, from your own runs: the slope of speed vs heart rate
     # within each year (so getting fitter over the years doesn't bias it).
     slope = _speed_per_beat([r for r in out if not r["outlier"]])
+    reference = efficiency_reference(db, out)
     for r in out:
-        speed = 1000 / r["pace"] + slope * (EFFICIENCY_HR - r["avg_hr"])   # m/min at the reference HR
+        speed = 1000 / r["pace"] + slope * (reference - r["avg_hr"])   # m/min at the reference HR
         r["pace_at_hr"] = round(1000 / speed, 3)
-    return EFFICIENCY_HR, out
+    return reference, out
+
+
+def efficiency_reference(db: Session, runs: list[dict]) -> int:
+    """The heart rate every run is normalised to: yours if set in the profile, else your typical
+    easy-run heart rate (the median), so runs are adjusted by only a few beats."""
+    from zachy.models import Profile
+    p = db.get(Profile, 1)
+    if p and p.efficiency_ref_hr:
+        return int(p.efficiency_ref_hr)
+    return auto_efficiency_reference(runs)
+
+
+def auto_efficiency_reference(runs: list[dict]) -> int:
+    hrs = sorted(r["avg_hr"] for r in runs if not r.get("outlier"))
+    return round(hrs[len(hrs) // 2]) if hrs else 130
 
 
 def _speed_per_beat(runs: list[dict]) -> float:
@@ -155,9 +173,12 @@ def yearly_max_hr(db: Session) -> dict[int, dict]:
     - one run standing more than 10 bpm above every other that year is dropped as a spike.
     Runs without FIT records use the watch's max."""
     from sqlalchemy import func
-    from zachy.analytics.profile import max_hr_ceiling, profile
+    from zachy.analytics.profile import max_hr_ceiling
     from zachy.analytics.terrain import FOOT_TYPES
-    key = (db.query(func.count(Activity.id), func.max(Activity.id)).one(), profile(db)["effective"]["birth_date"])
+    from zachy.models import Profile
+    p = db.get(Profile, 1)
+    key = (tuple(db.query(func.count(Activity.id), func.max(Activity.id)).one()),
+           p and (p.birth_date, p.max_hr_ceiling, p.garmin_json))
     if _max_hr_cache.get("key") == key:
         return _max_hr_cache["value"]
     by_year: dict[int, list] = {}

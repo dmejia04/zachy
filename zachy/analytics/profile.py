@@ -13,6 +13,8 @@ from sqlalchemy.orm import Session
 from zachy.models import Profile, Wellness
 
 FIELDS = ("birth_date", "height_cm", "weight_kg", "sex")
+SETTINGS = ("efficiency_ref_hr", "max_hr_ceiling")
+LINKS = ("utmb_url", "itra_url", "betrail_url", "ffa_licence")       # your pages on results sites   # computed automatically unless you set them
 DEFAULT_MAX_HR = 200
 
 
@@ -60,14 +62,23 @@ def profile(db: Session) -> dict:
         b = date.fromisoformat(effective["birth_date"])
         t = date.today()
         age = t.year - b.year - ((t.month, t.day) < (b.month, b.day))
-    return {"effective": effective, "source": source, "manual": manual, "garmin": garmin, "age": age,
-            "max_hr_ceiling": max_hr_ceiling(db, date.today().year, effective["birth_date"]),
+    # Settings: yours, else automatic.
+    from zachy.analytics.body import aerobic_efficiency
+    ceiling_auto = _age_ceiling(date.today().year, effective["birth_date"])
+    reference = aerobic_efficiency(db)[0]
+    for f, auto in (("max_hr_ceiling", ceiling_auto), ("efficiency_ref_hr", reference)):
+        manual[f] = getattr(row, f)
+        effective[f] = manual[f] if manual[f] is not None else auto
+        source[f] = "manual" if manual[f] is not None else "auto"
+    links = {f: getattr(row, f) for f in LINKS}
+    return {"effective": effective, "source": source, "manual": manual, "garmin": garmin, "age": age, "links": links,
+            "max_hr_ceiling": effective["max_hr_ceiling"], "max_hr_ceiling_auto": ceiling_auto,
             "garmin_fetched_at": row.garmin_fetched_at.isoformat() if row.garmin_fetched_at else None}
 
 
 def update(db: Session, values: dict) -> None:
     row = _row(db)
-    for f in FIELDS:
+    for f in FIELDS + SETTINGS + LINKS:
         if f in values:
             v = values[f]
             if f == "birth_date" and v:
@@ -76,12 +87,17 @@ def update(db: Session, values: dict) -> None:
     db.commit()
 
 
-def max_hr_ceiling(db: Session, year: int, birth_date: str | None = None) -> float:
-    """Highest believable heart rate in a given year: 220 - age/2, never above 200 without an age."""
-    if birth_date is None:
-        p = _row(db)
-        birth_date = p.birth_date.isoformat() if p.birth_date else (json.loads(p.garmin_json or "{}").get("birth_date"))
+def max_hr_ceiling(db: Session, year: int) -> float:
+    """Highest believable heart rate in a given year: yours if set in the profile, else
+    220 - age/2 (200 without an age)."""
+    p = _row(db)
+    if p.max_hr_ceiling:
+        return p.max_hr_ceiling
+    birth_date = p.birth_date.isoformat() if p.birth_date else (json.loads(p.garmin_json or "{}").get("birth_date"))
+    return _age_ceiling(year, birth_date)
+
+
+def _age_ceiling(year: int, birth_date: str | None) -> float:
     if not birth_date:
         return DEFAULT_MAX_HR
-    age = year - int(birth_date[:4])
-    return round(220 - age / 2, 1)
+    return round(220 - (year - int(birth_date[:4])) / 2, 1)

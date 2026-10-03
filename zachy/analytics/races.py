@@ -126,7 +126,9 @@ def auto_race(db: Session, a: Activity) -> tuple[bool, list[str]]:
     return bool(reasons), reasons
 
 
-CATEGORIES = ("race", "workout", "easy")
+CATEGORIES = ("race", "workout", "long", "easy")
+LONG_RUN_S = 2 * 3600     # an easy run this long (moving time)…
+LONG_RUN_KM = 25.0        # …or this far is a long run
 
 
 def structured_laps(db: Session, a: Activity, min_laps: int = 5) -> bool:
@@ -140,18 +142,33 @@ def structured_laps(db: Session, a: Activity, min_laps: int = 5) -> bool:
 
 
 def auto_category(db: Session, a: Activity) -> tuple[str, list[str]]:
-    """("race" | "workout" | "easy", reasons)."""
+    """("race" | "workout" | "long" | "easy", reasons)."""
+    from zachy.analytics.race_results import has_official_result
+    from zachy.models import ActivityOverride
+    override = db.get(ActivityOverride, a.id)
+    if override and override.surface == "cross":   # a cross country is always a race
+        return "race", ["cross country"]
+    official = has_official_result(db, a.id)
+    if official:
+        return "race", [f"official result: {official.event} – {official.race}"]
     is_race, reasons = auto_race(db, a)
     if is_race:
         return "race", reasons
     if a.name and not DEFAULT_NAME.match(a.name):
         if EASY_WORDS.search(a.name):
-            return "easy", ["easy-run name"]
+            return _easy_or_long(a, ["easy-run name"])
         if WORKOUT_WORDS.search(a.name):
             return "workout", ["workout name"]
     if a.activity_type not in ("trail_running", "ultra_run") and structured_laps(db, a):
         return "workout", ["structured laps (intervals or workout steps)"]
-    return "easy", []
+    return _easy_or_long(a, [])
+
+
+def _easy_or_long(a: Activity, reasons: list[str]) -> tuple[str, list[str]]:
+    """An easy run of 2 h or more (moving), or 25 km or more, is a long run."""
+    if (a.duration_s or 0) >= LONG_RUN_S or (a.distance_km or 0) >= LONG_RUN_KM:
+        return "long", reasons + [f"long: {'2 h+' if (a.duration_s or 0) >= LONG_RUN_S else '25 km+'}"]
+    return "easy", reasons
 
 
 def cached_auto_category(db: Session, a: Activity) -> tuple[str, list[str]]:

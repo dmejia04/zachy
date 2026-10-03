@@ -4,10 +4,10 @@
 - road: 5 km, 10 km, half, marathon best efforts — the fastest stretch of exactly that distance
   inside any run (analytics/best_efforts.py), so a 5 km record can be a split of a 10 km race;
   downhill stretches don't count. By time.
-- climb: fastest 500 m and 1,000 m of elevation gain inside any run;
+- climb: fastest 100 m, 500 m and 1,000 m of elevation gain inside any run;
 - biggest: most elevation gain, longest moving time, longest distance, most calories in one activity;
 - 50 km, 100 km, 100 miles: whole activities whose distance falls in the range (a "100 km" trail
-  can be 105 km), ranked by personal flat-equivalent pace (analytics/gap.py), so courses with very
+  can be 105 km), ranked by flat-equivalent pace from the race model (analytics/gap_race.py), so courses with very
   different climbing compare fairly. Runs without FIT data fall back to their actual pace.
 Treadmill runs are left out. Each entry carries the activity's race / workout / easy category,
 so the page can show races only.
@@ -26,7 +26,7 @@ BEST_EFFORTS = [
     ("road", "5k", "5 km", 5.0), ("road", "10k", "10 km", 10.0),
     ("road", "half", "Half marathon", 21.0975), ("road", "marathon", "Marathon", 42.195),
 ]
-CLIMBS = [("climb500", "500 m climb", 500), ("climb1000", "1,000 m climb", 1000)]
+CLIMBS = [("climb100", "100 m climb", 100), ("climb500", "500 m climb", 500), ("climb1000", "1,000 m climb", 1000)]
 BIGGEST = [
     ("max_gain", "Most elevation gain", "elevation_gain"),
     ("max_time", "Longest time", "duration_s"),
@@ -83,8 +83,9 @@ def records(db: Session) -> list[dict]:
         for a in runs:
             e = _entry(db, a, overrides)
             gap = adjusted_paces(db, a)
-            e["adjusted_pace"] = (gap or {}).get("personal") or (gap or {}).get("minetti")
-            e["adjusted_method"] = "personal" if (gap or {}).get("personal") else ("minetti" if gap else None)
+            gap = gap or {}
+            method = next((m for m in ("race", "personal", "minetti") if gap.get(m)), None)
+            e["adjusted_pace"], e["adjusted_method"] = gap.get(method) if method else None, method
             entries.append(e)
         # Fastest flat-equivalent pace first; no FIT data -> ranked by actual pace.
         entries.sort(key=lambda e: e["adjusted_pace"] or e["pace"])

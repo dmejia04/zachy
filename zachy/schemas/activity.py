@@ -22,11 +22,13 @@ class ActivityOut(BaseModel):
     training_effect_anaerobic: float | None
     calories: int | None
     steps: int | None
+    relative_effort: float | None = None
     category: str | None = None   # race | workout | easy — automatic guess or your override (analytics/races.py)
     place: str | None = None      # from the activity name ("Toulouse Running" -> Toulouse)
     surface: str | None = None    # road | trail | treadmill | track (analytics/terrain.py)
     terrain: str | None = None    # flat | rolling | mountain
     workout: dict | None = None   # {"type", "summary", ...} for workouts (analytics/workouts.py)
+    official: dict | None = None  # official result (UTMB / ITRA / Betrail) matched to it (analytics/race_results.py)
 
     class Config:
         from_attributes = True

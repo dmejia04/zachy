@@ -2,7 +2,7 @@
 - 1 km, 1 mile, 3 km — absolute: downhill allowed (the "fastest you've ever moved" list);
 - 5 km, 10 km, half, marathon — the fastest stretch of exactly that distance (a 5 km record can be a
   split of a 10 km race), but not downhill (see below);
-- climbs — the fastest 500 m and 1,000 m of elevation gain (altitude smoothed, 2 m hysteresis).
+- climbs — the fastest 100 m, 500 m and 1,000 m of elevation gain (altitude smoothed, 2 m hysteresis).
 
 For every starting point, the time at which the distance was reached is interpolated between
 records; the shortest such time is the best effort. Moving time (watch pauses removed).
@@ -29,7 +29,7 @@ from zachy.models import Activity, BestEffort, FitFile, Record
 # key, km, downhill allowed
 EFFORTS = [("1k", 1.0, True), ("1mi", 1.609344, True), ("3k", 3.0, True),
            ("5k", 5.0, False), ("10k", 10.0, False), ("half", 21.0975, False), ("marathon", 42.195, False)]
-CLIMBS = [("climb500", 500.0), ("climb1000", 1000.0)]
+CLIMBS = [("climb100", 100.0), ("climb500", 500.0), ("climb1000", 1000.0)]
 MAX_VERTICAL_MH = 3000.0     # faster climbing than this is an altimeter glitch
 EFFORT_TYPES = FOOT_TYPES - {"treadmill_running"}   # treadmill distance isn't reliable
 JUMP_SPEED_MS = 8.0          # a GPS jump: faster than this between two records…
@@ -37,6 +37,7 @@ JUMP_MIN_M = 25.0            # …and longer than this (1-second jitter is ~10 m
 MAX_EFFORT_SPEED_MS = 6.45   # 2:35/km: anything faster over a whole effort is a glitch
 MAX_DROP_M_PER_KM = 5.0      # downhill efforts don't count as records
 MIN_HR_FRACTION = 0.60       # below this share of max HR, you weren't running it
+GAP_S = 30                   # no record for longer than this: a recording gap
 
 
 def best_efforts_for(timer_s: np.ndarray, distance_km: np.ndarray,
@@ -100,9 +101,14 @@ def best_efforts_for(timer_s: np.ndarray, distance_km: np.ndarray,
         i = int(np.argmin(durations))
         out[key] = (float(durations[i]), float(d[starts[i]]))
 
-    # Climbs: fastest time to accumulate 500 m / 1,000 m of elevation gain.
+    # Climbs: fastest time to accumulate 100 m / 500 m / 1,000 m of elevation gain.
     if has_elev:
-        z = pd.Series(e).rolling(15, center=True, min_periods=1).mean().to_numpy()
+        # Recording gaps (no data for over 30 s): the altitude gained while nothing was recorded
+        # isn't a climb we can time, and smoothing would spread it over the next seconds.
+        z = e.copy()
+        for i in np.nonzero(np.diff(t) > GAP_S)[0]:
+            z[i + 1:] -= z[i + 1] - z[i]
+        z = pd.Series(z).rolling(15, center=True, min_periods=1).mean().to_numpy()
         gain, _ = elevation_steps(z)
         cum = np.cumsum(gain)
         for key, metres in CLIMBS:

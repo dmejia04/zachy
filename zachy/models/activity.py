@@ -26,6 +26,9 @@ class Activity(Base):
     calories                  = Column(Integer, nullable=True)
     steps                     = Column(Integer, nullable=True)
     notes                     = Column(String, nullable=True)
+    relative_effort           = Column(Float, nullable=True)    # TRIMP (analytics/relative_effort.py)
+    relative_effort_method    = Column(String, nullable=True)   # "records" | "average"
+    footprint_km              = Column(Float, nullable=True)    # GPS course spread (analytics/terrain.py); -1 = no GPS
 
     laps       = relationship("Lap", back_populates="activity", cascade="all, delete")
     timeseries = relationship("Timeseries", back_populates="activity", cascade="all, delete")

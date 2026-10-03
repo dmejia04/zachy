@@ -10,6 +10,8 @@ from zachy.analytics.best_efforts import EFFORT_TYPES
 from zachy.analytics.best_efforts import compute_for_activity as compute_best_efforts
 from zachy.analytics.races import auto_category, clear_category_cache_around
 from zachy.analytics.profile import refresh_from_garmin as refresh_profile
+from zachy.analytics.effort import activity_effort
+from zachy.analytics.relative_effort import compute as relative_effort
 from zachy.analytics.weather import activity_weather
 from zachy.analytics.workouts import cached_workout
 from zachy.services.fit import process_activity
@@ -46,10 +48,13 @@ def run_sync(run_id: int) -> None:
                     cached_workout(db, activity)   # describe it now so the list stays fast
                 if activity.activity_type in EFFORT_TYPES:
                     compute_best_efforts(db, activity)   # 5 km / 10 km / half / marathon records
-            try:
-                activity_weather(db, activity, client)   # temperature, humidity, wind at the start
-            except Exception:
-                db.rollback()                            # no weather is fine; the page retries
+            for extra in (activity_weather,              # temperature, humidity, wind at the start
+                          activity_effort,               # training effect, RPE, feel, stamina
+                          lambda db, a, client: relative_effort(db, a)):   # TRIMP load
+                try:
+                    extra(db, activity, client)
+                except Exception:
+                    db.rollback()                        # missing is fine; the page retries
 
         run.new_body_metrics = sync_recent_wellness(client, db, log=lambda *_: None)
         try:

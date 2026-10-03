@@ -1,4 +1,4 @@
-"""Grade-adjusted pace: four ways to turn a hilly run into a flat-equivalent pace.
+"""Grade-adjusted pace: five ways to turn a hilly run into a flat-equivalent pace.
 
 Every method is expressed the same way so they can be compared: a cost factor per slope — how
 many flat metres one metre at that slope is worth (1.0 on the flat). The flat-equivalent distance
@@ -12,6 +12,7 @@ of a run is the sum of its metres × cost factor; adjusted pace = moving time ÷
 - Personal: fitted from your runs — heartbeats per metre on each slope divided by heartbeats per
   metre on the flat in the same run (so fitness, heat and fatigue cancel out), one-minute windows,
   median per 1% slope bin, smoothed.
+- Race model: fitted from your trail races so they come out as flat as possible (gap_race.py).
 """
 
 import json
@@ -25,8 +26,9 @@ from zachy.analytics.elevation import moving_elevation
 from zachy.models import Activity, FitFile, GapModel, Record
 
 MAX_GRADE = 0.45
-METHODS = ["km_effort", "minetti", "strava", "personal"]
-LABELS = {"km_effort": "km-effort", "minetti": "Minetti", "strava": "Strava-like", "personal": "Personal"}
+METHODS = ["km_effort", "minetti", "strava", "personal", "race"]
+LABELS = {"km_effort": "km-effort", "minetti": "Minetti", "strava": "Strava-like", "personal": "Personal",
+          "race": "Race model"}
 
 
 # ---------- the four cost curves (slope as a fraction, e.g. 0.10 = 10%) ----------
@@ -52,9 +54,11 @@ def cost_personal(g, model: dict | None):
     return np.interp(np.clip(g, grades[0], grades[-1]), grades, model["factors"])
 
 
-def costs(g, model: dict | None) -> dict:
+def costs(g, model: dict | None, race: dict | None = None) -> dict:
+    """Every model's cost factor per slope. race: the race model (gap_race.py), if fitted."""
+    from zachy.analytics.gap_race import cost_race
     return {"km_effort": cost_km_effort(g), "minetti": cost_minetti(g),
-            "strava": cost_strava(g), "personal": cost_personal(g, model)}
+            "strava": cost_strava(g), "personal": cost_personal(g, model), "race": cost_race(g, race)}
 
 
 # ---------- personal model ----------
@@ -114,7 +118,7 @@ def fit_personal(db: Session, window_s: int = 60) -> dict:
         "walk_run": walk_vs_run(df),
         "fitted_at": datetime.now(timezone.utc).isoformat(timespec="seconds"),
     }
-    db.query(GapModel).delete()
+    db.query(GapModel).filter(GapModel.id == 1).delete()   # row 2 is the race model (gap_race.py)
     db.add(GapModel(id=1, data=json.dumps(model)))
     db.commit()
     return model
@@ -226,15 +230,16 @@ _cache: dict[tuple, dict | None] = {}
 def adjusted_paces(db: Session, activity: Activity) -> dict | None:
     """Flat-equivalent pace (min/km) of a run with each method, plus the actual pace.
     Kept in memory per (activity, personal model version): FIT records never change."""
-    model = personal_model(db)
-    key = (activity.id, model and model["fitted_at"], activity.distance_km, activity.duration_s,
-           activity.elevation_gain)
+    from zachy.analytics.gap_race import race_model
+    model, race = personal_model(db), race_model(db)
+    key = (activity.id, model and model["fitted_at"], race and race["fitted_at"], activity.distance_km,
+           activity.duration_s, activity.elevation_gain)
     if key not in _cache:
-        _cache[key] = _adjusted_paces(db, activity, model)
+        _cache[key] = _adjusted_paces(db, activity, model, race)
     return _cache[key]
 
 
-def _adjusted_paces(db: Session, activity: Activity, model: dict | None) -> dict | None:
+def _adjusted_paces(db: Session, activity: Activity, model: dict | None, race: dict | None = None) -> dict | None:
     if not activity.distance_km or not activity.duration_s:
         return None
     g = profile(db, activity)
@@ -246,7 +251,7 @@ def _adjusted_paces(db: Session, activity: Activity, model: dict | None) -> dict
     # scaled to the activity's official distance.
     out["km_effort"] = round(minutes / (activity.distance_km + (activity.elevation_gain or 0) / 100), 3)
     scale = activity.distance_km / (len(g) * 0.01)
-    for m, c in costs(g, model).items():
+    for m, c in costs(g, model, race).items():
         if m == "km_effort" or np.isnan(c).all():
             continue
         equivalent_km = float(np.sum(c) * 0.01 * scale)
@@ -255,13 +260,16 @@ def _adjusted_paces(db: Session, activity: Activity, model: dict | None) -> dict
 
 
 def curves(db: Session) -> dict:
-    """All four cost curves from −40% to +40%, plus the personal model's data, for the chart."""
-    model = personal_model(db)
+    """All cost curves from −40% to +40%, plus the personal and race models' data, for the chart."""
+    from zachy.analytics.gap_race import race_model
+    model, race = personal_model(db), race_model(db)
     grades = np.arange(-40, 41)
-    c = costs(grades / 100, model)
+    c = costs(grades / 100, model, race)
     return {
         "grades": grades.tolist(),
         "curves": {m: [None if np.isnan(v) else round(float(v), 3) for v in c[m]] for m in METHODS},
         "labels": LABELS,
         "personal": model and {k: model.get(k) for k in ("bins", "windows", "runs", "fitted_at", "by_year", "walk_run")},
+        "race": race and {k: race.get(k) for k in ("n_races", "segments", "summary", "races", "beta_hr", "gamma_fatigue",
+                                                   "fitted_at")},
     }

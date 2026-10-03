@@ -133,7 +133,7 @@
   .stat-value { font-size: 20px; font-weight: 500; margin-top: 2px; }
   .detail-title { font-size: 26px; font-weight: 500; margin: 0 0 2px; line-height: 1.25; }
   .detail-title > b { font-weight: 700; }
-  .detail-wsub { font-size: 19px; font-weight: 400; margin: 0 0 6px; font-variant-numeric: tabular-nums; }
+  .detail-wsub { font-size: 19px; font-weight: 400; margin: 0 0 6px; font-variant-numeric: tabular-nums; white-space: pre-line; line-height: 1.35; }
   .detail-date { color: var(--muted); font-size: 13px; }
   .loading, .error { color: var(--muted); padding: 40px 0; text-align: center; }
   .section-title {
@@ -270,6 +270,7 @@
   .zone-model-row .muted { font-size: 11px; }
   .race-row { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin-top: 8px; }
   .race-seg button.cat-easy.on { background: #3d7ebf; }
+  .race-seg button.cat-long.on { background: #1f4e8c; }
   .race-seg button.cat-workout.on { background: #3f8f3a; }
   .race-seg button.cat-race.on { background: #a50f15; }
   .race-note { font-size: 12px; color: var(--muted); }
@@ -277,7 +278,9 @@
   .tag.tag-race { color: #a50f15; border-color: #a50f15; font-weight: 600; }
   .tag.tag-workout { color: #2d6b29; border-color: #3f8f3a; }
   .tag.tag-road { color: #555; border-color: #999; }
+  .tag.tag-cross { color: #8a5a00; border-color: #c99a3b; }
   .tag.tag-easy { color: #2f6aa6; border-color: #3d7ebf; }
+  .tag.tag-long { color: #1f4e8c; border-color: #1f4e8c; font-weight: 600; }
   .tag.tag-trail { color: #4a5d3a; border-color: #4a5d3a; }
   .tag.tag-rolling { color: #fb6a4a; border-color: #fcae91; }
   .tag.tag-mountain { color: #a50f15; border-color: #fb6a4a; }
@@ -295,6 +298,8 @@
   .profile-field input:focus, .profile-field select:focus { outline: none; border-color: var(--ink); }
   .profile-field .pf-src { font-size: 11px; color: var(--muted); margin-top: 6px; }
   .profile-field .pf-src.manual { color: var(--clay); }
+  .pf-group { grid-column: 1 / -1; font-size: 14px; font-weight: 500; margin-top: 10px; }
+  .pf-group .muted-note { font-weight: 400; margin-left: 6px; }
   .profile-derived { margin-top: 22px; display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 14px; }
   .zones-bar { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; }
   .zones-date { font-size: 13px; color: var(--muted); display: flex; align-items: center; gap: 8px; }
@@ -361,6 +366,11 @@
   .body-tiles { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 12px; margin: 12px 0 16px; }
   .body-tiles .stat-value { font-size: 19px; }
   .stat-sub { font-size: 11px; color: var(--muted); margin-top: 2px; }
+  .te-row { display: grid; grid-template-columns: 1fr auto; row-gap: 2px; font-size: 11px; color: var(--muted); margin-top: 5px; }
+  .te-row b { color: var(--ink); }
+  .te-row .te-bar { grid-column: 1 / -1; }
+  .te-bar { height: 6px; background: var(--line); border-radius: 3px; overflow: hidden; }
+  .te-bar div { height: 100%; border-radius: 3px; }
   .stat-sub .up { color: var(--moss); } .stat-sub .down { color: var(--clay); }
   .body-cards { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
   @media (max-width: 640px) { .body-cards { grid-template-columns: 1fr; } }
@@ -371,6 +381,65 @@
   .kv:last-child { border-bottom: none; }
   .kv span:first-child { color: var(--muted); }
   .month-summary { font-size: 13px; color: var(--muted); margin: 14px 0 4px; }
+  /* Races page: filters, map of starts, cards with the elevation silhouette, race comparison. */
+  .race-indexes { display: flex; flex-wrap: wrap; gap: 12px; align-items: flex-end; margin-bottom: 14px; }
+  .race-indexes .ri { background: white; border: 1px solid var(--line); border-radius: 8px; padding: 8px 14px; }
+  .race-indexes .ri span { display: block; font-size: 11px; color: var(--muted); }
+  .race-indexes .ri b { font-size: 24px; font-weight: 600; margin-right: 8px; }
+  .race-indexes .ri small { font-size: 12px; color: var(--muted); }
+  .race-indexes .ri-when { font-size: 11px; color: var(--muted); }
+  .races-filters { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+  .races-filters .sep { width: 1px; height: 20px; background: var(--line); margin: 0 6px; }
+  #races-map { height: 300px; border-radius: 6px; }
+  .race-year { font-size: 18px; font-weight: 600; margin: 28px 0 10px; display: flex; align-items: baseline; gap: 10px; }
+  .race-year span { font-size: 12px; font-weight: 400; color: var(--muted); }
+  .race-cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 14px; }
+  .race-card { background: white; border: 1px solid var(--line); border-radius: 8px; overflow: hidden; cursor: pointer;
+               transition: box-shadow .15s, transform .15s; position: relative; }
+  .race-card:hover { box-shadow: 0 4px 14px rgba(0,0,0,0.08); transform: translateY(-1px); }
+  .race-card svg { display: block; width: 100%; height: 64px; }
+  .race-card .rc-body { padding: 10px 12px 12px; }
+  .race-card .rc-name { font-weight: 600; font-size: 15px; line-height: 1.25; }
+  .race-card .rc-meta { font-size: 12px; color: var(--muted); margin-top: 2px; }
+  .race-card .rc-nums { display: flex; justify-content: space-between; margin-top: 8px; font-variant-numeric: tabular-nums; }
+  .race-card .rc-nums b { font-size: 16px; font-weight: 600; }
+  .race-card .rc-nums small { display: block; font-size: 11px; color: var(--muted); }
+  .race-card .rc-rank { position: absolute; top: 8px; left: 8px; background: rgba(255,255,255,0.92); border: 1px solid var(--line);
+                        border-radius: 10px; font-size: 11px; padding: 1px 7px; font-variant-numeric: tabular-nums; }
+  .race-card .rc-score { color: var(--ink); font-weight: 600; }
+  .race-card .rc-ffa { background: #1f4e8c; color: white; border-radius: 10px; font-size: 10.5px; font-weight: 700;
+                       padding: 1px 7px; margin-left: 4px; white-space: nowrap; }
+  .race-card .rc-rank.podium { background: #f6e7b0; border-color: #d4a017; font-weight: 700; }
+  .race-card .rc-rank.dnf { background: #f3d3d3; border-color: #a50f15; color: #a50f15; font-weight: 700; }
+  .official { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 12px; }
+  .race-card .rc-ed { position: absolute; top: 8px; right: 8px; background: rgba(255,255,255,0.92); border: 1px solid var(--line);
+                      border-radius: 10px; font-size: 11px; padding: 1px 7px; font-weight: 600; }
+  .race-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; flex-wrap: wrap; }
+  .race-head h2 { margin: 0; font-size: 26px; }
+  table.perf { width: 100%; border-collapse: collapse; font-size: 12.5px; font-variant-numeric: tabular-nums; min-width: 760px; }
+  table.perf th { text-align: left; font-weight: 500; color: var(--muted); font-size: 11px; padding: 8px; border-bottom: 1px solid var(--line);
+                  cursor: pointer; white-space: nowrap; user-select: none; background: white; position: sticky; top: 0; padding: 8px 6px; }
+  table.perf th.on { color: var(--ink); }
+  table.perf td { padding: 7px 6px; border-bottom: 1px solid var(--line); white-space: nowrap; }
+  table.perf td.name { white-space: normal; min-width: 150px; }
+  table.perf td.name small { display: block; color: var(--muted); font-size: 11px; }
+  table.perf tbody tr { cursor: pointer; } table.perf tbody tr:hover td { background: #faf9f6; }
+  table.perf td.sc { text-align: right; font-weight: 600; }
+  table.perf td.best { color: #2d6b29; } table.perf td.worst { color: #a50f15; }
+  table.perf td.na { color: #c9c9c9; font-weight: 400; }
+  .perf-head { font-size: 24px; font-weight: 700; color: var(--ink); margin: 0 0 14px; display: flex; flex-wrap: wrap;
+               align-items: baseline; gap: 4px 12px; }
+  .perf-head .section-sub { font-size: 13px; font-weight: 400; }
+  .perf-sep { margin-top: 44px; padding-top: 22px; border-top: 1px solid var(--line); }
+  .overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.35); z-index: 2000; display: flex; align-items: flex-start;
+             justify-content: center; padding: 40px 16px; overflow-y: auto; }
+  .overlay-box { background: var(--bg, white); border-radius: 10px; padding: 18px 20px; max-width: 760px; width: 100%;
+                 box-shadow: 0 10px 40px rgba(0,0,0,0.25); }
+  table.editions { width: 100%; border-collapse: collapse; font-size: 13px; font-variant-numeric: tabular-nums; }
+  table.editions th { text-align: left; font-weight: 500; color: var(--muted); font-size: 11px; padding: 6px 8px; border-bottom: 1px solid var(--line); }
+  table.editions td { padding: 8px; border-bottom: 1px solid var(--line); }
+  table.editions tr.cur td { background: rgba(165,15,21,0.05); font-weight: 600; }
+  table.editions tr { cursor: pointer; }
   .list-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap; }
   .list-head .seg { margin-top: 10px; }
 
@@ -390,6 +459,9 @@
   .cal-week .wk-more { font-size: 11px; color: var(--muted); margin-top: 2px; }
   .cal-week .wk-bar { height: 3px; background: var(--line); border-radius: 2px; margin-top: 8px; }
   .cal-week .wk-bar div { height: 100%; background: var(--moss); border-radius: 2px; }
+  .cal-week .wk-effort { font-size: 11px; color: var(--muted); margin-top: 6px; }
+  .cal-week .wk-effort b { color: var(--ink); }
+  .cal-week .wk-effort .up { color: #a50f15; font-weight: 600; } .cal-week .wk-effort .down { color: #3d7ebf; font-weight: 600; }
   .cal-day { display: flex; flex-direction: column; align-items: center; justify-content: flex-start; gap: 6px;
              padding: 12px 2px 10px; position: relative; }
   .cal-day.out, .cal-sub.out { opacity: 0.55; }
@@ -406,6 +478,7 @@
   .cal-act:hover .cal-bub { transform: scale(1.06); }
   .cal-bub span { white-space: nowrap; text-shadow: 0 1px 2px rgba(0,0,0,0.35); }
   .cal-bub.easy { background-color: #3d7ebf; }
+  .cal-bub.long { background-color: #1f4e8c; }
   .cal-bub.workout { background-color: #3f8f3a; }
   .cal-bub.race { background-color: #a50f15; box-shadow: 0 0 0 3px #f3c9c9; }
   .cal-bub.other { background-color: #9aa5b1; }
@@ -469,6 +542,8 @@
   <div class="tabs">
     <button class="tab active" data-tab="activities" onclick="switchTab('activities')">Activities</button>
     <button class="tab" data-tab="yearly" onclick="switchTab('yearly')">Yearly</button>
+    <button class="tab" data-tab="races" onclick="switchTab('races')">Races</button>
+    <button class="tab" data-tab="performance" onclick="switchTab('performance')">Performance</button>
     <button class="tab" data-tab="records" onclick="switchTab('records')">Records</button>
     <button class="tab" data-tab="grade" onclick="switchTab('grade')">Grade</button>
     <button class="tab" data-tab="body" onclick="switchTab('body')">Body</button>
@@ -566,6 +641,32 @@
     </div>
 
   </div>
+  <div id="panel-races" class="panel">
+    <div id="races-list">
+      <div class="race-indexes" id="race-indexes"></div>
+      <div class="races-filters" id="races-filters"></div>
+      <div class="card" style="padding:0;margin-top:10px;"><div id="races-map"></div></div>
+      <div id="races-cards"><div class="loading">Loading races…</div></div>
+    </div>
+    <div id="race-detail" style="display:none;">
+      <span class="back" onclick="showRacesList()">&larr; back to races</span>
+      <div id="race-detail-content"></div>
+    </div>
+  </div>
+
+  <div id="panel-performance" class="panel">
+    <div class="perf-head" style="margin-top:4px;">Road races<span class="section-sub">FFA levels · French athletics grid (men, all ages) · official time when known, else watch time ·
+      <a href="#" onclick="showFfaGrid(); return false;">see the FFA grid</a></span></div>
+    <div id="perf-ffa"></div>
+    <div class="perf-head perf-sep">Trail races<span class="section-sub">UTMB, ITRA and Betrail</span></div>
+    <div class="race-indexes" id="perf-indexes"></div>
+    <div class="section-title" style="margin-top:6px;">Race scores over time<span class="section-sub">each site's score for each race · UTMB and ITRA left axis, Betrail right</span></div>
+    <div class="card"><canvas id="perf-chart" height="90"></canvas></div>
+    <div class="section-title">All official results<span class="section-sub">UTMB, ITRA and Betrail together · click a column to sort, a row to open the race</span></div>
+    <div class="races-filters" id="perf-filters"></div>
+    <div class="card" style="padding:0;overflow-x:auto;margin-top:10px;"><table class="perf" id="perf-table"></table></div>
+  </div>
+
   <div id="panel-records" class="panel">
     <div class="chart-bar" style="margin-top:0;">
       <div class="section-title">Personal records<span class="section-sub">fastest activities at each distance</span></div>
@@ -579,13 +680,14 @@
   </div>
 
   <div id="panel-grade" class="panel">
-    <div class="section-title" style="margin-top:0;">Grade-adjusted pace: four models compared</div>
+    <div class="section-title" style="margin-top:0;">Grade-adjusted pace: five models compared</div>
     <div class="muted-note" style="margin:0 0 12px;">
       Each model says how many flat metres one metre on a slope is worth (1.0 = flat). A run's
       flat-equivalent pace is its moving time divided by its slope-weighted distance.
     </div>
     <div class="seg" id="gap-view" style="margin-bottom:10px;">
-      <button data-v="models" onclick="setGapView('models')">Four models</button>
+      <button data-v="models" onclick="setGapView('models')">Models</button>
+      <button data-v="race" onclick="setGapView('race')">Race model</button>
       <button data-v="years" onclick="setGapView('years')">Your curve by year</button>
       <button data-v="walk" onclick="setGapView('walk')">Walk vs run</button>
     </div>
@@ -936,8 +1038,9 @@ async function monthActivities(year, month) {
 // Short label under a bubble: what the session was.
 function calendarLabel(a) {
   if (a.category === "workout") return a.workout ? `${a.workout.type}` : surfaceFartlek(a.surface);
-  if (a.category === "race") return customName(a) || a.place || "Race";
-  if (a.category === "easy") return a.distance_km >= 25 ? "Long run" : "Easy run";
+  if (a.category === "race") return a.official?.race || customName(a) || (a.surface === "cross" ? "Cross country" : a.place) || "Race";
+  if (a.category === "long") return "Long run";
+  if (a.category === "easy") return "Easy run";
   return customName(a) || SPORT_LABELS[a.activity_type] || "Run";
 }
 
@@ -949,9 +1052,12 @@ async function renderCalendar(year, month, activities) {
   const first = new Date(year, month - 1, 1), last = new Date(year, month, 0);
   const start = new Date(first); start.setDate(first.getDate() - ((first.getDay() + 6) % 7));
   const end = new Date(last); end.setDate(last.getDate() + (7 - ((last.getDay() + 6) % 7)) - 1);
-  // Days of the neighbouring months shown in the first/last week.
+  // Days of the neighbouring months shown in the first/last week, and the 3 weeks before the
+  // first one (for the relative effort comparison).
   let all = [...activities];
-  if (start.getMonth() !== first.getMonth()) all = all.concat(await monthActivities(start.getFullYear(), start.getMonth() + 1));
+  const before = new Date(start); before.setDate(start.getDate() - 21);
+  if (before.getMonth() !== first.getMonth()) all = all.concat(await monthActivities(before.getFullYear(), before.getMonth() + 1));
+  if (start.getMonth() !== first.getMonth() && start.getMonth() !== before.getMonth()) all = all.concat(await monthActivities(start.getFullYear(), start.getMonth() + 1));
   if (end.getMonth() !== last.getMonth()) all = all.concat(await monthActivities(end.getFullYear(), end.getMonth() + 1));
   const today = iso(new Date());
   const byDay = {};
@@ -961,13 +1067,22 @@ async function renderCalendar(year, month, activities) {
   const maxKm = Math.max(10, ...runs.map(a => a.distance_km));
   const size = km => Math.round(30 + 48 * Math.sqrt(Math.min(km, maxKm) / maxKm));
 
+  // Relative effort per week (all activities with heart rate, like Strava), for any Monday.
+  const weekEffort = monday => {
+    let sum = 0;
+    for (let i = 0; i < 7; i++) { const x = new Date(monday); x.setDate(monday.getDate() + i);
+      for (const a of byDay[iso(x)] || []) sum += a.relative_effort || 0; }
+    return sum;
+  };
   const weeks = [];
   for (let d = new Date(start); d <= end && iso(d) <= today; d.setDate(d.getDate() + 7)) {   // no future weeks
     const days = [...Array(7)].map((_, i) => { const x = new Date(d); x.setDate(d.getDate() + i); return x; });
     const wkRuns = days.flatMap(x => (byDay[iso(x)] || []).filter(a => RUN_TYPES.has(a.activity_type)));
     weeks.push({ days, km: wkRuns.reduce((s, a) => s + (a.distance_km || 0), 0),
                  secs: wkRuns.reduce((s, a) => s + (a.duration_s || 0), 0),
-                 gain: wkRuns.reduce((s, a) => s + (a.elevation_gain || 0), 0), n: wkRuns.length });
+                 gain: wkRuns.reduce((s, a) => s + (a.elevation_gain || 0), 0), n: wkRuns.length,
+                 effort: weekEffort(d),
+                 effortAvg: [1, 2, 3].reduce((s, k) => { const m = new Date(d); m.setDate(d.getDate() - 7 * k); return s + weekEffort(m); }, 0) / 3 });
   }
   const maxWeek = Math.max(1, ...weeks.map(w => w.km));
   const fmtRange = (a, b) => {
@@ -990,7 +1105,7 @@ async function renderCalendar(year, month, activities) {
   // One bubble per day: the main run (race > workout > easy, then the longest). A second real run
   // (a double) is added into the same bubble; a short one (under 30% of the main run and 5 km or
   // less) is a warm-up / cool-down and goes below with the other activities.
-  const RANK = { race: 3, workout: 2, easy: 1 };
+  const RANK = { race: 4, workout: 3, long: 2, easy: 1 };
   const dayRuns = runs => {
     const sorted = [...runs].sort((a, b) => (RANK[b.category] || 0) - (RANK[a.category] || 0) || b.distance_km - a.distance_km);
     const main = sorted[0];
@@ -1019,6 +1134,7 @@ async function renderCalendar(year, month, activities) {
   return `
     <div class="cal-legend">
       <span><i style="background:#3d7ebf"></i>easy run</span>
+      <span><i style="background:#1f4e8c"></i>long run</span>
       <span><i style="background:#3f8f3a"></i>workout</span>
       <span><i style="background:#a50f15"></i>race</span>
       <span style="margin-left:6px;"><i style="background:#fff;outline:2px dashed #999;outline-offset:-1px"></i>trail</span>
@@ -1044,6 +1160,8 @@ async function renderCalendar(year, month, activities) {
             <div class="wk-km">${w.km.toFixed(1)} km</div>
             <div class="wk-more">${!w.n ? "no runs" : `${w.n} run${w.n === 1 ? "" : "s"} · ${fmtDurationPretty(w.secs)}`}${w.gain >= 50 ? ` · +${Math.round(w.gain).toLocaleString()} m` : ""}</div>
             <div class="wk-bar"><div style="width:${Math.round(w.km / maxWeek * 100)}%"></div></div>
+            ${w.effort ? `<div class="wk-effort" title="Relative effort of the week (heart-rate load), against the average of the 3 weeks before">
+              effort <b>${Math.round(w.effort)}</b>${w.effortAvg ? ` <span class="${w.effort > 1.3 * w.effortAvg ? "up" : w.effort < 0.7 * w.effortAvg ? "down" : ""}">${w.effort >= w.effortAvg ? "▲" : "▼"} ${Math.round(Math.abs(w.effort / w.effortAvg - 1) * 100)}%</span> vs 3 wk` : ""}</div>` : ""}
           </div>
           ${cells.map(({ x, k, list, main }) => {
             const out = x.getMonth() !== month - 1;
@@ -1137,8 +1255,11 @@ function cardTitle(a) {
     if (a.workout) return `<b>${a.workout.type}</b> · ${a.workout.summary}`;
     return `<b>${surfaceFartlek(a.surface)}</b>${own ? ` · ${own}` : ""}`;   // no clear structure
   }
-  if (a.category === "race") return own ? `<b class="t-race">Race</b> · ${own}` : `<b class="t-race">Race</b>`;
+  if (a.category === "race" && a.official?.race) return `<b class="t-race">${a.official.race}</b> · ${a.official.event}`;   // official result
+  const raceWord = a.surface === "cross" ? "Cross Country Race" : "Race";
+  if (a.category === "race") return own ? `<b class="t-race">${raceWord}</b> · ${own}` : `<b class="t-race">${raceWord}</b>`;
   if (a.category === "easy") return "Easy run";
+  if (a.category === "long") return "Long run";
   const sport = SPORT_LABELS[a.activity_type] || (a.activity_type || "Activity").replace(/_/g, " ").replace(/^./, c => c.toUpperCase());
   return own && own !== sport ? `${sport} · ${own}` : sport;
 }
@@ -1147,6 +1268,15 @@ function cardTitle(a) {
 // own line below it.
 function detailTitle(a) {
   if (a.category === "workout" && a.workout) return { title: `<b>${a.workout.type}</b>`, sub: a.workout.summary };
+  if (a.category === "race" && a.official?.race) {   // the official race name, event and result underneath
+    const o = a.official;
+    const rank = o.dnf ? "DNF" : o.rank ? resultBadge(o) : "";
+    const scores = scoresText(Object.fromEntries(Object.entries(o.scores || {}).map(([k, v]) => [k, { score: v }])));
+    return { title: `<b class="t-race">${o.race}</b>`,
+             // Line 1: the event; line 2: the result (rank and scores).
+             sub: [[a.surface === "cross" ? "Cross country" : "", o.event, o.stages > 1 ? `stage ${o.stage}/${o.stages}` : ""],
+                   [rank, scores]].map(line => line.filter(Boolean).join(" · ")).filter(Boolean).join("\n") };
+  }
   let t = cardTitle(a);
   if (!t.startsWith("<b")) t = t.replace(/^([^·]+)/, m => `<b>${m.trim()}</b> `).replace(/ $/, "");
   return { title: t, sub: "" };
@@ -1154,7 +1284,7 @@ function detailTitle(a) {
 
 // Line 3 tags: session type (easy / workout / race), surface (road / trail / treadmill / track),
 // and rolling / mountain when the run wasn't flat.
-const CATEGORY_TAGS = { easy: "easy run", workout: "workout", race: "race" };
+const CATEGORY_TAGS = { easy: "easy run", long: "long run", workout: "workout", race: "race" };
 
 function cardTags(a) {
   const tags = [];
@@ -1208,8 +1338,54 @@ function summaryBoxes(a) {
     box("temperature", t ? `${Math.round(t.mean)}°C` : "—",
         t ? `watch <b>${Math.round(t.min)}–${Math.round(t.max)}°</b>` : "", "stat-temp"),
     box("weather", "—", "", "stat-weather"),
+    box("training effect", "—", "", "stat-te"),
+    box("perceived effort", "—", "", "stat-rpe"),
+    a.relative_effort != null ? box("relative effort", `${Math.round(a.relative_effort)}`,
+        `${effortWord(a.relative_effort)}${a.relative_effort_method === "average" ? " · from the average HR" : ""}`, "",
+        "Heart-rate load (TRIMP, like Strava's Relative Effort): each minute weighted by how close your heart rate is to your max. Easy hour ≈ 50–80, hard race 200+") : "",
     box("calories", a.calories || "—"),
   ].join("");
+}
+
+const effortWord = v => v < 50 ? "light" : v < 100 ? "moderate" : v < 200 ? "hard" : v < 400 ? "very hard" : "epic";
+
+// Training effect (Garmin's measure of the session) next to your own rating (RPE, feel).
+const TE_LABELS = { AEROBIC_BASE: "Base", RECOVERY: "Recovery", TEMPO: "Tempo", LACTATE_THRESHOLD: "Threshold",
+  THRESHOLD: "Threshold", VO2MAX: "VO2 max", ANAEROBIC_CAPACITY: "Anaerobic", SPRINT: "Sprint", NO_BENEFIT: "No benefit" };
+const FEEL = [[0, "very weak"], [25, "weak"], [50, "normal"], [75, "strong"], [100, "very strong"]];
+const rpeWord = r => r <= 1 ? "very light" : r <= 3 ? "light" : r <= 6 ? "moderate" : r <= 8 ? "hard" : r <= 9 ? "very hard" : "maximum";
+const teWord = v => v < 1 ? "no benefit" : v < 2 ? "minor" : v < 3 ? "maintaining" : v < 4 ? "improving" : v < 5 ? "highly improving" : "overreaching";
+
+async function showEffort(a) {
+  let e = null;
+  try {
+    const res = await fetch(`${API}/activities/${a.id}/effort`);
+    if (res.ok) e = await res.json();
+  } catch (err) {}
+  if (detailState.activity !== a) return;
+  const te = document.getElementById("stat-te"), rpe = document.getElementById("stat-rpe");
+  const aer = e?.aerobic ?? a.training_effect_aerobic, ana = e?.anaerobic ?? a.training_effect_anaerobic;
+  if (te) {
+    if (aer == null) te.remove();
+    else {
+      // Aerobic and anaerobic on the same 0–5 scale: the session's mix at a glance.
+      const bar = (name, v, color) => `<div class="te-row"><span>${name}</span><b>${v.toFixed(1)}</b>
+        <div class="te-bar"><div style="width:${Math.min(v, 5) / 5 * 100}%;background:${color}"></div></div></div>`;
+      te.innerHTML = `<div class="stat-label">training effect</div>
+        <div class="stat-value">${TE_LABELS[e?.label] || (e?.label ? titleCase(e.label) : teWord(aer))}</div>
+        ${bar("aerobic", aer, "#3d7ebf")}${bar("anaerobic", ana || 0, "#a50f15")}
+        <div class="stat-sub">${e?.load != null ? `load <b>${Math.round(e.load)}</b>` : ""}${e?.stamina_start != null ? ` · stamina ${Math.round(e.stamina_start)} → ${Math.round(e.stamina_end)}%` : ""}${e?.body_battery != null ? ` · body battery ${e.body_battery > 0 ? "+" : ""}${e.body_battery}` : ""}</div>`;
+      te.title = `Aerobic ${aer.toFixed(1)}: ${teWord(aer)} · anaerobic ${(ana || 0).toFixed(1)}: ${teWord(ana || 0)} (Garmin, 0–5)`;
+    }
+  }
+  if (rpe) {
+    if (e?.rpe == null && e?.feel == null) { rpe.remove(); return; }
+    const feel = e.feel != null ? FEEL.reduce((b, f) => Math.abs(f[0] - e.feel) < Math.abs(b[0] - e.feel) ? f : b)[1] : null;
+    rpe.innerHTML = `<div class="stat-label">perceived effort</div>
+      <div class="stat-value">${e.rpe != null ? `${Math.round(e.rpe)}<span class="rec-unit">/10</span>` : "—"}</div>
+      <div class="stat-sub">${e.rpe != null ? rpeWord(e.rpe) : "not rated"}${feel ? ` · felt <b>${feel}</b>` : ""}</div>`;
+    rpe.title = "Your rating on the watch at the end of the activity";
+  }
 }
 
 // Weather at the start (Garmin, nearest station; cached by the API): temperature, feels-like,
@@ -1261,8 +1437,8 @@ const mapbox = (style, token) => L.tileLayer(
 const MAP_LAYERS = {
   "Mapbox Outdoors": token => token && mapbox("outdoors-v12", token),
   "Mapbox Satellite": token => token && mapbox("satellite-streets-v12", token),
-  // Stadia Maps works without a key on localhost; a free account is needed if hosted elsewhere.
-  "Outdoors": () => L.tileLayer("https://tiles.stadiamaps.com/tiles/outdoors/{z}/{x}/{y}{r}.png",
+  // Stadia Maps works without a key only when the page is opened as localhost.
+  "Stadia Outdoors": () => L.tileLayer("https://tiles.stadiamaps.com/tiles/outdoors/{z}/{x}/{y}{r}.png",
     { maxZoom: 20, attribution: '&copy; <a href="https://stadiamaps.com/">Stadia Maps</a> ' +
       '&copy; <a href="https://openmaptiles.org/">OpenMapTiles</a> ' + OSM_ATTR }),
   "Plan IGN": () => L.tileLayer(`${IGN_WMTS}&LAYER=GEOGRAPHICALGRIDSYSTEMS.PLANIGNV2&FORMAT=image/png`,
@@ -1274,6 +1450,15 @@ const MAP_LAYERS = {
   "OpenStreetMap": () => L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png",
     { maxZoom: 19, attribution: OSM_ATTR }),
 };
+
+// Every map opens on Mapbox Outdoors when a token is set (.env); the layer menu changes only the
+// map you're looking at. Without a token: IGN in France, OpenTopoMap elsewhere (no key needed).
+function mapLayers(token, inFrance = false) {
+  const layers = Object.fromEntries(Object.entries(MAP_LAYERS)
+    .map(([name, make]) => [name, make(token)]).filter(([, layer]) => layer)
+    .filter(([name]) => inFrance || !name.includes("IGN")));   // IGN only covers France
+  return { layers, choice: token ? "Mapbox Outdoors" : inFrance ? "Plan IGN" : "OpenTopoMap" };
+}
 
 // Fetched once from the API (.env); null when not configured.
 let mapboxToken;
@@ -1299,24 +1484,15 @@ async function drawRouteMap(points) {
     return;
   }
 
-  // Remember the viewer's last layer choice (IGN layers only for routes in France).
   const mid = pts[Math.floor(pts.length / 2)];
   const inFrance = mid[0] > FRANCE.minLat && mid[0] < FRANCE.maxLat &&
                    mid[1] > FRANCE.minLon && mid[1] < FRANCE.maxLon;
-  let saved = null;
-  try { saved = localStorage.getItem("zachy.mapLayer"); } catch (e) {}
-  // Default: Mapbox Outdoors (Strava-like) when a token is set, else Stadia Outdoors.
   const token = await getMapboxToken();
   if (!document.body.contains(el)) return;   // the user left this activity while we waited
-  const layers = Object.fromEntries(Object.entries(MAP_LAYERS)
-    .map(([name, make]) => [name, make(token)]).filter(([, layer]) => layer));
-  let choice = saved && layers[saved] ? saved : (token ? "Mapbox Outdoors" : "Outdoors");
-  if (choice.includes("IGN") && !inFrance) choice = token ? "Mapbox Outdoors" : "Outdoors";   // IGN only covers France
-
+  const { layers, choice } = mapLayers(token, inFrance);
   routeMap = L.map(el, { scrollWheelZoom: false, layers: [layers[choice]] });
   L.control.layers(layers, null, { position: "topright" }).addTo(routeMap);
   L.control.scale({ imperial: false }).addTo(routeMap);
-  routeMap.on("baselayerchange", e => { try { localStorage.setItem("zachy.mapLayer", e.name); } catch (err) {} });
   routeMap.on("click", () => routeMap.scrollWheelZoom.enable());   // wheel zoom after a click only
 
   // White casing under the line keeps it readable on any background.
@@ -1414,7 +1590,7 @@ function renderPeaks(peaks) {
 // First half vs second half (by distance, moving time): negative split = second half faster.
 function renderHalfSplit(points) {
   const el = document.getElementById("pace-split");
-  if (detailState.activity?.category?.category !== "race") { el.innerHTML = ""; return; }   // races only
+  if (!["race", "long"].includes(detailState.activity?.category?.category)) { el.innerHTML = ""; return; }   // races and long runs
   const pts = points.filter(p => p.distance_km != null && p.seconds_elapsed != null);
   const total = pts.length ? pts[pts.length - 1].distance_km : 0;
   if (total < 1) { el.innerHTML = ""; return; }
@@ -1447,7 +1623,7 @@ function renderHalfSplit(points) {
 // (pace:HR) — how much less speed each heartbeat bought in the second half (< 5% = good).
 function renderHrDrift(points) {
   const el = document.getElementById("hr-split");
-  if (detailState.activity?.category?.category !== "race") { el.innerHTML = ""; return; }   // races only
+  if (!["race", "long"].includes(detailState.activity?.category?.category)) { el.innerHTML = ""; return; }   // races and long runs
   const pts = points.filter(p => p.seconds_elapsed != null);
   if (pts.length < 10 || !pts.some(p => p.hr)) { el.innerHTML = ""; return; }
   const t0 = pts[0].seconds_elapsed, tEnd = pts[pts.length - 1].seconds_elapsed;
@@ -1768,8 +1944,9 @@ function renderTimeInZones(elId, values, spec, fmt, unit) {
 
 // Easy / Workout / Race. The automatic guess is the default; a click stores your choice and
 // "back to automatic" removes it. What the page shows follows the category:
-//   race: everything, incl. half split and HR drift · workout: no split/drift · easy: also no laps.
-const CATEGORY_LABELS = { easy: "Easy run", workout: "Workout", race: "Race" };
+//   race and long run: everything, incl. half split and HR drift · workout: no split/drift ·
+//   easy: also no laps.
+const CATEGORY_LABELS = { easy: "Easy run", long: "Long run", workout: "Workout", race: "Race" };
 
 function renderCategoryToggle(a) {
   const c = a.category;
@@ -1779,7 +1956,7 @@ function renderCategoryToggle(a) {
   const note = c.source === "manual"
     ? `set by you · <a href="#" onclick="setCategory(${a.id}, null); return false;">back to automatic</a> (would be ${CATEGORY_LABELS[c.auto].toLowerCase()})`
     : `automatic guess${why}`;
-  return `<span class="seg race-seg">${btn("easy")}${btn("workout")}${btn("race")}</span>
+  return `<span class="seg race-seg">${btn("easy")}${btn("long")}${btn("workout")}${btn("race")}</span>
           <span class="race-note">${note}</span>`;
 }
 
@@ -1837,17 +2014,19 @@ async function showWorkout() {
 // mountain terrain; picking Trail or Road stores an override for this activity.
 const SURFACE_SOURCE = { garmin: "from watch mode", elevation: "from elevation", gps: "from GPS (track oval)",
                          manual: "set by you" };
-const SURFACE_OPTIONS = ["road", "trail", "track", "treadmill"];
+const SURFACE_OPTIONS = ["road", "trail", "track", "treadmill", "cross"];
+// Where the surface came from, in words ("from GPS" covers the track oval and the cross loop).
+const surfaceSource = t => t.surface_source === "gps" && t.surface === "cross" ? "from GPS (short looped course)" : SURFACE_SOURCE[t.surface_source];
 
 // Surface dropdown: "Auto (…)" follows the rules; picking one is saved for this activity.
 function renderSurfacePicker(a) {
   const t = a.terrain;
   const manual = t.surface_source === "manual";
   const opt = (value, label, selected) => `<option value="${value}" ${selected ? "selected" : ""}>${label}</option>`;
-  return `<select class="surface-pick" onchange="setSurface(${a.id}, this.value)" title="${SURFACE_SOURCE[t.surface_source]}">
+  return `<select class="surface-pick" onchange="setSurface(${a.id}, this.value)" title="${surfaceSource(t)}">
       ${opt("", `Auto (${t.auto_surface})`, !manual)}
       ${SURFACE_OPTIONS.map(v => opt(v, v[0].toUpperCase() + v.slice(1), manual && t.surface === v)).join("")}
-    </select> <span class="surface-src">${SURFACE_SOURCE[t.surface_source]}</span>`;
+    </select> <span class="surface-src">${surfaceSource(t)}</span>`;
 }
 
 async function setSurface(id, value) {
@@ -1856,8 +2035,10 @@ async function setSurface(id, value) {
     body: JSON.stringify({ surface: value || null }),
   });
   if (!res.ok) return;
+  const wasCross = detailState.activity.terrain?.surface === "cross";
   detailState.activity.terrain = await res.json();
-  document.querySelector(".surface-src").textContent = SURFACE_SOURCE[detailState.activity.terrain.surface_source];
+  if (value === "cross" || wasCross) { racesState.data = null; showDetail(id); return; }   // a cross is a race: reload category & page
+  document.querySelector(".surface-src").textContent = surfaceSource(detailState.activity.terrain);
   renderDetailHeader();
   showWorkout();   // an unstructured workout is titled by surface ("Track fartlek")
 }
@@ -1870,7 +2051,7 @@ function renderDetailHeader() {
     name: a.name, place: a.place, activity_type: a.activity_type, date: a.date,
     category: a.category?.category ?? null,
     surface: a.terrain?.surface ?? null, terrain: a.terrain?.terrain ?? null,
-    workout: a.workout ?? null,
+    workout: a.workout ?? null, official: a.official ?? null,
   };
   const { title, sub } = detailTitle(card);
   document.getElementById("detail-title").innerHTML = title;
@@ -2436,6 +2617,7 @@ async function showDetail(id) {
     drawTimeseriesCharts();
     drawRouteMap(a.timeseries);
     showWeather(a);
+    showEffort(a);
     if (a.laps.length) drawLapCharts(a.laps, hilly);
     renderDetailHeader();
     applyCategory();
@@ -2470,6 +2652,8 @@ function switchTab(name) {
   if (name === "profile") { loadProfile(); if (!zonesState.loaded) loadZones(); }
   if (name === "body" && !bodyState.loaded) loadBody();
   if (name === "records" && !recordsState.data) loadRecords();
+  if (name === "performance") loadPerformance();
+  if (name === "races") { if (racesState.data) renderRaces(); else loadRaces(); }
   if (name === "grade") { if (gapState.data) renderGap(); else loadGap(); }
 }
 
@@ -2479,6 +2663,14 @@ const PROFILE_FIELDS = [
   { key: "height_cm", label: "Height (cm)", type: "number", step: "0.5" },
   { key: "weight_kg", label: "Weight (kg)", type: "number", step: "0.1" },
   { key: "sex", label: "Sex", type: "select", options: [["", "—"], ["male", "Male"], ["female", "Female"]] },
+  { key: "efficiency_ref_hr", label: "Efficiency reference HR (bpm)", type: "number", step: "1",
+    auto: "your typical easy-run heart rate", setting: true },
+  { key: "max_hr_ceiling", label: "Max HR ceiling (bpm)", type: "number", step: "1",
+    auto: "220 − age/2; higher readings are glitches", setting: true },
+  { key: "utmb_url", label: "UTMB runner page", type: "url", link: true, placeholder: "https://utmb.world/en/runner/…" },
+  { key: "itra_url", label: "ITRA runner page", type: "url", link: true, placeholder: "https://itra.run/RunnerSpace/… (coming)" },
+  { key: "betrail_url", label: "Betrail runner page", type: "url", link: true, placeholder: "https://www.betrail.run/runner/…" },
+  { key: "ffa_licence", label: "FFA licence number", type: "text", link: true, placeholder: "e.g. 1234567" },
 ];
 let profileData = null;
 
@@ -2492,24 +2684,32 @@ async function loadProfile() {
 function renderProfile() {
   const p = profileData;
   const srcText = f => {
+    if (f.key === "ffa_licence") return `<div class="pf-src">${p.links[f.key] ? "French athletics licence (reference)" : "not set"}</div>`;
+    if (f.link) return p.links[f.key] ? `<div class="pf-src"><a href="${p.links[f.key]}" target="_blank" rel="noopener">open</a></div>` : `<div class="pf-src">not set</div>`;
     const src = p.source[f.key];
-    if (src === "manual") return `<div class="pf-src manual">set by you${p.garmin[f.key] != null ? ` · Garmin: ${p.garmin[f.key]}` : ""}</div>`;
+    if (src === "manual") return `<div class="pf-src manual">set by you${p.garmin[f.key] != null ? ` · Garmin: ${p.garmin[f.key]}` : ""}${f.setting ? " · empty it for automatic" : ""}</div>`;
+    if (src === "auto") return `<div class="pf-src">automatic: ${f.auto}</div>`;
     if (src) return `<div class="pf-src">from ${src.startsWith("scale") ? `your ${src}` : "Garmin"}</div>`;
     return `<div class="pf-src">not set</div>`;
   };
-  document.getElementById("profile-grid").innerHTML = PROFILE_FIELDS.map(f => {
-    const v = p.effective[f.key] ?? "";
+  document.getElementById("profile-grid").innerHTML = PROFILE_FIELDS.map((f, i) => {
+    const v = (f.link ? p.links[f.key] : p.effective[f.key]) ?? "";
     const input = f.type === "select"
       ? `<select id="pf-${f.key}">${f.options.map(([val, lbl]) => `<option value="${val}" ${val === v ? "selected" : ""}>${lbl}</option>`).join("")}</select>`
-      : `<input id="pf-${f.key}" type="${f.type}" ${f.step ? `step="${f.step}"` : ""} value="${v}">`;
-    return `<div class="profile-field"><label for="pf-${f.key}">${f.label}</label>${input}${srcText(f)}</div>`;
+      : `<input id="pf-${f.key}" type="${f.type}" ${f.step ? `step="${f.step}"` : ""} ${f.placeholder ? `placeholder="${f.placeholder}"` : ""} value="${v}">`;
+    const head = f.setting && !PROFILE_FIELDS[i - 1].setting
+      ? `<div class="pf-group">Analysis settings <span class="muted-note">used by the aerobic efficiency and max heart rate charts</span></div>`
+      : f.link && !PROFILE_FIELDS[i - 1].link
+      ? `<div class="pf-group">Results pages <span class="muted-note">your official results, matched to your races</span>
+           <button class="pick" style="margin-left:8px;" onclick="importResults()">Import results</button>
+           <span class="muted-note" id="results-status"></span></div>` : "";
+    return `${head}<div class="profile-field"><label for="pf-${f.key}">${f.label}</label>${input}${srcText(f)}</div>`;
   }).join("");
   const e = p.effective;
   const bmi = e.height_cm && e.weight_kg ? e.weight_kg / (e.height_cm / 100) ** 2 : null;
   const box = (label, value, sub) => `<div class="stat"><div class="stat-label">${label}</div><div class="stat-value">${value}</div><div class="stat-sub">${sub}</div></div>`;
   document.getElementById("profile-derived").innerHTML = [
     box("age", p.age != null ? `${p.age}` : "—", "from the birth date"),
-    box("max HR ceiling", `${p.max_hr_ceiling} bpm`, "220 − age/2: higher readings are treated as glitches"),
     bmi ? box("BMI", bmi.toFixed(1), "weight / height²") : "",
     p.garmin.lthr ? box("lactate threshold HR", `${p.garmin.lthr} bpm`, "from Garmin") : "",
   ].join("");
@@ -2520,6 +2720,7 @@ async function saveProfile() {
   for (const f of PROFILE_FIELDS) {
     const raw = document.getElementById(`pf-${f.key}`).value.trim();
     let v = raw === "" ? null : f.type === "number" ? parseFloat(raw.replace(",", ".")) : raw;
+    if (f.link) { body[f.key] = v; continue; }
     // Unchanged from what Garmin (or the scale) says: keep following it rather than freezing a copy.
     const auto = p.source[f.key] !== "manual" ? p.effective[f.key] : undefined;
     body[f.key] = v === auto || (v != null && auto != null && String(v) === String(auto)) ? null : v;
@@ -2530,7 +2731,19 @@ async function saveProfile() {
   profileData = await res.json();
   renderProfile();
   status.textContent = "Saved.";
-  yearlyCharts.forEach(c => c.destroy()); yearlyCharts = []; yearlyLoaded = false;   // the max HR ceiling depends on the age
+  yearlyCharts.forEach(c => c.destroy()); yearlyCharts = []; yearlyLoaded = false;   // max HR ceiling, efficiency reference
+  bodyState.loaded = false;
+}
+
+async function importResults() {
+  const status = document.getElementById("results-status");
+  await saveProfile();   // the links as typed
+  status.textContent = "Reading your results…";
+  const res = await fetch(`${API}/races/results/import`, { method: "POST" });
+  const d = await res.json().catch(() => ({}));
+  if (!res.ok) { status.textContent = d.detail || "Could not import."; return; }
+  status.textContent = `${d.results} results · ${d.matched} matched to your activities`;
+  racesState.data = null;   // races and their categories changed
 }
 
 async function refreshProfileFromGarmin() {
@@ -2541,6 +2754,418 @@ async function refreshProfileFromGarmin() {
   profileData = await res.json();
   renderProfile();
   status.textContent = "Updated from Garmin.";
+}
+
+/* ---------- Races: map + cards, then one race with its other editions ---------- */
+const racesState = { data: null, filters: { surface: "all", dist: "all" }, map: null, charts: [] };
+const RACE_DISTANCES = [
+  ["all", "All distances", () => true], ["short", "≤ 21 km", k => k < 22], ["marathon", "Marathon", k => k >= 22 && k < 45],
+  ["50", "50 km", k => k >= 45 && k < 80], ["100", "100 km", k => k >= 80 && k < 130], ["160", "100 mi +", k => k >= 130],
+];
+const raceName = r => customName(r) || r.place || r.name || "Race";
+const topPct = (rank, total) => Math.max(1, Math.round(rank / total * 100));
+// "UTMB 770 · ITRA 761 · Betrail 78.2": each site's score for the race.
+const scoresText = rs => [rs?.utmb?.score && `UTMB ${rs.utmb.score}`, rs?.itra?.score && `ITRA ${rs.itra.score}`,
+                          rs?.betrail?.score && `Betrail ${rs.betrail.score.toFixed(1)}`]
+  .filter(Boolean).join(" · ");
+
+// "276 / 1,516 · top 18%", "🥇 1 / 215", "DNF".
+function resultBadge(x) {
+  if (x.dnf) return "DNF";
+  if (!x.rank) return "finished";
+  const medal = ["🥇", "🥈", "🥉"][x.rank - 1] || "";
+  if (!x.total) return `${medal ? medal + " " : ""}${x.rank}${x.rank === 1 ? "st" : x.rank === 2 ? "nd" : x.rank === 3 ? "rd" : "th"}`;   // Betrail: no field size
+  return `${medal ? medal + " " : ""}${x.rank} / ${x.total.toLocaleString()}${x.rank > 3 ? ` · top ${topPct(x.rank, x.total)}%` : ""}`;
+}
+
+async function loadRaces() {
+  fetch(`${API}/races/indexes`).then(r => r.json()).then(renderIndexes).catch(() => {});
+  try { racesState.data = await (await fetch(`${API}/races/`)).json(); }
+  catch (e) { document.getElementById("races-cards").innerHTML = `<div class="error">Could not load races.</div>`; return; }
+  renderRaces();
+}
+
+// Your overall indexes from the results sites (Import results in the Profile).
+function renderIndexes(ix, elId = "race-indexes") {
+  const el = document.getElementById(elId);
+  if (!ix || (!ix.utmb && !ix.itra && !ix.betrail)) { el.innerHTML = ""; return; }
+  const u = ix.utmb || {};
+  const cats = [["20k", "20K"], ["50k", "50K"], ["100k", "100K"], ["100m", "100M"]].filter(([k]) => u[k]);
+  el.innerHTML = `${u.general ? `<div class="ri"><span>UTMB index</span><b>${u.general}</b>${cats.length ? `<small>${cats.map(([k, l]) => `${l} ${u[k]}`).join(" · ")}</small>` : ""}</div>` : ""}
+    ${ix.itra ? `<div class="ri"><span>ITRA performance index</span><b>${ix.itra}</b></div>` : ""}
+    ${ix.betrail?.ultra || ix.betrail?.short ? `<div class="ri" title="Betrail levels over your recent races (${ix.betrail.races} races, ${ix.betrail.races_ultra} ultras)">
+      <span>Betrail level</span>${ix.betrail.ultra ? `<b>${ix.betrail.ultra.toFixed(1)}</b><small>ultra${ix.betrail.ultra_rank ? ` · ${ix.betrail.ultra_rank.toLocaleString()} / ${ix.betrail.ultra_total.toLocaleString()} men in France` : ""}</small>` : ""}
+      ${ix.betrail.short ? `<b style="margin-left:10px">${ix.betrail.short.toFixed(1)}</b><small>short</small>` : ""}</div>` : ""}
+    <div class="ri-when">as of ${ix.fetched_at?.slice(0, 10) || "—"} · update with Import results (Profile)</div>`;
+}
+
+function setRaceFilter(key, value) { racesState.filters[key] = value; renderRaces(); }
+
+function filteredRaces() {
+  const { surface, dist } = racesState.filters;
+  const inDist = RACE_DISTANCES.find(d => d[0] === dist)[2];
+  return racesState.data.filter(r => (surface === "all" || (surface === "road" ? !["trail", "cross"].includes(r.surface) : r.surface === surface))
+                                     && inDist(r.distance_km));
+}
+
+// Elevation silhouette for a card (SVG area), coloured by terrain.
+function profileSvg(profile, color) {
+  if (!profile || profile.length < 2) return `<svg viewBox="0 0 100 32" preserveAspectRatio="none"><rect width="100" height="32" fill="#f4f4f2"/></svg>`;
+  const lo = Math.min(...profile), hi = Math.max(...profile), span = Math.max(hi - lo, 60);   // flat races stay flat
+  const pts = profile.map((v, i) => `${(i / (profile.length - 1) * 100).toFixed(1)},${(30 - (v - lo) / span * 26).toFixed(1)}`);
+  return `<svg viewBox="0 0 100 32" preserveAspectRatio="none">
+    <rect width="100" height="32" fill="${hexToRgba(color, 0.06)}"/>
+    <polygon points="0,32 ${pts.join(" ")} 100,32" fill="${hexToRgba(color, 0.35)}"/>
+    <polyline points="${pts.join(" ")}" fill="none" stroke="${color}" stroke-width="0.8" vector-effect="non-scaling-stroke"/></svg>`;
+}
+
+function renderRaces() {
+  if (!racesState.detail) {   // a race opened meanwhile (from Performance) stays open
+    document.getElementById("races-list").style.display = "";
+    document.getElementById("race-detail").style.display = "none";
+  }
+  const f = racesState.filters;
+  const chip = (key, value, label) => `<button class="pick ${f[key] === value ? "on" : ""}" onclick="setRaceFilter('${key}','${value}')">${label}</button>`;
+  document.getElementById("races-filters").innerHTML =
+    chip("surface", "all", "All") + chip("surface", "trail", "Trail") + chip("surface", "road", "Road") + chip("surface", "cross", "Cross") + `<span class="sep"></span>` +
+    RACE_DISTANCES.map(([v, label]) => chip("dist", v, label)).join("");
+
+  const races = filteredRaces();
+  // Cards by year, newest first.
+  const years = [...new Set(races.map(r => r.date.slice(0, 4)))];
+  document.getElementById("races-cards").innerHTML = !races.length ? `<div class="error">No race with these filters.</div>` :
+    years.map(y => {
+      const list = races.filter(r => r.date.startsWith(y));
+      const km = list.reduce((s, r) => s + r.distance_km, 0), gain = list.reduce((s, r) => s + r.elevation_gain, 0);
+      return `<div class="race-year">${y}<span>${list.length} race${list.length > 1 ? "s" : ""} · ${Math.round(km).toLocaleString()} km · +${Math.round(gain).toLocaleString()} m</span></div>
+      <div class="race-cards">${list.map(r => {
+        const color = TERRAIN_COLORS[r.terrain] || "#9aa5b1";
+        const day = new Date(r.date + "T00:00:00").toLocaleDateString(undefined, { day: "numeric", month: "short" });
+        return `<div class="race-card" onclick="openRace(${r.id})">
+          ${r.editions > 1 ? `<span class="rc-ed" title="You ran this race ${r.editions} times">×${r.editions}</span>` : ""}
+          ${r.result ? `<span class="rc-rank${r.result.dnf ? " dnf" : r.result.rank <= 3 ? " podium" : ""}" title="${r.result.event} – ${r.result.race} (official result)">${resultBadge(r.result)}</span>` : ""}
+          ${profileSvg(r.profile, color)}
+          <div class="rc-body">
+            <div class="rc-name">${r.result?.race || raceName(r)}</div>
+            ${r.result?.event ? `<div class="rc-meta">${r.result.event}${r.result.stages > 1 ? ` · stage ${r.result.stage}/${r.result.stages}` : ""}${scoresText(r.results) ? ` · <b class="rc-score">${scoresText(r.results)}</b>` : ""}</div>` : ""}
+            <div class="rc-meta">${day}${r.place && raceName(r) !== r.place ? ` · ${r.place}` : ""} · ${r.surface || ""} ${r.terrain || ""}${r.ffa?.level ? ` <span class="rc-ffa" title="FFA level on ${r.ffa.label} (${r.ffa.time_source} time)">FFA ${r.ffa.level}</span>` : ""}</div>
+            <div class="rc-nums">
+              <div><b>${r.distance_km.toFixed(r.distance_km < 30 ? 1 : 0)} km</b><small>+${r.elevation_gain.toLocaleString()} m</small></div>
+              <div style="text-align:right"><b>${fmtRaceTime(r.duration_s)}</b><small>${r.adjusted_pace ? `${fmtPace(r.adjusted_pace)}/km flat-eq.` : `${fmtPace(r.pace)}/km`}</small></div>
+            </div>
+          </div>
+        </div>`;
+      }).join("")}</div>`;
+    }).join("");
+  drawRacesMap(races);
+}
+
+async function drawRacesMap(races) {
+  const el = document.getElementById("races-map");
+  if (racesState.map) { racesState.map.remove(); racesState.map = null; }
+  const pts = races.filter(r => r.start);
+  if (!pts.length) return;
+  const token = await getMapboxToken();
+  const { layers, choice } = mapLayers(token);
+  const map = racesState.map = L.map(el, { scrollWheelZoom: false, layers: [layers[token ? choice : "OpenStreetMap"]] });
+  L.control.layers(layers, null, { position: "topright" }).addTo(map);
+  map.on("click", () => map.scrollWheelZoom.enable());
+  const maxKm = Math.max(...pts.map(r => r.distance_km));
+  const markers = pts.map(r => L.circleMarker(r.start, {
+      radius: 5 + 11 * Math.sqrt(r.distance_km / maxKm), color: "white", weight: 1.5,
+      fillColor: TERRAIN_COLORS[r.terrain] || "#9aa5b1", fillOpacity: 0.85 })
+    .bindTooltip(`<b>${raceName(r)}</b><br>${r.date} · ${r.distance_km.toFixed(0)} km · +${r.elevation_gain.toLocaleString()} m · ${fmtRaceTime(r.duration_s)}`)
+    .on("click", () => openRace(r.id))
+    .addTo(map));
+  map.fitBounds(L.featureGroup(markers).getBounds(), { padding: [30, 30], maxZoom: 10 });
+}
+
+function showRacesList() {
+  racesState.detail = null;
+  racesState.charts.forEach(c => c.destroy()); racesState.charts = [];
+  document.getElementById("races-list").style.display = "";
+  document.getElementById("race-detail").style.display = "none";
+  racesState.map?.invalidateSize();
+}
+
+// FFA level of a road race, and how far the next one is.
+function ffaBlock(f) {
+  const box = (label, value, sub = "") => `<div class="stat"><div class="stat-label">${label}</div><div class="stat-value">${value}</div>${sub ? `<div class="stat-sub">${sub}</div>` : ""}</div>`;
+  return `<div class="section-title">FFA level<span class="section-sub">French athletics road grid (men) · ${f.label} · ${f.time_source === "official" ? "official time" : "watch time (start to finish)"}</span></div>
+    <div class="official">
+      ${box("level", f.level || "below D7", f.level ? `${f.points} points · limit ${fmtRaceTime(f.limit_s)}` : "")}
+      ${f.next ? box(`next: ${f.next.level}`, fmtRaceTime(f.next.limit_s), `${fmtRaceTime(f.next.gap_s)} faster needed`) : ""}
+    </div>`;
+}
+
+// Official results: time, ranks and score from each site (UTMB, Betrail), with links.
+function officialBlock(r) {
+  const x = r.result, all = r.results || {};
+  const box = (label, value, sub = "") => `<div class="stat"><div class="stat-label">${label}</div><div class="stat-value">${value}</div>${sub ? `<div class="stat-sub">${sub}</div>` : ""}</div>`;
+  const stage = x.stages > 1 ? `stage ${x.stage} of ${x.stages}; the result is for the whole race` : "";
+  const links = Object.values(all).map(o => `<a href="${o.url}" target="_blank" rel="noopener">${{ utmb: "UTMB", betrail: "Betrail", itra: "ITRA" }[o.source] || o.source}</a>`).join(" · ");
+  const rankBox = (o, label) => o.rank && o.total ? box(label, `${o.rank} / ${o.total.toLocaleString()}`, `top ${topPct(o.rank, o.total)}%`)
+                                                  : o.rank ? box(label, resultBadge(o)) : "";
+  return `<div class="section-title">Official result<span class="section-sub">${links}${stage ? ` · ${stage}` : ""}</span></div>
+    <div class="official">
+      ${box("official time", x.dnf ? "DNF" : fmtRaceTime(x.time_s), x.dnf ? "did not finish" : x.stages > 1 ? "all stages" : `watch ${fmtRaceTime(r.duration_s)}`)}
+      ${rankBox(x, "overall")}
+      ${x.rank_gender ? box("men", x.total_gender ? `${x.rank_gender} / ${x.total_gender.toLocaleString()}` : resultBadge({ rank: x.rank_gender }),
+                          x.total_gender ? `top ${topPct(x.rank_gender, x.total_gender)}%` : "") : ""}
+      ${all.utmb?.score ? box("UTMB score", all.utmb.score, "performance on this race") : ""}
+      ${all.itra?.score ? box("ITRA score", all.itra.score, "race score (subscriber)") : ""}
+      ${all.betrail?.score ? box("Betrail score", all.betrail.score.toFixed(1), "performance level on this race") : ""}
+      ${box("official course", `${x.distance_km} km`, `+${(x.elevation_gain || 0).toLocaleString()} m`)}
+    </div>`;
+}
+
+// A race you ran several times opens the comparison page; a single one goes straight to its activity.
+function openRace(id) {
+  const r = racesState.data?.find(x => x.id === id);
+  if (r && r.editions <= 1) { switchTab("activities"); showDetail(id); return; }
+  showRace(id);
+}
+
+// One race: header, its editions side by side, and where along the course time was won or lost.
+async function showRace(id) {
+  racesState.detail = id;
+  if (document.getElementById("panel-races").classList.contains("active") === false) switchTab("races");
+  document.getElementById("races-list").style.display = "none";
+  const box = document.getElementById("race-detail-content");
+  document.getElementById("race-detail").style.display = "";
+  box.innerHTML = `<div class="loading">Loading…</div>`;
+  scrollTo(0, 0);
+  let d;
+  try { d = await (await fetch(`${API}/races/${id}`)).json(); } catch (e) { box.innerHTML = `<div class="error">Could not load this race.</div>`; return; }
+  racesState.charts.forEach(c => c.destroy()); racesState.charts = [];
+  const eds = d.editions, r = { ...d.race, ...eds.find(e => e.id === d.race.id) };   // with its course data
+  const best = eds.reduce((a, b) => b.duration_s < a.duration_s ? b : a);
+  const multi = eds.length > 1;
+  const stat = (label, value, sub = "") => `<div class="stat"><div class="stat-label">${label}</div><div class="stat-value">${value}</div>${sub ? `<div class="stat-sub">${sub}</div>` : ""}</div>`;
+  box.innerHTML = `
+    <div class="race-head">
+      <div><h2>${r.result?.race || raceName(r)}</h2><div class="detail-date">${r.result?.event ? `${r.result.event} · ` : ""}${r.date}${r.place ? ` · ${r.place}` : ""} · ${r.surface || ""} ${r.terrain || ""}</div></div>
+      <button class="sync-btn" onclick="switchTab('activities'); showDetail(${r.id})">Open activity</button>
+    </div>
+    <div class="stat-grid">
+      ${stat("distance", `${r.distance_km.toFixed(1)} km`, `+${r.elevation_gain.toLocaleString()} m · ${r.km_effort ?? ""} km-effort`)}
+      ${stat("time", fmtRaceTime(r.duration_s), `${fmtPace(r.pace)}/km`)}
+      ${stat("flat-equivalent pace", r.adjusted_pace ? `${fmtPace(r.adjusted_pace)}/km` : "—", "race model (Grade tab)")}
+      ${stat("heart rate", r.avg_hr ? `${Math.round(r.avg_hr)} bpm` : "—", r.relative_effort ? `relative effort ${Math.round(r.relative_effort)}` : "")}
+    </div>
+    ${r.result && r.result.source !== "manual" ? officialBlock(r) : ""}
+    ${r.ffa ? ffaBlock(r.ffa) : ""}
+    <div class="section-title">${multi ? `Your ${eds.length} editions` : "Only edition so far"}</div>
+    <div class="card"><table class="editions">
+      <thead><tr><th>year</th><th>distance</th><th>climb</th><th>time</th><th>vs best</th><th>rank</th><th>UTMB</th><th>ITRA</th><th>Betrail</th><th>pace</th><th>flat-eq.</th><th>avg HR</th><th>effort</th></tr></thead>
+      <tbody>${eds.map(e => `<tr class="${e.id === r.id ? "cur" : ""}" onclick="showRace(${e.id})" title="Show this edition">
+        <td>${e.date.slice(0, 4)}</td><td>${e.distance_km.toFixed(1)} km</td><td>+${e.elevation_gain.toLocaleString()} m</td>
+        <td>${fmtRaceTime(e.duration_s)}${e.id === best.id && multi ? " 🏆" : ""}</td>
+        <td>${e.id === best.id ? "—" : `+${fmtRaceTime(e.duration_s - best.duration_s)}`}</td>
+        <td>${e.result ? resultBadge(e.result) : "—"}</td><td>${e.results?.utmb?.score ?? "—"}</td><td>${e.results?.itra?.score ?? "—"}</td><td>${e.results?.betrail?.score?.toFixed(1) ?? "—"}</td>
+        <td>${fmtPace(e.pace)}</td><td>${e.adjusted_pace ? fmtPace(e.adjusted_pace) : "—"}</td>
+        <td>${e.avg_hr ? Math.round(e.avg_hr) : "—"}</td><td>${e.relative_effort ? Math.round(e.relative_effort) : "—"}</td></tr>`).join("")}</tbody>
+    </table></div>
+    ${multi ? `<div class="section-title">Ahead or behind along the course<span class="section-sub">time difference to ${r.date.slice(0, 4)} at each point (by share of the distance) · grey: altitude</span></div>
+      <div class="card"><canvas id="race-gap" height="90"></canvas></div>
+      <div class="section-title">Heart rate along the course</div>
+      <div class="card"><canvas id="race-hr" height="70"></canvas></div>` :
+      `<div class="section-title">Profile</div><div class="card"><canvas id="race-gap" height="70"></canvas></div>`}`;
+
+  const labels = [...Array(101).keys()];
+  const COLORS = ["#a50f15", "#3d7ebf", "#3f8f3a", "#e0a43a", "#6b5b95", "#7d7d7d"];
+  const color = (e, i) => e.id === r.id ? THEME.ink : COLORS[i % COLORS.length];
+  const alt = (r.elevation_pct || eds.find(e => e.elevation_pct)?.elevation_pct);
+  const altSet = alt ? [{ label: "Altitude", data: alt, yAxisID: "y1", borderWidth: 0, pointRadius: 0, fill: "origin",
+                          backgroundColor: "rgba(150,150,150,0.18)", order: 9 }] : [];
+  const x = { grid: { display: false }, ticks: { maxTicksLimit: 6, callback: v => `${v}%` }, title: { display: true, text: "share of the distance" } };
+  const y1 = { position: "right", grid: { display: false }, ticks: { callback: v => `${v} m` } };
+  if (multi && r.progress) {
+    racesState.charts.push(new Chart(document.getElementById("race-gap"), {
+      type: "line",
+      data: { labels, datasets: [...eds.filter(e => e.progress).map((e, i) => ({
+          label: e.date.slice(0, 4), data: e.progress.map((t, k) => (t - r.progress[k]) / 60), borderColor: color(e, i),
+          backgroundColor: color(e, i), borderWidth: e.id === r.id ? 1 : 2, pointRadius: 0, borderDash: e.id === r.id ? [4, 4] : [] })),
+        ...altSet] },
+      options: { responsive: true, animation: false, interaction: { mode: "index", intersect: false },
+        plugins: { tooltip: { filter: i => i.dataset.label !== "Altitude", callbacks: {
+          title: items => `${items[0].label}% · km ${(items[0].dataIndex / 100 * r.distance_km).toFixed(1)}`,
+          label: ctx => { const m = ctx.parsed.y; return `${ctx.dataset.label}: ${m === 0 ? "reference" : `${m > 0 ? "+" : "−"}${fmtDuration(Math.round(Math.abs(m) * 60))} ${m > 0 ? "behind" : "ahead"}`}`; } } } },
+        scales: { x, y: { reverse: true, ticks: { callback: v => `${v > 0 ? "+" : ""}${Math.round(v)} min` }, title: { display: true, text: "▲ ahead · behind ▼" } }, y1 } },
+    }));
+    racesState.charts.push(new Chart(document.getElementById("race-hr"), {
+      type: "line",
+      data: { labels, datasets: eds.filter(e => e.hr_pct).map((e, i) => ({ label: e.date.slice(0, 4), data: e.hr_pct,
+        borderColor: color(e, i), borderWidth: 1.5, pointRadius: 0, tension: 0.3 })) },
+      options: { responsive: true, animation: false, interaction: { mode: "index", intersect: false },
+        plugins: { tooltip: { callbacks: { label: ctx => `${ctx.dataset.label}: ${ctx.parsed.y} bpm` } } },
+        scales: { x, y: { ticks: { callback: v => `${v} bpm` } } } },
+    }));
+  } else if (alt) {
+    racesState.charts.push(new Chart(document.getElementById("race-gap"), {
+      type: "line", data: { labels, datasets: [{ ...altSet[0], yAxisID: "y", backgroundColor: hexToRgba(TERRAIN_COLORS[r.terrain] || "#9aa5b1", 0.3),
+        borderColor: TERRAIN_COLORS[r.terrain] || "#9aa5b1", borderWidth: 1.5 }] },
+      options: { responsive: true, animation: false, plugins: { legend: { display: false } },
+        scales: { x, y: { ticks: { callback: v => `${v} m` } } } },
+    }));
+  }
+}
+
+/* ---------- Performance: every official result of every site, with scores ---------- */
+const perfState = { data: null, sort: { key: "date", dir: -1 }, site: "all", chart: null };
+const PERF_SITES = [["utmb", "UTMB", "#a50f15"], ["itra", "ITRA", "#3d7ebf"], ["betrail", "Betrail", "#3f8f3a"]];
+
+async function loadPerformance() {
+  fetch(`${API}/races/indexes`).then(r => r.json()).then(ix => renderIndexes(ix, "perf-indexes")).catch(() => {});
+  if (!perfState.data) {
+    renderFfa();
+    try { perfState.data = await (await fetch(`${API}/races/performance`)).json(); }
+    catch (e) { document.getElementById("perf-table").innerHTML = `<tr><td class="error">Could not load results.</td></tr>`; return; }
+  }
+  renderPerformance();
+}
+
+// Road races with their FFA level, best per distance first, and the grid around your levels.
+async function renderFfa() {
+  const el = document.getElementById("perf-ffa");
+  el.innerHTML = `<div class="loading">Loading…</div>`;
+  let races, grid;
+  try {
+    [races, grid] = await Promise.all([racesState.data ? racesState.data : fetch(`${API}/races/`).then(r => r.json()),
+                                       fetch(`${API}/races/ffa`).then(r => r.json())]);
+  } catch (e) { el.innerHTML = ""; return; }
+  racesState.data ||= races;
+  const road = races.filter(r => r.ffa).sort((a, b) => b.ffa.points - a.ffa.points || (a.date < b.date ? 1 : -1));
+  if (!road.length) { el.innerHTML = `<div class="muted-note">No road race at a standard distance yet.</div>`; return; }
+  const order = ["5k", "10k", "15k", "20k", "half", "marathon"];
+  const best = order.map(k => road.find(r => r.ffa.distance === k)).filter(Boolean);
+  const box = r => `<div class="stat" style="cursor:pointer" onclick="openRace(${r.id})"><div class="stat-label">best ${r.ffa.label}</div>
+      <div class="stat-value">${r.ffa.level || "—"}<span class="rec-unit"> ${fmtRaceTime(r.ffa.time_s)}</span></div>
+      <div class="stat-sub">${r.date} · ${raceName(r)}${r.ffa.next ? ` · ${r.ffa.next.level} at ${fmtRaceTime(r.ffa.next.limit_s)}` : ""}</div></div>`;
+  // Every road race with its level, and the cross countries (marked, no FFA time grid), newest first.
+  const crosses = races.filter(r => r.surface === "cross");
+  const list = [...road, ...crosses].sort((a, b) => a.date < b.date ? 1 : -1);
+  el.innerHTML = `<div class="official">${best.map(box).join("")}</div>
+    <div class="card" style="padding:0;overflow-x:auto;margin-top:12px;"><table class="perf" style="min-width:600px">
+      <thead><tr><th>date</th><th>race</th><th>distance</th><th>time</th><th>rank</th><th>level</th><th>pts</th><th>next level</th></tr></thead>
+      <tbody>${list.map(r => r.ffa ? `<tr onclick="openRace(${r.id})" title="Open the race">
+        <td>${r.date}</td><td class="name">${raceName(r)}${r.place && raceName(r) !== r.place ? `<small>${r.place}</small>` : ""}</td>
+        <td>${r.ffa.label}</td>
+        <td>${fmtRaceTime(r.ffa.time_s)}<small style="display:block;color:var(--muted);font-size:11px">${r.ffa.time_source === "official" ? "official" : "watch"}</small></td>
+        ${rankCell(r)}
+        <td class="sc" style="text-align:left">${r.ffa.level || "below D7"}</td><td>${r.ffa.points}</td>
+        <td>${r.ffa.next ? `${r.ffa.next.level} at ${fmtRaceTime(r.ffa.next.limit_s)} <span style="color:var(--muted)">(−${fmtRaceTime(r.ffa.next.gap_s)})</span>` : "—"}</td>
+      </tr>` : `<tr onclick="openRace(${r.id})" title="Open the race">
+        <td>${r.date}</td><td class="name">${r.place || raceName(r)} <span class="tag tag-cross">cross</span></td>
+        <td>${r.distance_km.toFixed(1)} km</td><td>${fmtRaceTime(r.duration_s)}<small style="display:block;color:var(--muted);font-size:11px">watch</small></td>
+        ${rankCell(r)}
+        <td colspan="3" style="color:var(--muted)">cross country: no FFA time grid${r.result?.rank && r.result.total ? ` · FFA cross points ${r.result.total - r.result.rank + 1}` : " (ranked by place)"}</td>
+      </tr>`).join("")}</tbody>
+    </table></div>`;
+  ffaGrid = grid;
+}
+
+// Rank in the road table: the imported one, or yours to type (click).
+function rankCell(r) {
+  const x = r.result;
+  if (x && x.source !== "manual") return `<td>${x.dnf ? "DNF" : x.rank ? resultBadge(x) : "—"}</td>`;
+  const label = x?.rank ? `${x.rank}${x.total ? ` / ${x.total.toLocaleString()}` : ""}` : "+ add";
+  return `<td onclick="event.stopPropagation(); editRank(${r.id}, '${x?.rank ? `${x.rank}${x.total ? "/" + x.total : ""}` : ""}')"
+            title="Your place: click to ${x?.rank ? "edit" : "add"}" style="cursor:text"><span class="${x?.rank ? "" : "muted-note"}"
+            style="${x?.rank ? "" : "margin:0"}">${label}</span>${x?.rank ? ` <span style="color:var(--muted);font-size:11px">✎</span>` : ""}</td>`;
+}
+
+async function editRank(id, current) {
+  const v = prompt("Your place in this race, and the number of finishers if you know it (e.g. 12/180). Empty to remove.", current);
+  if (v === null) return;
+  const m = v.trim().match(/^(\d+)\s*(?:\/\s*(\d+))?$/);
+  if (v.trim() && !m) { alert("Write it like 12 or 12/180"); return; }
+  await fetch(`${API}/races/${id}/rank`, { method: "PUT", headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(m ? { rank: +m[1], total: m[2] ? +m[2] : null } : { rank: null }) });
+  racesState.data = null;
+  renderFfa();
+}
+
+// The full FFA grid, in an overlay (from "see the FFA grid").
+let ffaGrid = null;
+async function showFfaGrid() {
+  const grid = ffaGrid || (ffaGrid = await fetch(`${API}/races/ffa`).then(r => r.json()));
+  const keys = ["5k", "10k", "15k", "20k", "half", "marathon"];
+  const over = document.createElement("div");
+  over.className = "overlay";
+  over.onclick = e => { if (e.target === over) over.remove(); };
+  over.innerHTML = `<div class="overlay-box">
+    <div class="race-head"><div class="section-title" style="margin:0">FFA road grid · men, all ages<span class="section-sub">each time is the limit to beat for the level</span></div>
+      <button class="pick" onclick="this.closest('.overlay').remove()">Close</button></div>
+    <div style="overflow-x:auto;margin-top:10px"><table class="perf" style="min-width:560px">
+      <thead><tr><th>level</th><th>pts</th>${keys.map(k => `<th>${grid.labels[k]}</th>`).join("")}</tr></thead>
+      <tbody>${grid.levels.map((l, i) => `<tr style="cursor:default"><td><b>${l.level}</b></td><td>${l.points}</td>
+        ${keys.map(k => `<td>${fmtRaceTime(grid.grid[k][i])}</td>`).join("")}</tr>`).join("")}</tbody></table></div>
+    <div class="muted-note">Barème Hommes FFA (au 1er janvier 2010), the reference grid for road levels.</div></div>`;
+  document.body.appendChild(over);
+}
+
+function setPerfSort(key) {
+  const s = perfState.sort;
+  perfState.sort = { key, dir: s.key === key ? -s.dir : (key === "date" || key.startsWith("score") ? -1 : 1) };
+  renderPerformance();
+}
+function setPerfSite(site) { perfState.site = site; renderPerformance(); }
+
+function renderPerformance() {
+  const rows = perfState.data.filter(r => perfState.site === "all" || r.scores[perfState.site] !== undefined);
+  const val = (r, key) => key === "date" ? r.date : key === "race" ? r.race.toLowerCase() : key === "distance" ? r.distance_km
+    : key === "gain" ? r.elevation_gain : key === "time" ? (r.dnf ? Infinity : r.time_s) : key === "rank" ? (r.dnf ? Infinity : r.rank ?? Infinity)
+    : key === "top" ? (r.rank && r.total ? r.rank / r.total : Infinity) : r.scores[key.slice(6)] ?? null;
+  const { key, dir } = perfState.sort;
+  rows.sort((a, b) => { const x = val(a, key), y = val(b, key);
+    if (x == null) return 1; if (y == null) return -1; return (x > y ? 1 : x < y ? -1 : 0) * dir; });
+
+  document.getElementById("perf-filters").innerHTML = [["all", "All sites"], ...PERF_SITES.map(([k, l]) => [k, `On ${l}`])]
+    .map(([k, l]) => `<button class="pick ${perfState.site === k ? "on" : ""}" onclick="setPerfSite('${k}')">${l}</button>`).join("")
+    + `<span class="muted-note" style="margin:0 0 0 8px;">${rows.length} races</span>`;
+
+  // Best / worst score per site, to colour the cells.
+  const ext = Object.fromEntries(PERF_SITES.map(([k]) => { const v = perfState.data.map(r => r.scores[k]).filter(x => x != null);
+    return [k, { hi: Math.max(...v), lo: Math.min(...v) }]; }));
+  const th = (k, label) => `<th class="${key === k ? "on" : ""}" onclick="setPerfSort('${k}')">${label}${key === k ? (dir > 0 ? " ▲" : " ▼") : ""}</th>`;
+  const scoreCell = (r, k) => { const v = r.scores[k];
+    if (v === undefined) return `<td class="sc na">—</td>`;
+    if (v === null) return `<td class="sc na">${r.dnf ? "DNF" : "…"}</td>`;
+    return `<td class="sc ${v === ext[k].hi ? "best" : v === ext[k].lo ? "worst" : ""}">${k === "betrail" ? v.toFixed(1) : Math.round(v)}</td>`; };
+  document.getElementById("perf-table").innerHTML = `
+    <thead><tr>${th("date", "date")}${th("race", "race")}${th("distance", "km")}${th("gain", "climb")}${th("time", "time")}
+      ${th("rank", "rank")}${th("top", "top %")}${PERF_SITES.map(([k, l]) => th("score_" + k, l)).join("")}</tr></thead>
+    <tbody>${rows.map(r => `<tr onclick="${r.activity_id ? `openRace(${r.activity_id})` : ""}" title="${r.activity_id ? "Open the race" : "No Garmin activity for this race"}">
+      <td>${r.date}</td>
+      <td class="name">${r.race}<small>${r.event}</small></td>
+      <td>${r.distance_km != null ? Math.round(r.distance_km) : "—"}</td><td>${r.elevation_gain != null ? `+${Math.round(r.elevation_gain).toLocaleString()}` : "—"}</td>
+      <td>${r.dnf ? "DNF" : fmtRaceTime(r.time_s)}</td>
+      <td>${r.dnf ? "—" : r.rank ? (r.total ? `${r.rank} / ${r.total.toLocaleString()}` : resultBadge({ rank: r.rank })) : "—"}</td>
+      <td>${r.rank && r.total && !r.dnf ? `${topPct(r.rank, r.total)}%` : "—"}</td>
+      ${PERF_SITES.map(([k]) => scoreCell(r, k)).join("")}</tr>`).join("")}</tbody>`;
+  drawPerfChart();
+}
+
+function drawPerfChart() {
+  if (perfState.chart) perfState.chart.destroy();
+  const rows = [...perfState.data].filter(r => !r.dnf).sort((a, b) => a.date < b.date ? -1 : 1);
+  const t = d => new Date(d + "T00:00:00").getTime();
+  perfState.chart = new Chart(document.getElementById("perf-chart"), {
+    type: "scatter",
+    data: { datasets: PERF_SITES.map(([k, label, color]) => ({
+      label, yAxisID: k === "betrail" ? "y1" : "y", showLine: true, borderWidth: 1.25, tension: 0.2, pointRadius: 3.5,
+      borderColor: hexToRgba(color, 0.55), backgroundColor: color,
+      data: rows.filter(r => r.scores[k] != null).map(r => ({ x: t(r.date), y: r.scores[k], r })) })) },
+    options: { responsive: true, animation: false,
+      onClick: (evt, els) => { const p = els[0] && perfState.chart.data.datasets[els[0].datasetIndex].data[els[0].index]; if (p?.r.activity_id) openRace(p.r.activity_id); },
+      plugins: { tooltip: { callbacks: { label: ctx => `${ctx.dataset.label} ${ctx.dataset.label === "Betrail" ? ctx.parsed.y.toFixed(1) : ctx.parsed.y} · ${ctx.raw.r.race} (${ctx.raw.r.date})` } } },
+      scales: {
+        x: { type: "linear", grid: { display: false }, ticks: { maxTicksLimit: 8, callback: v => new Date(v).getFullYear() } },
+        y: { title: { display: true, text: "UTMB / ITRA" }, suggestedMin: 450 },
+        y1: { position: "right", grid: { display: false }, title: { display: true, text: "Betrail" } },
+      } },
+  });
 }
 
 /* ---------- Yearly summary: three metrics, each clickable ---------- */
@@ -3327,6 +3952,8 @@ async function deleteZoneSet() {
 
 /* ---------- Grade-adjusted pace (GAP): four models ---------- */
 const GAP_METHODS = [
+  { key: "race",      label: "Race model",  color: "#1f4e8c",
+    text: "Fitted on your trail races of 1.5–6 h so they come out as flat as possible (constant effort): what a slope costs you when racing — walking the steep climbs, how you descend. Heart rate and fatigue are taken out first." },
   { key: "personal",  label: "Personal",    color: "#a50f15",
     text: "Fitted from your own runs: heartbeats per metre on each slope ÷ heartbeats per metre on the flat in the same run (fitness, heat and fatigue cancel out). Your body, your descending skill." },
   { key: "strava",    label: "Strava-like", color: "#fc4c02",
@@ -3436,6 +4063,86 @@ function renderWalkRun(d) {
   document.getElementById("gap-methods").innerHTML = "";
 }
 
+// Race model: how flat each model makes your trail races, and one race's grade-adjusted pace
+// under every model (pick a race in the table).
+function renderRaceModel(d) {
+  if (gapState.chart) gapState.chart.destroy();
+  const rm = d.race;
+  document.getElementById("gap-methods").innerHTML = "";
+  if (!rm) {
+    document.getElementById("gap-table").innerHTML = `<div class="muted-note">No race model yet.
+      <button class="pick" onclick="refitRace(this)">Fit it now</button></div>`;
+    return;
+  }
+  const order = ["race", "personal", "strava", "km_effort", "minetti"];
+  const M = Object.fromEntries(GAP_METHODS.map(m => [m.key, m]));
+  const sum = rm.summary;
+  gapState.raceId ||= rm.races[0]?.id;
+  document.getElementById("gap-table").innerHTML = `
+    <div class="card" style="margin-top:12px;"><table class="laps gap-tab">
+      <thead><tr><th>model</th><th>spread (median)</th><th>flattest on</th><th>road check: bias</th><th>road check: spread</th></tr></thead>
+      <tbody>${order.map(k => `<tr><td><span class="zone-dot" style="background:${M[k].color}"></span>${M[k].label}</td>
+        <td><b>${sum[k].flatness_median.toFixed(1)}%</b></td><td>${sum[k].wins} of ${rm.n_races} races</td>
+        <td>${sum[k].road_bias != null ? `${sum[k].road_bias > 0 ? "+" : ""}${sum[k].road_bias}%` : "—"}</td>
+        <td>${sum[k].road_spread != null ? `±${sum[k].road_spread}%` : "—"}</td></tr>`).join("")}</tbody></table>
+      <div class="muted-note"><b>Spread</b>: how much the grade-adjusted pace still varies along a race (lower = flatter = the model explains
+        the slopes better), after taking out heart rate and fatigue; the race model is tested on each race without having learned
+        from it. <b>Road check</b>: each model's flat-equivalent distance through Riegel from your best road half/marathon of the
+        previous 12 months, vs your real time — bias is how much slower the trail was than predicted, spread how consistent.
+        ${rm.n_races} races, ${rm.segments.toLocaleString()} segments of 200 m · heart rate: +1% HR ≈ ${(rm.beta_hr).toFixed(2)}% faster ·
+        fatigue: ${(rm.gamma_fatigue * 100).toFixed(0)}% by the finish · fitted ${rm.fitted_at.slice(0, 10)}
+        <button class="pick" style="margin-left:6px" onclick="refitRace(this)">Refit</button></div>
+    </div>
+    <div class="section-title">Your races<span class="section-sub">spread per model · bold = flattest · click a race to see its profile above</span></div>
+    <div class="card" style="padding:0;overflow-x:auto"><table class="perf" style="min-width:640px">
+      <thead><tr><th>date</th><th>race</th><th>km</th><th>climb</th><th>time</th>${order.map(k => `<th style="color:${M[k].color}">${M[k].label}</th>`).join("")}</tr></thead>
+      <tbody>${rm.races.map(r => { const best = order.reduce((a, b) => r.flatness[b] < r.flatness[a] ? b : a);
+        return `<tr onclick="gapState.raceId=${r.id}; renderGap()" style="${r.id === gapState.raceId ? "background:#f6f3ec" : ""}">
+          <td>${r.date}</td><td class="name">${r.place || r.name}</td><td>${Math.round(r.distance_km)}</td>
+          <td>+${r.elevation_gain.toLocaleString()}</td><td>${fmtRaceTime(r.duration_s)}</td>
+          ${order.map(k => `<td class="sc" style="${k === best ? "color:#2d6b29" : "font-weight:400"}">${r.flatness[k].toFixed(1)}%</td>`).join("")}</tr>`; }).join("")}</tbody>
+    </table></div>`;
+  drawRaceGap(gapState.raceId);
+}
+
+async function drawRaceGap(id) {
+  const rm = gapState.data.race, r = rm.races.find(x => x.id === id);
+  let p;
+  try { p = await (await fetch(`${API}/gap/race/${id}`)).json(); } catch (e) { return; }
+  if (gapState.view !== "race" || gapState.raceId !== id) return;
+  if (gapState.chart) gapState.chart.destroy();
+  const M = Object.fromEntries(GAP_METHODS.map(m => [m.key, m]));
+  const x = p.done.map(v => Math.round(v * r.distance_km * 10) / 10);
+  // Rolling 1 km (5 segments) so the lines are readable.
+  const smooth = a => a.map((_, i) => { const w = a.slice(Math.max(0, i - 2), i + 3); return w.reduce((s, v) => s + v, 0) / w.length; });
+  const keys = ["race", "personal", "strava", "minetti"].filter(k => p.gap[k]);
+  const all = keys.flatMap(k => smooth(p.gap[k])).sort((a, b) => a - b);
+  gapState.chart = new Chart(document.getElementById("gap-chart"), {
+    type: "line",
+    data: { datasets: [
+      { label: "actual pace", data: x.map((v, i) => ({ x: v, y: smooth(p.pace)[i] })), borderColor: "rgba(31,29,24,0.25)", borderWidth: 1, pointRadius: 0 },
+      ...keys.map(k => ({ label: M[k].label, data: x.map((v, i) => ({ x: v, y: smooth(p.gap[k])[i] })), borderColor: M[k].color,
+        borderWidth: k === "race" ? 2.5 : 1.5, pointRadius: 0 })),
+      { label: "slope", data: x.map((v, i) => ({ x: v, y: p.grade[i] })), yAxisID: "y1", borderWidth: 0, pointRadius: 0,
+        fill: "origin", backgroundColor: "rgba(150,150,150,0.15)" },
+    ] },
+    options: { responsive: true, animation: false, interaction: { mode: "index", intersect: false },
+      plugins: { title: { display: true, text: `${r.date} · ${r.place || r.name} — grade-adjusted pace along the race (flatter = better)` },
+        tooltip: { filter: i => i.dataset.label !== "slope", callbacks: { label: ctx => `${ctx.dataset.label}: ${fmtPace(ctx.parsed.y)}/km` } } },
+      scales: { x: { type: "linear", title: { display: true, text: "km" }, grid: { display: false } },
+        y: { reverse: true, min: all[Math.floor(all.length * 0.02)] - 0.3, max: all[Math.floor(all.length * 0.98)] + 0.3,
+             ticks: { callback: v => fmtPace(v) }, title: { display: true, text: "grade-adjusted pace /km" } },
+        y1: { position: "right", grid: { display: false }, ticks: { callback: v => `${v}%` }, title: { display: true, text: "slope" } } } },
+  });
+}
+
+async function refitRace(btn) {
+  btn.disabled = true; btn.textContent = "Refitting… (~10 s)";
+  await fetch(`${API}/gap/models/race`, { method: "POST" });
+  gapState.data = null;
+  await loadGap();
+}
+
 // Your personal curve fitted per year: does climbing / descending get cheaper over time?
 function renderGapYears(d) {
   if (gapState.chart) gapState.chart.destroy();
@@ -3523,6 +4230,7 @@ function renderGap() {
   document.querySelectorAll("#gap-view button").forEach(b => b.classList.toggle("on", b.dataset.v === gapState.view));
   if (gapState.view === "years") return renderGapYears(d);
   if (gapState.view === "walk") return renderWalkRun(d);
+  if (gapState.view === "race") return renderRaceModel(d);
   if (gapState.chart) gapState.chart.destroy();
   const bins = d.personal?.bins || [];
   const maxCount = Math.max(1, ...bins.map(b => b.count));
@@ -3531,7 +4239,7 @@ function renderGap() {
     data: { datasets: [
       ...GAP_METHODS.map(m => ({
         label: m.label, borderColor: m.color, backgroundColor: m.color, pointRadius: 0,
-        borderWidth: m.key === "personal" ? 3 : 1.75, borderDash: m.key === "km_effort" ? [5, 4] : [],
+        borderWidth: m.key === "personal" || m.key === "race" ? 3 : 1.75, borderDash: m.key === "km_effort" ? [5, 4] : [],
         data: d.grades.map((g, i) => ({ x: g, y: d.curves[m.key][i] })).filter(p => p.y != null),
       })),
       { label: "Your data (median per 1%)", type: "scatter", backgroundColor: "rgba(165,15,21,0.25)",
@@ -3660,7 +4368,7 @@ function renderRecords() {
   document.getElementById("records-note").textContent =
     "Road distances skip downhill stretches (more than 5 m drop per km) like official records; GPS jumps and " +
     "altimeter recalibrations are repaired, and car or bus rides (very low heart rate) don't count. " +
-    "Ultra distances use your personal grade model (Grade tab). Click a record to open it.";
+    "Ultra distances use the race model (Grade tab). Click a record to open it.";
 }
 
 /* ---------- Body: daily wellness data from Garmin ---------- */

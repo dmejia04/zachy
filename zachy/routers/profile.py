@@ -13,6 +13,12 @@ class ProfileIn(BaseModel):
     height_cm: float | None = None
     weight_kg: float | None = None
     sex: str | None = None
+    efficiency_ref_hr: float | None = None
+    max_hr_ceiling: float | None = None
+    utmb_url: str | None = None
+    itra_url: str | None = None
+    betrail_url: str | None = None
+    ffa_licence: str | None = None
 
 
 @router.get("/")
@@ -23,8 +29,8 @@ def get_profile(db: Session = Depends(get_db)):
 
 @router.put("/")
 def put_profile(body: ProfileIn, db: Session = Depends(get_db)):
-    """Manual values; send null (or leave a field out) to fall back to Garmin's."""
-    update(db, body.model_dump())
+    """Manual values: send null to fall back to Garmin's (or automatic); fields left out are kept."""
+    update(db, body.model_dump(exclude_unset=True))
     return profile(db)
 
 

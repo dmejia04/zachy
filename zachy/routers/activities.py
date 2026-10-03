@@ -15,13 +15,15 @@ from zachy.analytics.gap import adjusted_paces, split_paces
 from zachy.analytics.peaks import elevation_extremes, sustained_extremes
 from zachy.analytics.splits import km_splits, lap_stats, load_track
 from zachy.analytics.races import CATEGORIES, category_status
-from zachy.analytics.terrain import SURFACES, classify, place_from_name
+from zachy.analytics.terrain import SURFACES, classify, looks_like_cross, place_from_name
+from zachy.analytics.effort import activity_effort
+from zachy.analytics.race_results import official_for, results_by_activity
 from zachy.analytics.weather import activity_weather
 from zachy.analytics.workouts import cached_workout
 from zachy.models import FitFile
 from pydantic import BaseModel
 
-from zachy.models import Activity, ActivityOverride, Lap, Record, Timeseries
+from zachy.models import Activity, ActivityOverride, CategoryCache, Lap, Record, Timeseries
 from zachy.schemas.activity import ActivityOut, ActivityDetailOut, TimeseriesPointOut
 
 router = APIRouter()
@@ -53,6 +55,7 @@ def list_activities(
     overrides = {o.activity_id: o for o in db.query(ActivityOverride)
                  .filter(ActivityOverride.activity_id.in_([a.id for a in activities]))}
     out = []
+    official = results_by_activity(db)
     for a in activities:
         row = ActivityOut.model_validate(a).model_dump()
         override = overrides.get(a.id)
@@ -60,9 +63,11 @@ def list_activities(
         row["category"] = status["category"] if status else None
         row["workout"] = cached_workout(db, a) if row["category"] == "workout" else None
         t = classify(a.activity_type, a.distance_km, a.elevation_gain, getattr(override, "surface", None),
-                     detected_track=bool(row["workout"] and row["workout"]["on_track"]))
+                     detected_track=bool(row["workout"] and row["workout"]["on_track"]),
+                     detected_cross=looks_like_cross(db, a, row["category"]))
         row["surface"], row["terrain"] = (t["surface"], t["terrain"]) if t else (None, None)
         row["place"] = place_from_name(a.name)
+        row["official"] = official_for(official.get(a.id))
         out.append(row)
     return out
 
@@ -153,6 +158,7 @@ def get_activity_detail(
         "terrain": activity_terrain(db, activity),
         "category": (category := activity_category(db, activity)),
         "place": place_from_name(activity.name),
+        "official": official_for(results_by_activity(db).get(activity.id)),
         "gap": adjusted_paces(db, activity) if source == "fit" else None,
         # Workout structure (cached), so the page header can say "Track intervals · 12 × 400 m…".
         "workout": cached_workout(db, activity) if category and category["category"] == "workout" else None,
@@ -177,7 +183,7 @@ def activity_category(db: Session, activity: Activity) -> dict | None:
 
 
 class CategoryIn(BaseModel):
-    category: str | None   # "race" | "workout" | "easy", or null = back to the automatic guess
+    category: str | None   # "race" | "workout" | "long" | "easy", or null = back to the automatic guess
 
 
 @router.put("/{activity_id}/category")
@@ -201,11 +207,12 @@ def activity_terrain(db: Session, activity: Activity) -> dict | None:
     workout = cached_workout(db, activity) if category and category["category"] == "workout" else None
     return classify(activity.activity_type, activity.distance_km, activity.elevation_gain,
                     override.surface if override else None,
-                    detected_track=bool(workout and workout["on_track"]))
+                    detected_track=bool(workout and workout["on_track"]),
+                    detected_cross=looks_like_cross(db, activity, category and category["category"]))
 
 
 class SurfaceIn(BaseModel):
-    surface: str | None   # "road", "trail", "track", "treadmill", or null to go back to automatic
+    surface: str | None   # "road", "trail", "track", "treadmill", "cross", or null to go back to automatic
 
 
 @router.put("/{activity_id}/surface")
@@ -219,6 +226,7 @@ def set_surface(activity_id: int, body: SurfaceIn, db: Session = Depends(get_db)
     override = db.get(ActivityOverride, activity_id) or ActivityOverride(activity_id=activity_id)
     override.surface = body.surface
     db.merge(override)
+    db.query(CategoryCache).filter(CategoryCache.activity_id == activity_id).delete()   # cross = race
     db.commit()
     return activity_terrain(db, activity)
 
@@ -255,6 +263,18 @@ def get_activity_weather(activity_id: int, db: Session = Depends(get_db)):
         return activity_weather(db, activity)
     except Exception:
         raise HTTPException(status_code=503, detail="Garmin weather unavailable")
+
+
+@router.get("/{activity_id}/effort")
+def get_activity_effort(activity_id: int, db: Session = Depends(get_db)):
+    """Training effect (aerobic / anaerobic, label, load), your RPE and feel, stamina. Cached."""
+    activity = db.query(Activity).filter(Activity.id == activity_id).first()
+    if not activity:
+        raise HTTPException(status_code=404, detail="Activity not found")
+    try:
+        return activity_effort(db, activity)
+    except Exception:
+        raise HTTPException(status_code=503, detail="Garmin unavailable")
 
 
 @router.get("/{activity_id}/splits")

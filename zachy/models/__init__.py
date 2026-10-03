@@ -13,5 +13,7 @@ from zachy.models.gap_model import GapModel
 from zachy.models.category_cache import CategoryCache
 from zachy.models.activity_weather import ActivityWeather
 from zachy.models.profile import Profile
+from zachy.models.activity_effort import ActivityEffort
+from zachy.models.race_result import RaceResult
 
-__all__ = ["Activity", "Lap", "Timeseries", "BodyMetric", "SyncRun", "FitFile", "Record", "ZoneSettings", "Wellness", "ActivityOverride", "WorkoutSummary", "BestEffort", "GapModel", "CategoryCache", "ActivityWeather", "Profile"]
+__all__ = ["Activity", "Lap", "Timeseries", "BodyMetric", "SyncRun", "FitFile", "Record", "ZoneSettings", "Wellness", "ActivityOverride", "WorkoutSummary", "BestEffort", "GapModel", "CategoryCache", "ActivityWeather", "Profile", "ActivityEffort", "RaceResult"]
