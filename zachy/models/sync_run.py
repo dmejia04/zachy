@@ -12,5 +12,5 @@ class SyncRun(Base):
     status           = Column(String, nullable=False)     # running | ok | error
     new_activities   = Column(Integer, default=0)
     new_details      = Column(Integer, default=0)         # activities whose FIT file was stored
-    new_body_metrics = Column(Integer, default=0)
+    new_body_metrics = Column(Integer, default=0)         # wellness days refreshed
     error            = Column(String, nullable=True)

@@ -1,38 +1,23 @@
 """Runs a full incremental sync for the "Sync" button and records it as a SyncRun."""
 
-from datetime import date, datetime, timedelta, timezone
+from datetime import datetime, timezone
 
 from garmin_auth import GarminAuth
-from sqlalchemy import func
-from sqlalchemy.orm import Session
 
 from zachy.database import SessionLocal
-from zachy.models import BodyMetric, SyncRun
+from zachy.models import SyncRun
 from zachy.services.fit import process_activity
 from zachy.services.sync import sync_new_activities
-from zachy.services.sync_body_metrics import sync_body_metrics
+from zachy.services.wellness import sync_recent as sync_recent_wellness
 from zachy.services.sync_laps_timeseries import RUNNING_TYPES, fetch_laps_and_timeseries
-
-# With no body metrics stored at all, go back this far on the first sync.
-BODY_METRICS_FIRST_SYNC_DAYS = 30
 
 
 def utcnow() -> datetime:
     return datetime.now(timezone.utc).replace(tzinfo=None)
 
 
-def body_metrics_days_to_sync(db: Session) -> int:
-    """Days to fetch (counting back from today): from the day before the newest stored day, so a
-    day that was synced while still in progress gets completed, through today."""
-    latest = db.query(func.max(BodyMetric.date)).scalar()
-    if latest is None:
-        return BODY_METRICS_FIRST_SYNC_DAYS
-    start = latest - timedelta(days=1)
-    return (date.today() - start).days + 1
-
-
 def run_sync(run_id: int) -> None:
-    """New activities -> original FIT file (+ laps for runs) -> recent body metrics."""
+    """New activities -> original FIT file (+ laps for runs) -> recent wellness days."""
     db = SessionLocal()
     run = db.get(SyncRun, run_id)
     try:
@@ -50,9 +35,7 @@ def run_sync(run_id: int) -> None:
                 run.new_details += 1
                 db.commit()
 
-        run.new_body_metrics = sync_body_metrics(
-            days_back=body_metrics_days_to_sync(db), client=client, refresh_existing=True
-        )
+        run.new_body_metrics = sync_recent_wellness(client, db, log=lambda *_: None)
         run.status = "ok"
     except Exception as e:
         db.rollback()

@@ -3,7 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from zachy.config import settings
 from zachy.database import Base, engine
 from zachy.models import Activity, Lap, Timeseries, BodyMetric, SyncRun
-from zachy.routers import activities, app_config, reports, body_metrics, sync, zones
+from zachy.routers import activities, app_config, reports, body_metrics, sync, wellness, zones
 
 Base.metadata.create_all(bind=engine)
 
@@ -22,6 +22,7 @@ app.include_router(body_metrics.router, prefix="/body-metrics", tags=["body-metr
 app.include_router(sync.router, prefix="/sync", tags=["sync"])
 app.include_router(zones.router, prefix="/zones", tags=["zones"])
 app.include_router(app_config.router, prefix="/config", tags=["config"])
+app.include_router(wellness.router, prefix="/wellness", tags=["wellness"])
 
 
 @app.get("/")
