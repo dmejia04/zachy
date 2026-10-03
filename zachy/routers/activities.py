@@ -6,6 +6,10 @@ from sqlalchemy import extract, func
 from sqlalchemy.orm import Session
 
 from zachy.database import get_db
+import pandas as pd
+
+from zachy.analytics.peaks import elevation_extremes, sustained_extremes
+from zachy.analytics.splits import km_splits, lap_stats, load_track
 from zachy.models import Activity, Lap, Record, Timeseries
 from zachy.schemas.activity import ActivityOut, ActivityDetailOut, TimeseriesPointOut
 
@@ -102,12 +106,15 @@ def get_activity_detail(
     )
 
     timeseries, source = fit_timeseries(db, activity_id), "fit"
-    if not timeseries:
+    if timeseries:
+        laps = laps_with_fit_stats(laps, timeseries, activity)
+    else:
         timeseries, source = chart_timeseries(db, activity), "chart"
     if not timeseries:
         source = "none"
     total = len(timeseries)
     step = max(1, ceil(total / max_points))
+    peaks = compute_peaks(timeseries) if timeseries else None
 
     return {
         **{c.name: getattr(activity, c.name) for c in Activity.__table__.columns},
@@ -116,7 +123,52 @@ def get_activity_detail(
         "timeseries": timeseries[::step] + ([timeseries[-1]] if total and (total - 1) % step else []),
         "timeseries_source": source,
         "timeseries_points": total,
+        "peaks": peaks,
     }
+
+
+def compute_peaks(timeseries: list[dict]) -> dict:
+    """Sustained extremes on the full-resolution track (before thinning for the charts)."""
+    track = pd.DataFrame(timeseries).rename(columns={"seconds_elapsed": "timer_s"})
+    cols = ["timer_s", "elapsed_s", "distance_km", "speed_ms", "pace", "hr", "cadence", "power", "elevation"]
+    track = track.reindex(columns=cols).astype(float)
+    if track["speed_ms"].isna().all() and track["pace"].notna().any():   # old chart data: pace only
+        track["speed_ms"] = 1000 / (track["pace"] * 60)
+    return {**sustained_extremes(track), "elevation": elevation_extremes(track)}
+
+
+@router.get("/{activity_id}/splits")
+def get_activity_splits(
+    activity_id: int,
+    km: float = Query(1.0, gt=0.09, le=50),
+    db: Session = Depends(get_db),
+):
+    """Splits every `km` kilometres from the FIT records: time, pace, HR, cadence, power,
+    elevation gain and loss (calibrated to the activity's official totals)."""
+    activity = db.query(Activity).filter(Activity.id == activity_id).first()
+    if not activity:
+        raise HTTPException(status_code=404, detail="Activity not found")
+    track = load_track(db, activity_id)
+    if track.empty:
+        raise HTTPException(status_code=404, detail="No FIT records for this activity")
+    return {"split_km": km, "splits": km_splits(track, activity, km)}
+
+
+def laps_with_fit_stats(laps: list[Lap], timeseries: list[dict], activity: Activity) -> list[dict]:
+    """Laps with elevation gain/loss, power and cadence recomputed from the FIT track (same
+    method as the km splits). Garmin's own lap cadence averages in stopped time, so it's replaced."""
+    track = pd.DataFrame(timeseries).reindex(
+        columns=["seconds_elapsed", "elevation", "power", "cadence"]).rename(
+        columns={"seconds_elapsed": "timer_s"}).astype(float)
+    stats = lap_stats(track, activity, [lap.duration_s for lap in laps])
+    out = []
+    for i, lap in enumerate(laps):
+        row = {c: getattr(lap, c) for c in ("lap_number", "distance_km", "duration_s", "avg_pace",
+                                            "avg_hr", "avg_cadence", "elevation_gain")}
+        if i < len(stats):
+            row.update({k: v for k, v in stats[i].items() if v is not None})
+        out.append(row)
+    return out
 
 
 def fit_timeseries(db: Session, activity_id: int) -> list[dict]:

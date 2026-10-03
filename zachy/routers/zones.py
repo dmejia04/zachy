@@ -35,11 +35,8 @@ def list_zone_settings(db: Session = Depends(get_db)):
 
 @router.get("/on/{day}")
 def zones_on(day: date, db: Session = Depends(get_db)):
-    """The absolute zones that applied on a given date."""
-    zones = zones_for(db, day)
-    if zones is None:
-        raise HTTPException(status_code=404, detail="No zone settings for that date")
-    return zones
+    """The zones that applied on a given date, or null if none were set yet."""
+    return zones_for(db, day)
 
 
 @router.put("/{valid_from}")

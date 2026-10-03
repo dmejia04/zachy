@@ -52,6 +52,8 @@ class LapOut(BaseModel):
     avg_hr: float | None
     avg_cadence: float | None
     elevation_gain: float | None
+    elevation_loss: float | None = None   # computed from FIT records when available
+    avg_power: float | None = None        # computed from FIT records when available
 
     class Config:
         from_attributes = True
@@ -80,3 +82,4 @@ class ActivityDetailOut(ActivityOut):
     timeseries: list[TimeseriesPointOut]
     timeseries_source: str                # "fit" (original file) | "chart" (old 2,000-point data) | "none"
     timeseries_points: int                # points before downsampling
+    peaks: dict | None = None             # 30 s extremes + altitude/gradient extremes (analytics/peaks.py)
