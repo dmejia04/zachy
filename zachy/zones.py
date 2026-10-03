@@ -61,13 +61,14 @@ def validate(zone_model: int, data: dict) -> dict:
 
 
 def settings_for(db: Session, day: date) -> ZoneSettings | None:
-    """The settings in effect on `day` (latest valid_from <= day)."""
+    """The settings in effect on `day` (latest valid_from <= day); for days before your first
+    set, the earliest set (the next one) — better than no zones at all."""
     return (
         db.query(ZoneSettings)
         .filter(ZoneSettings.valid_from <= day)
         .order_by(ZoneSettings.valid_from.desc())
         .first()
-    )
+    ) or db.query(ZoneSettings).order_by(ZoneSettings.valid_from).first()
 
 
 def compute_zones(zone_model: int, data: dict) -> dict:
@@ -95,4 +96,6 @@ def zones_for(db: Session, day: date) -> dict | None:
     if s is None:
         return None
     return {"valid_from": s.valid_from.isoformat(), "zone_model": s.zone_model,
-            "zones": compute_zones(s.zone_model, s.data)}
+            "zones": compute_zones(s.zone_model, s.data),
+            # Both models, so a page can switch between 3 and 5 zones.
+            "by_model": {str(m): compute_zones(m, s.data) for m in MODELS}}

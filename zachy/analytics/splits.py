@@ -3,13 +3,15 @@
 Elevation gain/loss: raw altitude jitters, so changes are only counted once they exceed a
 small threshold (hysteresis). No single threshold matches Garmin everywhere (flat city runs
 want ~1 m, mountain races ~5 m), so the result is then scaled so the splits add up exactly to
-the activity's official gain and loss — the same totals shown on the activity.
+the activity's official gain and loss — the same totals shown on the activity. Altimeter jumps
+and altitude changes during pauses (a lift, a shuttle) are left out first (see elevation.py).
 """
 
 import numpy as np
 import pandas as pd
 from sqlalchemy.orm import Session
 
+from zachy.analytics.elevation import moving_elevation
 from zachy.models import Activity, Record
 
 ELEVATION_THRESHOLD_M = 2.0
@@ -17,14 +19,14 @@ ELEVATION_THRESHOLD_M = 2.0
 
 def load_track(db: Session, activity_id: int) -> pd.DataFrame:
     rows = (
-        db.query(Record.timer_s, Record.distance_km, Record.hr, Record.cadence,
+        db.query(Record.timer_s, Record.elapsed_s, Record.distance_km, Record.hr, Record.cadence,
                  Record.power, Record.elevation)
         .filter(Record.activity_id == activity_id)
         .order_by(Record.id)
         .all()
     )
-    return pd.DataFrame(rows, columns=["timer_s", "distance_km", "hr", "cadence", "power", "elevation"],
-                        dtype=float)
+    return pd.DataFrame(rows, columns=["timer_s", "elapsed_s", "distance_km", "hr", "cadence", "power",
+                                       "elevation"], dtype=float)
 
 
 def elevation_steps(alt: np.ndarray, threshold: float = ELEVATION_THRESHOLD_M) -> tuple[np.ndarray, np.ndarray]:
@@ -46,7 +48,7 @@ def elevation_steps(alt: np.ndarray, threshold: float = ELEVATION_THRESHOLD_M) -
 
 def calibrated_elevation(df: pd.DataFrame, activity: Activity) -> tuple[np.ndarray, np.ndarray]:
     """Per-point gain/loss, scaled so the totals equal Garmin's official gain/loss."""
-    gain, loss = elevation_steps(df["elevation"].to_numpy())
+    gain, loss = elevation_steps(moving_elevation(df["elevation"], df["timer_s"], df.get("elapsed_s")))
     if activity.elevation_gain and gain.sum() > 0:
         gain *= activity.elevation_gain / gain.sum()
     if activity.elevation_loss and loss.sum() > 0:

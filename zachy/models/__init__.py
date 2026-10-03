@@ -10,5 +10,6 @@ from zachy.models.activity_override import ActivityOverride
 from zachy.models.workout_summary import WorkoutSummary
 from zachy.models.best_effort import BestEffort
 from zachy.models.gap_model import GapModel
+from zachy.models.category_cache import CategoryCache
 
-__all__ = ["Activity", "Lap", "Timeseries", "BodyMetric", "SyncRun", "FitFile", "Record", "ZoneSettings", "Wellness", "ActivityOverride", "WorkoutSummary", "BestEffort", "GapModel"]
+__all__ = ["Activity", "Lap", "Timeseries", "BodyMetric", "SyncRun", "FitFile", "Record", "ZoneSettings", "Wellness", "ActivityOverride", "WorkoutSummary", "BestEffort", "GapModel", "CategoryCache"]

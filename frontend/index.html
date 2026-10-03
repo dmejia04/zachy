@@ -174,10 +174,13 @@
   .tiz-row { display: grid; grid-template-columns: 14px 1fr auto 70px 40px; align-items: center; gap: 6px;
              font-size: 12px; padding: 2px 0; font-variant-numeric: tabular-nums; }
   .tiz-range { color: var(--muted); }
+  .tiz-row.grad-row { grid-template-columns: 14px 1fr auto 70px 84px; }
+  .tiz-pct .muted { color: var(--muted); font-size: 11px; }
   .tiz-time, .tiz-pct { text-align: right; }
   table.splits tr.fast td { font-weight: 700; color: #556b1f; background: rgba(107, 142, 35, 0.3); }
   table.splits tr.slow td { font-weight: 700; color: #8b0000; background: rgba(139, 0, 0, 0.3); }
   table.splits .muted { color: var(--muted); font-size: 11px; }
+  table.splits td.gap-col { color: #08306b; font-weight: 600; }
   table.laps thead th { position: sticky; top: 0; background: white; }
   #route-map { height: 380px; border-radius: 4px; z-index: 0; }
   @media (max-width: 600px) { #route-map { height: 300px; } }
@@ -258,6 +261,9 @@
   .detail-title b { font-weight: 700; }
   .detail-title .t-race { color: #a50f15; }
   .detail-place { font-size: 14px; color: var(--ink); opacity: 0.75; margin: 2px 0 4px; }
+  .chart-tools { display: flex; gap: 8px; flex-wrap: wrap; justify-content: flex-end; }
+  .zone-model-row { display: flex; align-items: center; gap: 8px; margin: 26px 0 -14px; font-size: 12px; color: var(--muted); }
+  .zone-model-row .muted { font-size: 11px; }
   .race-row { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin-top: 8px; }
   .race-seg button.cat-easy.on { background: #4a9d5b; }
   .race-seg button.cat-workout.on { background: #d94801; }
@@ -307,9 +313,20 @@
   .gap-pace span { font-size: 11px; font-weight: 400; color: var(--muted); margin-left: 2px; }
   table.gap-tab td, table.gap-tab th { text-align: right; }
   table.gap-tab td:first-child { white-space: nowrap; }
+  .walk-facts { display: grid; gap: 4px; font-size: 14px; margin-bottom: 10px; }
+  .year-chips { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 12px; }
+  .year-chip { display: inline-flex; align-items: center; gap: 4px; }
+  .year-chip.off { color: #bbb; border-color: var(--line); text-decoration: line-through; }
+  table.gap-tab td.best { color: #2e7d32; font-weight: 700; background: rgba(89, 161, 79, 0.18); }
+  table.gap-tab td.worst { color: #8b0000; font-weight: 700; background: rgba(139, 0, 0, 0.14); }
+  table.gap-tab tr.dim td { opacity: 0.4; }
+  .best-txt { color: #2e7d32; } .worst-txt { color: #8b0000; }
   .gap-methods { margin-top: 14px; display: grid; gap: 8px; font-size: 13px; }
   .gap-method { line-height: 1.45; }
-  .records-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 14px; }
+  .records-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 10px; }
+  .rec-group { margin-top: 22px; padding-top: 14px; border-top: 1px solid var(--line); }
+  .rec-group:first-child { margin-top: 8px; padding-top: 0; border-top: none; }
+  .rec-group > .section-title { font-size: 19px; font-weight: 700; color: var(--ink); margin: 0; }
   @media (max-width: 720px) { .records-grid { grid-template-columns: 1fr; } }
   .rec-head { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 8px; }
   .rec-title { font-size: 17px; font-weight: 700; }
@@ -326,6 +343,8 @@
   .rec-pace { font-size: 12px; font-weight: 400; color: var(--muted); margin-left: 8px; }
   .rec-unit { font-size: 13px; font-weight: 500; }
   .rec-meta { font-size: 12px; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .race-legend { display: flex; flex-wrap: wrap; gap: 12px; font-size: 12px; color: var(--muted); margin: 4px 0 6px; align-items: center; }
+  .race-legend span { display: inline-flex; align-items: center; gap: 4px; }
   .body-tiles { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 12px; margin: 12px 0 16px; }
   .body-tiles .stat-value { font-size: 19px; }
   .stat-sub { font-size: 11px; color: var(--muted); margin-top: 2px; }
@@ -465,7 +484,7 @@
         <button data-f="races" onclick="setRecordsFilter(true)">Races only</button>
       </div>
     </div>
-    <div class="records-grid" id="records-grid"><div class="loading">Loading…</div></div>
+    <div id="records-grid"><div class="loading">Loading…</div></div>
     <div class="muted-note" id="records-note"></div>
   </div>
 
@@ -474,6 +493,11 @@
     <div class="muted-note" style="margin:0 0 12px;">
       Each model says how many flat metres one metre on a slope is worth (1.0 = flat). A run's
       flat-equivalent pace is its moving time divided by its slope-weighted distance.
+    </div>
+    <div class="seg" id="gap-view" style="margin-bottom:10px;">
+      <button data-v="models" onclick="setGapView('models')">Four models</button>
+      <button data-v="years" onclick="setGapView('years')">Your curve by year</button>
+      <button data-v="walk" onclick="setGapView('walk')">Walk vs run</button>
     </div>
     <div class="card"><canvas id="gap-chart" height="170"></canvas></div>
     <div class="gap-table" id="gap-table"></div>
@@ -504,10 +528,14 @@
     <div class="card"><canvas id="bc-hrv" height="70"></canvas></div>
     <div class="section-title mm-row">Resting heart rate<span class="section-sub">bpm</span><span class="minmax" id="mm-rhr"></span></div>
     <div class="card"><canvas id="bc-rhr" height="70"></canvas></div>
+    <div class="section-title mm-row">Max heart rate<span class="section-sub">bpm · highest of the day</span><span class="minmax" id="mm-maxhr"></span></div>
+    <div class="card"><canvas id="bc-maxhr" height="70"></canvas></div>
     <div class="section-title mm-row">Sleep<span class="section-sub">hours by stage · line: sleep score</span><span class="minmax" id="mm-sleep"></span></div>
     <div class="card"><canvas id="bc-sleep" height="80"></canvas></div>
     <div class="section-title mm-row">VO2max<span class="minmax" id="mm-vo2"></span></div>
     <div class="card"><canvas id="bc-vo2" height="70"></canvas></div>
+    <div class="section-title mm-row">Aerobic efficiency<span class="section-sub"><span id="eff-sub">pace at your typical easy heart rate on flat easy runs</span> · higher = fitter</span><span class="minmax" id="mm-eff"></span></div>
+    <div class="card"><canvas id="bc-eff" height="110"></canvas></div>
     <div class="section-title mm-row">Endurance score<span class="section-sub">weekly · Garmin rates 8,600+ as elite for you</span><span class="minmax" id="mm-endurance"></span></div>
     <div class="card"><canvas id="bc-endurance" height="70"></canvas></div>
     <div class="section-title mm-row">Hill score<span class="section-sub">overall, with its strength and endurance parts</span><span class="minmax" id="mm-hill"></span></div>
@@ -516,6 +544,17 @@
     <div class="card"><canvas id="bc-load" height="80"></canvas></div>
     <div class="section-title mm-row">Race predictions<span class="section-sub">pace /km</span><span class="minmax" id="mm-race"></span></div>
     <div class="card"><canvas id="bc-race" height="80"></canvas></div>
+    <div id="body-races-section">
+      <div class="section-title mm-row">Races<span class="section-sub">height: flat-equivalent pace · size: distance · click to open</span></div>
+      <div class="race-legend">
+        <span><svg width="12" height="12"><circle cx="6" cy="6" r="5" fill="#9aa5b1"/></svg> road</span>
+        <span><svg width="12" height="12"><polygon points="6,1 11,11 1,11" fill="#9aa5b1"/></svg> trail</span>
+        <span><span class="zone-dot" style="background:#4a8fc2"></span>flat</span>
+        <span><span class="zone-dot" style="background:#e0a43a"></span>rolling</span>
+        <span><span class="zone-dot" style="background:#a50f15"></span>mountain</span>
+      </div>
+      <div class="card"><canvas id="bc-races" height="90"></canvas></div>
+    </div>
     <div class="section-title mm-row">Stress &amp; body battery<span class="minmax" id="mm-stress"></span></div>
     <div class="card"><canvas id="bc-stress" height="70"></canvas></div>
     <div class="section-title mm-row">Steps
@@ -1086,7 +1125,8 @@ function renderHrDrift(points) {
   if (!w[0] || !w[1]) { el.innerHTML = ""; return; }
   const hr1 = sum[0] / w[0], hr2 = sum[1] / w[1];
   const diff = hr2 - hr1, pct = diff / hr1 * 100;
-  const cls = Math.abs(diff) < 1 ? "" : diff > 0 ? "pos" : "neg";
+  // Shown on races: HR rising in the second half = pushing on (green), falling = fading (red).
+  const cls = Math.abs(diff) < 1 ? "" : diff > 0 ? "neg" : "pos";
   const kind = Math.abs(diff) < 1 ? "Steady HR" : diff > 0 ? "HR drift up" : "HR drift down";
 
   // Decoupling: speed per heartbeat, first vs second half (needs distance).
@@ -1140,26 +1180,7 @@ function vamBand(v) {
 // Altitude change per hour of moving time, over ~1 minute (30 s before and after each point),
 // wider if points are sparse, so altimeter jitter doesn't turn into fake spikes.
 function verticalSpeeds(points) {
-  const ts = [], ys = [];
-  for (const p of points) {
-    if (p.elevation == null || p.seconds_elapsed == null) continue;
-    if (ts.length && p.seconds_elapsed <= ts[ts.length - 1]) continue;
-    ts.push(p.seconds_elapsed); ys.push(p.elevation);
-  }
-  if (ts.length < 2) return points.map(() => null);
-  const half = Math.max(30, (ts[ts.length - 1] - ts[0]) / (ts.length - 1));
-  const at = t => {
-    if (t <= ts[0]) return ys[0];
-    if (t >= ts[ts.length - 1]) return ys[ys.length - 1];
-    let lo = 0, hi = ts.length - 1;
-    while (hi - lo > 1) { const mid = (lo + hi) >> 1; if (ts[mid] <= t) lo = mid; else hi = mid; }
-    return ys[lo] + (ys[hi] - ys[lo]) * (t - ts[lo]) / (ts[hi] - ts[lo]);
-  };
-  return points.map(p => {
-    if (p.seconds_elapsed == null) return null;
-    const a = Math.max(ts[0], p.seconds_elapsed - half), b = Math.min(ts[ts.length - 1], p.seconds_elapsed + half);
-    return b - a >= 20 ? (at(b) - at(a)) / (b - a) * 3600 : null;
-  });
+  return altitudeRates(points, p => p.seconds_elapsed, 30, 20).map(r => r == null ? null : r * 3600);
 }
 
 // Moving time in each vertical-speed band (fastest climbs first), like the slope breakdown.
@@ -1249,26 +1270,56 @@ function gradientBand(g) {
 // Slope (%) at each point over ~100 m of distance (altitude 50 m ahead minus 50 m behind),
 // so GPS/barometer jitter doesn't show up as fake 40% walls. Wider window if points are sparse.
 function gradients(points) {
-  const xs = [], ys = [];
-  for (const p of points) {
-    if (p.distance_km == null || p.elevation == null) continue;
-    if (xs.length && p.distance_km <= xs[xs.length - 1]) continue;   // keep distance increasing
-    xs.push(p.distance_km); ys.push(p.elevation);
-  }
-  if (xs.length < 2) return points.map(() => null);
-  const spacing = (xs[xs.length - 1] - xs[0]) / (xs.length - 1);
-  const half = Math.max(0.05, spacing);   // km on each side
-  const at = x => {   // altitude at distance x (linear interpolation)
+  return altitudeRates(points, p => p.distance_km, 0.05, 0.01).map(r => r == null ? null : r / 10);
+}
+
+// The API already removed altimeter jumps, so altitude changing faster than 5 m/s of moving time
+// means you were carried during a pause (a lift, a shuttle back up the hill). True at i when
+// that happened between points i − 1 and i.
+const CARRIED_MS = 5;
+function carriedBefore(points) {
+  let prev = null;
+  return points.map(p => {
+    if (p.elevation == null || p.seconds_elapsed == null) return false;
+    const carried = prev != null && Math.abs(p.elevation - prev.elevation) >
+      CARRIED_MS * Math.max(p.seconds_elapsed - prev.seconds_elapsed, 1);
+    prev = p;
+    return carried;
+  });
+}
+
+// Altitude change per unit of x (distance or moving time) at each point: altitude `half` ahead
+// minus `half` behind (at least minHalf, wider if points are sparse), null if the window is
+// shorter than minSpan. Measured within each stretch between carried moves, never across one.
+function altitudeRates(points, xOf, minHalf, minSpan) {
+  const carried = carriedBefore(points);
+  let id = 0;
+  const stretchOf = points.map((p, i) => (id += carried[i] ? 1 : 0));
+  const stretches = new Map();
+  let n = 0, xMin = Infinity, xMax = -Infinity;
+  points.forEach((p, i) => {
+    const x = xOf(p);
+    if (x == null || p.elevation == null) return;
+    if (!stretches.has(stretchOf[i])) stretches.set(stretchOf[i], { xs: [], ys: [] });
+    const s = stretches.get(stretchOf[i]);
+    if (s.xs.length && x <= s.xs[s.xs.length - 1]) return;   // keep x increasing
+    s.xs.push(x); s.ys.push(p.elevation);
+    n++; xMin = Math.min(xMin, x); xMax = Math.max(xMax, x);
+  });
+  if (n < 2) return points.map(() => null);
+  const half = Math.max(minHalf, (xMax - xMin) / (n - 1));
+  const at = ({ xs, ys }, x) => {   // altitude at x (linear interpolation)
     if (x <= xs[0]) return ys[0];
     if (x >= xs[xs.length - 1]) return ys[ys.length - 1];
     let lo = 0, hi = xs.length - 1;
     while (hi - lo > 1) { const mid = (lo + hi) >> 1; if (xs[mid] <= x) lo = mid; else hi = mid; }
     return ys[lo] + (ys[hi] - ys[lo]) * (x - xs[lo]) / (xs[hi] - xs[lo]);
   };
-  return points.map(p => {
-    if (p.distance_km == null) return null;
-    const a = Math.max(xs[0], p.distance_km - half), b = Math.min(xs[xs.length - 1], p.distance_km + half);
-    return b - a > 0.01 ? (at(b) - at(a)) / ((b - a) * 1000) * 100 : null;
+  return points.map((p, i) => {
+    const x = xOf(p), s = stretches.get(stretchOf[i]);
+    if (x == null || !s || s.xs.length < 2) return null;
+    const a = Math.max(s.xs[0], x - half), b = Math.min(s.xs[s.xs.length - 1], x + half);
+    return b - a >= minSpan ? (at(s, b) - at(s, a)) / (b - a) : null;
   });
 }
 
@@ -1285,8 +1336,10 @@ function renderGradientSummary(points) {
     if (dt > 0) secs[band] += dt;
   }
   const total = km.reduce((a, b) => a + b, 0);
+  const totalSecs = secs.reduce((a, b) => a + b, 0) || 1;
   if (!total) { el.innerHTML = ""; return; }
-  const bar = GRADIENT_BANDS.map((b, i) => km[i] ? `<div title="${b.label}" style="flex:${km[i]};background:${b.color}"></div>` : "").join("");
+  // Like every other breakdown, the bar and the main % are by time; distance % in brackets.
+  const bar = GRADIENT_BANDS.map((b, i) => secs[i] ? `<div title="${b.label}" style="flex:${secs[i]};background:${b.color}"></div>` : "").join("");
   // Steepest climbs first, like reading the profile from the top.
   const rows = GRADIENT_BANDS.map((b, i) => ({ b, i })).reverse().map(({ b, i }) => `
     <div class="tiz-row grad-row">
@@ -1294,16 +1347,40 @@ function renderGradientSummary(points) {
       <span class="tiz-name">${b.label}</span>
       <span class="tiz-range">${km[i].toFixed(2)} km</span>
       <span class="tiz-time">${fmtDuration(Math.round(secs[i]))}</span>
-      <span class="tiz-pct">${Math.round(km[i] / total * 100)}%</span>
+      <span class="tiz-pct">${Math.round(secs[i] / totalSecs * 100)}% <span class="muted">(${Math.round(km[i] / total * 100)}%)</span></span>
     </div>`).join("");
   el.innerHTML = `<div class="tiz"><div class="tiz-bar">${bar}</div>${rows}
-    <div class="muted-note" style="margin-top:4px;">Distance and moving time by slope (over ~100 m) · % of distance</div></div>`;
+    <div class="muted-note" style="margin-top:4px;">Moving time and distance by slope (over ~100 m) · % of time (% of distance)</div></div>`;
 }
 
 // Zones for one metric on the shown activity's date: { zones, zone: { of, colors }, descending }
 // or null if none are set. Pace limits get faster (smaller) from zone 1 up; the others get bigger.
+// Which zone model colors the activity charts: 3 or 5 (default 5), remembered in this browser.
+function chosenZoneModel() {
+  let m = null;
+  try { m = localStorage.getItem("zachy.zoneModel"); } catch (e) {}
+  return m === "3" ? 3 : 5;
+}
+
+function setZoneModelView(m) {
+  try { localStorage.setItem("zachy.zoneModel", String(m)); } catch (e) {}
+  drawTimeseriesCharts();
+  if (detailState.activity?.laps?.length) {
+    drawLapCharts(detailState.activity.laps, !!(detailState.activity.terrain && detailState.activity.terrain.terrain !== "flat"));
+  }
+}
+
+function renderZoneModelPicker() {
+  const m = chosenZoneModel();
+  document.querySelectorAll("#zone-model button").forEach(b => b.classList.toggle("on", +b.dataset.m === m));
+  const z = detailState.zones;
+  const note = document.getElementById("zone-model-note");
+  if (note) note.textContent = !z ? "Zones: none saved yet (Zones tab)."
+    : `Charts colored with your ${chosenZoneModel()}-zone limits from ${z.valid_from}${z.valid_from > detailState.activity.date ? " (your first set — none existed yet)" : ""}.`;
+}
+
 function zoneSpec(metric) {
-  const zones = detailState.zones?.zones?.[metric];
+  const zones = detailState.zones?.by_model?.[String(chosenZoneModel())]?.[metric] ?? null;
   if (!zones) return null;
   const descending = metric === "pace";
   const cuts = zones.slice(0, -1).map(z => z.max);
@@ -1489,19 +1566,20 @@ function drawLapCharts(laps, hilly = false) {
     { metric: "hr",      title: "Avg heart rate",  key: "avg_hr",      fmt: v => `${Math.round(v)} bpm`, color: THEME.clay },
     { metric: "power",   title: "Avg power",       key: "avg_power",   fmt: v => `${Math.round(v)} W`, color: "#54278f" },
     { metric: "cadence", title: "Avg cadence",     key: "avg_cadence", fmt: v => `${Math.round(v)} spm`, color: "#d94801" },
+    ...(hilly ? [{ metric: "gap", title: "Grade-adjusted pace", key: "gap_pace", fmt: v => `${fmtPace(v)} /km`, color: THEME.moss }] : []),
     ...(hilly ? [{ metric: "vam", title: "Vertical speed", key: "vam",
                    fmt: v => `${v > 0 ? "+" : ""}${Math.round(v).toLocaleString()} m/h`, color: THEME.muted }] : []),
   ].filter(d => laps.some(l => (d.key === "vam" ? lapVam(l) : l[d.key]) != null));
   laps.forEach(l => { l.vam = lapVam(l); });
   box.innerHTML = defs.map(d => `
-    <div class="section-title chart-title t-${d.metric === "vam" ? "elev" : d.metric}">${d.title} <span class="section-sub">by lap · column width = lap ${byDistance ? "distance" : "time"}</span></div>
+    <div class="section-title chart-title t-${d.metric === "vam" ? "elev" : d.metric === "gap" ? "pace" : d.metric}">${d.title} <span class="section-sub">by lap · column width = lap ${byDistance ? "distance" : "time"}</span></div>
     <div class="card"><canvas id="sc-${d.metric}" height="70"></canvas></div>`).join("");
 
   for (const d of defs) {
     const values = laps.map(l => l[d.key] ?? null);
     const z = d.metric === "vam"
       ? { zone: { of: vamBand, colors: VAM_BANDS.map(b => b.color), names: VAM_BANDS.map(b => b.name) } }
-      : zoneSpec(d.metric);
+      : zoneSpec(d.metric === "gap" ? "pace" : d.metric);   // GAP is a pace: pace zones
     const zoneOf = v => (z && v != null ? z.zone.of(v) : null);
     const colorOf = v => { const i = zoneOf(v); return i == null ? d.color : z.zone.colors[i]; };
 
@@ -1509,7 +1587,7 @@ function drawLapCharts(laps, hilly = false) {
     // lap pace so recoveries/stops don't flatten everything; those still show as a small step.
     const known = values.filter(v => v != null).sort((a, b) => a - b);
     let y, shown = values;
-    if (d.metric === "pace") {
+    if (d.metric === "pace" || d.metric === "gap") {
       const median = known[Math.floor(known.length / 2)];
       const lo = Math.floor(known[0] * 2) / 2;
       const hi = Math.ceil(Math.min(known.at(-1), median * 1.5) * 2) / 2 + 0.5;
@@ -1615,6 +1693,8 @@ async function toggleKmSplits(id) {
 function renderKmSplits(splits) {
   if (!splits.length) return `<div class="muted-note">No distance recorded for this activity.</div>`;
   const hasPower = splits.some(s => s.avg_power);
+  const t = detailState.activity?.terrain;
+  const hasGap = !!(t && t.terrain !== "flat") && splits.some(s => s.gap_pace);
   // Fastest and slowest full kilometres get highlighted.
   const full = splits.filter(s => s.distance_km >= 0.99 && s.pace);
   const fastest = full.length ? Math.min(...full.map(s => s.pace)) : null;
@@ -1627,6 +1707,7 @@ function renderKmSplits(splits) {
       <td>${km}</td>
       <td>${fmtDuration(s.duration_s)}</td>
       <td>${fmtPace(s.pace)}</td>
+      ${hasGap ? `<td class="gap-col">${fmtPace(s.gap_pace)}</td>` : ""}
       <td>${n(s.avg_hr)}</td>
       <td>${n(s.max_hr)}</td>
       <td>${n(s.avg_cadence)}</td>
@@ -1638,7 +1719,7 @@ function renderKmSplits(splits) {
   return `
     <div class="laps-wrap" style="max-height:420px;">
       <table class="laps splits">
-        <thead><tr><th>km</th><th>time</th><th>pace /km</th><th>avg hr</th><th>max hr</th><th>cadence</th>
+        <thead><tr><th>km</th><th>time</th><th>pace /km</th>${hasGap ? `<th title="grade-adjusted pace, personal model">GAP /km</th>` : ""}<th>avg hr</th><th>max hr</th><th>cadence</th>
           ${hasPower ? "<th>power</th>" : ""}<th>elev +m</th><th>elev −m</th></tr></thead>
         <tbody>${rows}</tbody>
       </table>
@@ -1795,6 +1876,11 @@ function drawTimeseriesCharts() {
          { min: yMin, max: yMax, afterBuildTicks: axis => { axis.ticks = roundTicks(yMin, yMax, step); } },
          0.35, gradZone,
          (v, p) => `${Math.round(v)} m` + (p.grad != null ? ` · ${p.grad > 0 ? "+" : ""}${p.grad.toFixed(1)}%` : ""));
+    // A move during a pause (lift, shuttle) is drawn dashed: not a climb or a descent.
+    carriedBefore(points).forEach((c, i) => { points[i].carried = c; });
+    const elevSet = detailCharts[detailCharts.length - 1].data.datasets[0];
+    elevSet.segment = { ...elevSet.segment, borderDash: ctx => ctx.p1.raw.p.carried ? [4, 4] : undefined };
+    detailCharts[detailCharts.length - 1].update();
     renderGradientSummary(points);
     drawVerticalSpeed(line, activity);
     const gain = activity.elevation_gain, loss = activity.elevation_loss;
@@ -1825,9 +1911,29 @@ function drawTimeseriesCharts() {
   }
   const paceZ = zoneSpec("pace");
   line("ts-pace", pace, THEME.moss, "74,93,58", v => `${fmtPace(v)} /km`, paceAxis, 0.18, paceZ?.zone);
+
+  // Grade-adjusted pace (rolling / mountain runs): pace ÷ your personal cost of that slope, on
+  // the same axis as pace so the two compare directly.
+  const gapSection = document.getElementById("gap-section");
+  const hillyRun = activity.terrain && activity.terrain.terrain !== "flat";
+  if (hillyRun && gapState.data?.curves?.personal && points.some(p => p.grad != null)) {
+    gapSection.style.display = "";
+    const gapPace = pace.map((v, i) => {
+      const g = points[i].grad;
+      return v == null || g == null ? null : v / personalCost(g / 100);
+    });
+    line("ts-gap", gapPace, THEME.moss, "74,93,58", v => `${fmtPace(v)} /km`, paceAxis, 0.18, paceZ?.zone);
+    renderTimeInZones("gap-zones", gapPace, paceZ, fmtPace, "");   // time per pace zone, by GAP
+    const gp = activity.gap;
+    document.getElementById("pk-gap").innerHTML = gp?.personal
+      ? `whole run <b>${fmtPace(gp.personal)}/km</b> flat-eq. · actual <b>${fmtPace(gp.actual)}/km</b>` : "";
+  } else {
+    gapSection.style.display = "none";
+  }
   renderTimeInZones("pace-zones", pace, paceZ, fmtPace, "");
   renderHalfSplit(points);
   renderHrDrift(points);
+  renderZoneModelPicker();
 
   // Power and cadence: only shown when recorded. 0 means stopped, so it's left out (not "zone 1").
   const optional = (metric, raw, window, color, rgb, unit) => {
@@ -1911,13 +2017,20 @@ async function showDetail(id) {
 
       <div class="chart-bar">
         <div class="section-title chart-title t-elev">Elevation profile<span class="section-sub" id="elev-sub"></span></div>
-        <div class="seg" id="x-toggle">
-          <button data-x="distance" onclick="setXMode('distance')">Distance</button>
-          <button data-x="time" onclick="setXMode('time')">Time</button>
+        <div class="chart-tools">
+          <span class="seg" id="zone-model" title="Zone model used to color the charts">
+            <button data-m="3" onclick="setZoneModelView(3)">3 zones</button>
+            <button data-m="5" onclick="setZoneModelView(5)">5 zones</button>
+          </span>
+          <div class="seg" id="x-toggle">
+            <button data-x="distance" onclick="setXMode('distance')">Distance</button>
+            <button data-x="time" onclick="setXMode('time')">Time</button>
+          </div>
         </div>
       </div>
       <div class="card" style="margin-top:10px;"><canvas id="ts-elev" height="80"></canvas></div>
       <div class="minmax" id="pk-elev" style="display:block;margin-top:6px;"></div>
+      <div class="muted-note" id="zone-model-note" style="margin-top:2px;"></div>
 
       <div class="section-title chart-title t-elev">Time on each slope</div>
       <div id="grad-summary"></div>
@@ -1938,6 +2051,13 @@ async function showDetail(id) {
       <div class="card"><canvas id="ts-pace" height="80"></canvas></div>
       <div class="half-split" id="pace-split"></div>
       <div id="pace-zones"></div>
+
+      <div id="gap-section" style="display:none;">
+        <div class="section-title mm-row chart-title t-pace">Grade-adjusted pace (min/km)
+          <span class="section-sub">personal model · what each moment is worth on the flat</span><span class="minmax" id="pk-gap"></span></div>
+        <div class="card"><canvas id="ts-gap" height="80"></canvas></div>
+        <div id="gap-zones"></div>
+      </div>
 
       <div id="power-section">
         <div class="section-title mm-row chart-title t-power">Power (W)<span class="minmax" id="pk-power"></span></div>
@@ -1964,6 +2084,9 @@ async function showDetail(id) {
 
     detailState.activity = a;
     detailState.points = a.timeseries;
+    if (hilly && !gapState.data) {   // the GAP chart needs your personal grade model
+      try { gapState.data = await (await fetch(`${API}/gap/models`)).json(); } catch (e) {}
+    }
     drawTimeseriesCharts();
     drawRouteMap(a.timeseries);
     if (a.laps.length) drawLapCharts(a.laps, hilly);
@@ -2000,7 +2123,7 @@ function switchTab(name) {
   if (name === "zones" && !zonesState.loaded) loadZones();
   if (name === "body" && !bodyState.loaded) loadBody();
   if (name === "records" && !recordsState.data) loadRecords();
-  if (name === "grade" && !gapState.data) loadGap();
+  if (name === "grade") { if (gapState.data) renderGap(); else loadGap(); }
 }
 
 /* ---------- Yearly summary: three metrics, each clickable ---------- */
@@ -2681,7 +2804,33 @@ const GAP_METHODS = [
   { key: "km_effort", label: "km-effort",   color: "#7a7263",
     text: "ITRA standard: 100 m of climbing = 1 km, descents count as flat. Simple and good for comparing race courses, but blind to steepness and descents." },
 ];
-const gapState = { data: null, chart: null };
+const gapState = { data: null, chart: null, view: "models", hiddenYears: new Set() };
+
+function setGapView(v) {
+  gapState.view = v;
+  renderGap();
+}
+
+// One clearly different color per year (categorical palette), the latest year in dark red.
+const YEAR_COLORS = ["#4e79a7", "#f28e2b", "#59a14f", "#b07aa1", "#76b7b2", "#edc948", "#9c755f", "#ff9da7", "#bab0ac"];
+function yearColor(i, n) {
+  return i === n - 1 ? "#a50f15" : YEAR_COLORS[i % YEAR_COLORS.length];
+}
+
+function toggleGapYear(y) {
+  if (gapState.hiddenYears.has(y)) gapState.hiddenYears.delete(y); else gapState.hiddenYears.add(y);
+  renderGap();
+}
+
+// Your personal cost factor at a slope (fraction), from the fitted curve (−40% … +40%).
+function personalCost(g) {
+  const d = gapState.data;
+  const x = Math.max(-40, Math.min(40, g * 100));
+  const i = Math.floor(x + 40), f = x + 40 - i;
+  const a = d.curves.personal[i], b = d.curves.personal[Math.min(i + 1, 80)];
+  if (a == null || b == null) return 1;
+  return a + (b - a) * f;
+}
 
 function renderGapBlock(gap) {
   const tile = (label, pace, cls = "") => `<div class="gap-tile ${cls}"><div class="stat-label">${label}</div>
@@ -2692,6 +2841,132 @@ function renderGapBlock(gap) {
       ${tile("actual", gap.actual, "actual")}
       ${GAP_METHODS.filter(m => gap[m.key]).map(m => tile(m.label, gap[m.key], m.key === "personal" ? "personal" : "")).join("")}
     </div>`;
+}
+
+// Walking vs running by slope: how often you walk, how fast you climb each way, what each costs.
+function renderWalkRun(d) {
+  if (gapState.chart) gapState.chart.destroy();
+  const w = d.personal?.walk_run;
+  if (!w) {
+    document.getElementById("gap-table").innerHTML = `<div class="muted-note">Refit the personal model to compute this.</div>`;
+    return;
+  }
+  const bands = w.bands;
+  gapState.chart = new Chart(document.getElementById("gap-chart"), {
+    data: { datasets: [
+      { type: "bar", label: "% of time walking", yAxisID: "y", backgroundColor: "rgba(122,114,99,0.28)",
+        data: bands.map(b => ({ x: b.grade, y: b.walk_share * 100 })), barPercentage: 1, categoryPercentage: 1 },
+      { type: "line", label: "Running cost", yAxisID: "y1", borderColor: "#a50f15", pointRadius: 0, borderWidth: 2.5,
+        data: bands.filter(b => b.run_cost).map(b => ({ x: b.grade, y: b.run_cost })) },
+      { type: "line", label: "Walking cost", yAxisID: "y1", borderColor: "#4a8fc2", pointRadius: 0, borderWidth: 2.5,
+        data: bands.filter(b => b.walk_cost).map(b => ({ x: b.grade, y: b.walk_cost })) },
+    ] },
+    options: {
+      responsive: true, animation: false,
+      interaction: { mode: "nearest", axis: "x", intersect: false },
+      plugins: { tooltip: { callbacks: {
+        title: items => `${items[0].parsed.x > 0 ? "+" : ""}${items[0].parsed.x}% slope`,
+        label: ctx => ctx.dataset.yAxisID === "y" ? `walking ${ctx.parsed.y.toFixed(0)}% of the time`
+                                                  : `${ctx.dataset.label}: ×${ctx.parsed.y.toFixed(2)} vs flat running`,
+      } } },
+      scales: {
+        x: { type: "linear", min: -40, max: 40, ticks: { stepSize: 10, maxRotation: 0, callback: v => `${v > 0 ? "+" : ""}${v}%` },
+             title: { display: true, text: "slope" } },
+        y: { min: 0, max: 100, position: "left", ticks: { callback: v => `${v}%` }, title: { display: true, text: "time walking" } },
+        y1: { min: 0, max: 4, position: "right", grid: { display: false }, ticks: { callback: v => `×${v}` },
+              title: { display: true, text: "cost vs flat running" } },
+      },
+    },
+  });
+  const climbs = bands.filter(b => b.grade > 0 && b.grade % 4 === 0 && b.grade <= 36);
+  const fmtV = v => v == null ? "—" : v.toLocaleString();
+  const ratio = b => b.walk_cost && b.run_cost ? (b.walk_cost / b.run_cost).toFixed(2) : "—";
+  document.getElementById("gap-table").innerHTML = `
+    <div class="card" style="margin-top:12px;">
+      <div class="walk-facts">
+        ${w.starts_walking != null ? `<div><b>From +${w.starts_walking}%</b> you walk more than half the time.</div>` : ""}
+        ${w.walking_cheaper != null ? `<div><b>From +${w.walking_cheaper}%</b> walking costs you fewer heartbeats per metre than running.</div>`
+          : `<div>Walking never costs fewer heartbeats per metre than running for you${w.nearly_equal != null ? `; it gets within 5% from <b>+${w.nearly_equal}%</b>` : ""}.</div>`}
+      </div>
+      <table class="laps gap-tab">
+        <thead><tr><th>climb</th>${climbs.map(b => `<th>+${b.grade}%</th>`).join("")}</tr></thead>
+        <tbody>
+          <tr><td>time walking</td>${climbs.map(b => `<td>${Math.round(b.walk_share * 100)}%</td>`).join("")}</tr>
+          <tr><td>m/h walking</td>${climbs.map(b => `<td>${fmtV(b.walk_vert)}</td>`).join("")}</tr>
+          <tr><td>m/h running</td>${climbs.map(b => `<td>${fmtV(b.run_vert)}</td>`).join("")}</tr>
+          <tr><td>cost walk ÷ run</td>${climbs.map(b => `<td>${ratio(b)}</td>`).join("")}</tr>
+        </tbody>
+      </table>
+      <div class="muted-note">Walking = cadence under ${w.cadence_threshold} steps/min, per one-minute window. Cost = heartbeats
+        per metre vs your flat running in the same run. Heart rate is biased against walking (it doesn't drop as fast as
+        speed, and you tend to walk when already tired), so read the cost ratio as "how close", not as an exact verdict.</div>
+    </div>`;
+  document.getElementById("gap-methods").innerHTML = "";
+}
+
+// Your personal curve fitted per year: does climbing / descending get cheaper over time?
+function renderGapYears(d) {
+  if (gapState.chart) gapState.chart.destroy();
+  const years = Object.keys(d.personal?.by_year || {}).sort();
+  const at = (y, g) => {
+    const c = d.personal.by_year[y]; const i = c.grades.indexOf(g);
+    return i < 0 ? null : c.factors[i];
+  };
+  gapState.chart = new Chart(document.getElementById("gap-chart"), {
+    type: "line",
+    data: { datasets: [
+      { label: "Strava-like", borderColor: "rgba(252,76,2,0.35)", borderDash: [4, 4], pointRadius: 0, borderWidth: 1.5,
+        data: d.grades.map((g, i) => ({ x: g, y: d.curves.strava[i] })).filter(p => Math.abs(p.x) <= 30) },
+      ...years.map((y, i) => ({ y, i })).filter(({ y }) => !gapState.hiddenYears.has(y)).map(({ y, i }) => ({
+        label: y, borderColor: yearColor(i, years.length), backgroundColor: yearColor(i, years.length),
+        pointRadius: 0, borderWidth: i === years.length - 1 ? 3 : 2,
+        data: d.personal.by_year[y].grades.map((g, k) => ({ x: g, y: d.personal.by_year[y].factors[k] })),
+      })),
+    ] },
+    options: {
+      responsive: true, animation: false,
+      interaction: { mode: "nearest", axis: "x", intersect: false },
+      plugins: { legend: { display: false },
+        tooltip: { itemSort: (a, b) => b.dataset.label.localeCompare(a.dataset.label),
+        callbacks: {
+          title: items => `${items[0].parsed.x > 0 ? "+" : ""}${items[0].parsed.x}% slope`,
+          label: ctx => `${ctx.dataset.label}: ×${ctx.parsed.y.toFixed(2)}`,
+      } } },
+      scales: {
+        x: { type: "linear", min: -30, max: 30, ticks: { stepSize: 10, callback: v => `${v > 0 ? "+" : ""}${v}%` },
+             title: { display: true, text: "slope" } },
+        y: { min: 0.5, max: 3.5, ticks: { stepSize: 0.5, callback: v => `×${v}` }, title: { display: true, text: "cost vs flat" } },
+      },
+    },
+  });
+  // Year chips above the table: click to show / hide a year on the chart (all shown by default).
+  const chips = years.map((y, i) => {
+    const off = gapState.hiddenYears.has(y);
+    return `<button class="pick year-chip ${off ? "off" : ""}" style="${off ? "" : `border-color:${yearColor(i, years.length)};color:${yearColor(i, years.length)}`}"
+              onclick="toggleGapYear('${y}')"><span class="zone-dot" style="background:${off ? "#ccc" : yearColor(i, years.length)}"></span>${y}</button>`;
+  }).join("");
+  // Per column, the best (cheapest) year in green and the worst in red — like fastest / slowest km.
+  const keys = [-30, -20, -10, 10, 20, 30];
+  const fmt = v => v == null ? "—" : v.toFixed(2);
+  const best = {}, worst = {};
+  keys.forEach(g => {
+    const vals = years.filter(y => !gapState.hiddenYears.has(y)).map(y => [y, at(y, g)]).filter(([, v]) => v != null);
+    if (vals.length < 2) return;
+    best[g] = vals.reduce((a, b) => (b[1] < a[1] ? b : a))[0];
+    worst[g] = vals.reduce((a, b) => (b[1] > a[1] ? b : a))[0];
+  });
+  const cellCls = (y, g) => best[g] === y ? "best" : worst[g] === y ? "worst" : "";
+  document.getElementById("gap-table").innerHTML = `<div class="year-chips">${chips}</div>
+    <div class="card" style="margin-top:8px;"><table class="laps gap-tab">
+    <thead><tr><th>year</th>${keys.map(g => `<th>${g > 0 ? "+" : ""}${g}%</th>`).join("")}<th>runs</th></tr></thead>
+    <tbody>${years.map((y, i) => `<tr class="${gapState.hiddenYears.has(y) ? "dim" : ""}"><td><span class="zone-dot" style="background:${yearColor(i, years.length)}"></span>${y}</td>
+      ${keys.map(g => `<td class="${cellCls(y, g)}">${fmt(at(y, g))}</td>`).join("")}<td>${d.personal.by_year[y].runs}</td></tr>`).join("")}</tbody></table>
+    <div class="muted-note"><b class="best-txt">Green</b>: your best year for that slope (cheapest), <b class="worst-txt">red</b>: your worst.
+      Descents on the left, climbs on the right.</div>
+    <div class="muted-note">Lower = cheaper relative to your own flat running. A falling descent column means you descend
+      better; a falling climb column means climbing costs you less compared with the flat (it can also rise just because
+      your flat running got faster that year). Years with fewer than 2,000 one-minute windows are left out.</div></div>`;
+  document.getElementById("gap-methods").innerHTML = "";
 }
 
 async function loadGap() {
@@ -2713,6 +2988,9 @@ async function refitPersonal(btn) {
 
 function renderGap() {
   const d = gapState.data;
+  document.querySelectorAll("#gap-view button").forEach(b => b.classList.toggle("on", b.dataset.v === gapState.view));
+  if (gapState.view === "years") return renderGapYears(d);
+  if (gapState.view === "walk") return renderWalkRun(d);
   if (gapState.chart) gapState.chart.destroy();
   const bins = d.personal?.bins || [];
   const maxCount = Math.max(1, ...bins.map(b => b.count));
@@ -2787,50 +3065,70 @@ function openActivity(id) {
   window.scrollTo(0, 0);
 }
 
+const RECORD_GROUPS = [
+  { key: "short",   title: "Fastest ever",    sub: "1 km, 1 mile, 3 km inside any run · downhill allowed" },
+  { key: "road",    title: "Road distances",  sub: "fastest stretch of the distance inside any run · not downhill" },
+  { key: "ultra",   title: "Ultra distances", sub: "whole activities · ranked by flat-equivalent pace" },
+  { key: "climb",   title: "Climbing",        sub: "fastest elevation gain inside any run" },
+  { key: "biggest", title: "Biggest days",    sub: "single activities" },
+];
+
+function recordRow(d, e, i) {
+  const kind = e.category === "race" ? "race" : e.category === "workout" ? "workout" : "run";
+  let main, where;
+  if (d.kind === "best_effort") {
+    main = `${fmtRaceTime(e.duration_s)}<span class="rec-pace">${fmtPace(e.pace)}/km</span>`;
+    where = e.whole_activity ? `${e.activity_distance_km.toFixed(2)} km ${kind}`
+      : `in a ${e.activity_distance_km.toFixed(2)} km ${kind}, km ${e.start_km.toFixed(1)}–${(e.start_km + d.target_km).toFixed(1)}`;
+  } else if (d.kind === "activity") {
+    // Ranked by flat-equivalent pace (personal grade model): that's the big number.
+    const adj = e.adjusted_pace;
+    main = adj
+      ? `${fmtPace(adj)}<span class="rec-unit">/km flat-eq.</span><span class="rec-pace">actual ${fmtPace(e.pace)}/km · ${fmtRaceTime(e.duration_s)}</span>`
+      : `${fmtPace(e.pace)}<span class="rec-unit">/km</span><span class="rec-pace">${fmtRaceTime(e.duration_s)}</span>`;
+    where = `${e.distance_km.toFixed(2)} km · +${e.elevation_gain.toLocaleString()} m · ${e.km_effort} km-effort`;
+  } else if (d.kind === "climb") {
+    main = `${fmtRaceTime(e.duration_s)}<span class="rec-pace">${e.vertical_m_per_h.toLocaleString()} m/h</span>`;
+    where = `in a ${e.distance_km.toFixed(1)} km ${kind} (+${e.elevation_gain.toLocaleString()} m), from km ${e.start_km.toFixed(1)}`;
+  } else {   // biggest
+    const parts = { elevation_gain: `+${e.elevation_gain.toLocaleString()} m`,
+                    duration_s: fmtRaceTime(e.duration_s), distance_km: `${e.distance_km.toFixed(1)} km` };
+    if (d.metric === "calories") parts.calories = `${(e.calories || 0).toLocaleString()}<span class="rec-unit">kcal</span>`;
+    main = parts[d.metric];
+    where = Object.entries(parts).filter(([k]) => k !== d.metric).map(([, v]) => v).join(" · ");
+  }
+  return `
+    <div class="rec-row" onclick="openActivity(${e.id})" title="Open this activity">
+      <span class="medal" style="background:${MEDALS[i]}">${i + 1}</span>
+      <div class="rec-main">
+        <div class="rec-time">${main}</div>
+        <div class="rec-meta">${e.date}${e.place ? " · " + e.place : ""}</div>
+        <div class="rec-meta">${where}</div>
+      </div>
+      ${e.category ? `<span class="tag tag-${e.category}">${CATEGORY_TAGS[e.category]}</span>` : ""}
+    </div>`;
+}
+
 function renderRecords() {
   document.querySelectorAll("#records-filter button").forEach(b =>
     b.classList.toggle("on", (b.dataset.f === "races") === recordsState.racesOnly));
-  document.getElementById("records-grid").innerHTML = recordsState.data.map(d => {
-    const effort = d.kind === "best_effort";
-    const list = d.top.filter(e => !recordsState.racesOnly || e.category === "race").slice(0, 3);
-    const rows = list.map((e, i) => {
-      const kind = e.category === "race" ? "race" : e.category === "workout" ? "workout" : "run";
-      // Road records are efforts: the whole activity, or a stretch of a longer one.
-      const where = effort
-        ? (e.whole_activity ? `${e.activity_distance_km.toFixed(2)} km ${kind}`
-           : `in a ${e.activity_distance_km.toFixed(2)} km ${kind}, km ${e.start_km.toFixed(1)}–${(e.start_km + d.target_km).toFixed(1)}`)
-        : `${e.distance_km.toFixed(2)} km · +${e.elevation_gain.toLocaleString()} m · ${e.km_effort} km-effort`;
-      // Ultras are ranked by flat-equivalent pace (personal grade model), so that's the big
-      // number; the actual pace and time sit beside it.
-      const adj = e.adjusted_pace;
-      const main = effort
-        ? `${fmtRaceTime(e.duration_s)}<span class="rec-pace">${fmtPace(e.pace)}/km</span>`
-        : adj
-          ? `${fmtPace(adj)}<span class="rec-unit">/km flat-eq.</span><span class="rec-pace">actual ${fmtPace(e.pace)}/km · ${fmtRaceTime(e.duration_s)}</span>`
-          : `${fmtPace(e.pace)}<span class="rec-unit">/km</span><span class="rec-pace">${fmtRaceTime(e.duration_s)}</span>`;
-      return `
-      <div class="rec-row" onclick="openActivity(${e.id})" title="Open this activity">
-        <span class="medal" style="background:${MEDALS[i]}">${i + 1}</span>
-        <div class="rec-main">
-          <div class="rec-time">${main}</div>
-          <div class="rec-meta">${e.date}${e.place ? " · " + e.place : ""}</div>
-          <div class="rec-meta">${where}</div>
-        </div>
-        ${e.category ? `<span class="tag tag-${e.category}">${CATEGORY_TAGS[e.category]}</span>` : ""}
+  document.getElementById("records-grid").innerHTML = RECORD_GROUPS.map(g => {
+    const cards = recordsState.data.filter(d => d.group === g.key).map(d => {
+      const list = d.top.filter(e => !recordsState.racesOnly || e.category === "race").slice(0, 3);
+      const rows = list.map((e, i) => recordRow(d, e, i)).join("");
+      return `<div class="card rec-card">
+        <div class="rec-head"><span class="rec-title">${d.label}</span>
+          <span class="rec-count">${d.count} run${d.count === 1 ? "" : "s"}</span></div>
+        ${rows || `<div class="muted-note">${recordsState.racesOnly ? "No race here yet." : "Nothing yet."}</div>`}
       </div>`;
     }).join("");
-    const sub = effort ? "best effort · by time" : "whole activity · by flat-equivalent pace";
-    return `<div class="card rec-card">
-      <div class="rec-head"><span class="rec-title">${d.label}</span>
-        <span class="rec-count">${sub} · ${d.count} run${d.count === 1 ? "" : "s"}</span></div>
-      ${rows || `<div class="muted-note">${recordsState.racesOnly ? "No race at this distance yet." : "No run at this distance yet."}</div>`}
-    </div>`;
+    return `<div class="rec-group"><div class="section-title">${g.title}<span class="section-sub">${g.sub}</span></div>
+      <div class="records-grid">${cards}</div></div>`;
   }).join("");
   document.getElementById("records-note").textContent =
-    "5 km to marathon: the fastest stretch of exactly that distance inside any run, so a 5 km record can be a " +
-    "split of a 10 km race (GPS jumps repaired; downhill stretches and car rides don't count). " +
-    "50 km to 100 miles: whole activities close to the distance, ranked by flat-equivalent pace from your personal " +
-    "grade model (see the Grade tab), so courses with very different climbing compare fairly. Click a record to open it.";
+    "Road distances skip downhill stretches (more than 5 m drop per km) like official records; GPS jumps and " +
+    "altimeter recalibrations are repaired, and car or bus rides (very low heart rate) don't count. " +
+    "Ultra distances use your personal grade model (Grade tab). Click a record to open it.";
 }
 
 /* ---------- Body: daily wellness data from Garmin ---------- */
@@ -2850,12 +3148,17 @@ const titleCase = t => t ? t.charAt(0) + t.slice(1).toLowerCase().replace(/_/g, 
 
 async function loadBody() {
   try {
-    const [rows, latest] = await Promise.all([
+    const [rows, latest, races, eff] = await Promise.all([
       fetch(`${API}/wellness/`).then(r => r.json()),
       fetch(`${API}/wellness/latest`).then(r => r.json()),
+      fetch(`${API}/body/races`).then(r => r.json()).catch(() => []),
+      fetch(`${API}/body/efficiency`).then(r => r.json()).catch(() => ({ runs: [] })),
     ]);
+    bodyState.races = races;
+    bodyState.efficiency = eff.runs;
+    bodyState.effHr = eff.reference_hr;
     bodyState.rows = rows;
-    for (const c of ["weight_kg", "resting_hr", "vo2max"]) addMovingAverage(rows, c);
+    for (const c of ["weight_kg", "resting_hr", "max_hr", "vo2max"]) addMovingAverage(rows, c);
     bodyState.latest = latest;
     bodyState.loaded = true;
     renderBodyLatest();
@@ -3019,6 +3322,7 @@ function renderBodyMinMax() {
   set("weight", pair("weight_kg", v => `${v.toFixed(1)} kg`));
   set("hrv", pair("hrv_night", v => `${Math.round(v)} ms`));
   set("rhr", pair("resting_hr", v => `${Math.round(v)} bpm`));
+  set("maxhr", pair("max_hr", v => `${Math.round(v)} bpm`));
   set("sleep", pair("sleep_s", fmtHours, "shortest", "longest"));
   set("vo2", pair("vo2max", v => v.toFixed(1)));
   set("endurance", pair("endurance_score", v => Math.round(v).toLocaleString()));
@@ -3131,10 +3435,124 @@ function drawStepsChart() {
                  `most <b>${Math.round(hi.v).toLocaleString()}</b> · ${bucket.label(hi.k)}`;
 }
 
+// Runs (races, efficiency) within the selected period.
+function inBodyPeriod(list) {
+  if (!bodyState.range) return list || [];
+  const from = new Date(); from.setDate(from.getDate() - bodyState.range);
+  const iso = from.toISOString().slice(0, 10);
+  return (list || []).filter(r => r.date >= iso);
+}
+
+// x axis in real time (for charts of individual runs rather than daily rows).
+function timeAxis(list) {
+  const long = !bodyState.range || bodyState.range > 365;
+  const t = list.map(r => new Date(r.date + "T00:00:00").getTime());
+  return {
+    type: "linear", min: Math.min(...t) - 86400000 * 3, max: Math.max(...t) + 86400000 * 3, grid: { display: false },
+    ticks: { maxTicksLimit: 7, maxRotation: 0, callback: v => new Date(v).toLocaleDateString(undefined,
+      long ? { month: "short", year: "numeric" } : { month: "short", day: "numeric" }) },
+  };
+}
+
+const TERRAIN_COLORS = { flat: "#4a8fc2", rolling: "#e0a43a", mountain: "#a50f15" };
+
+function drawRacesChart() {
+  const races = inBodyPeriod(bodyState.races);
+  const section = document.getElementById("body-races-section");
+  if (!races.length) { section.style.display = "none"; return; }   // no race in this period
+  section.style.display = "";
+  const maxKm = Math.max(...races.map(r => r.distance_km));
+  const data = races.map(r => ({ x: new Date(r.date + "T00:00:00").getTime(), y: r.adjusted_pace || r.pace, r }));
+  const ys = data.map(d => d.y);
+  bodyState.charts.push(new Chart(document.getElementById("bc-races"), {
+    type: "scatter",
+    data: { datasets: [{
+      data,
+      pointStyle: data.map(d => d.r.surface === "trail" ? "triangle" : "circle"),
+      pointRadius: data.map(d => 4 + 10 * Math.sqrt(d.r.distance_km / maxKm)),
+      pointHoverRadius: data.map(d => 6 + 10 * Math.sqrt(d.r.distance_km / maxKm)),
+      backgroundColor: data.map(d => hexToRgba(TERRAIN_COLORS[d.r.terrain] || "#9aa5b1", 0.7)),
+      borderColor: data.map(d => TERRAIN_COLORS[d.r.terrain] || "#9aa5b1"),
+    }] },
+    options: {
+      responsive: true, animation: false,
+      onClick: (evt, els) => { if (els.length) openActivity(data[els[0].index].r.id); },
+      onHover: (evt, els) => { evt.native.target.style.cursor = els.length ? "pointer" : "default"; },
+      plugins: { legend: { display: false }, tooltip: { displayColors: false, callbacks: {
+        title: items => { const r = items[0].raw.r; return `${r.date} · ${r.place || r.name}`; },
+        label: ctx => {
+          const r = ctx.raw.r;
+          return [`${r.distance_km.toFixed(1)} km · +${r.elevation_gain.toLocaleString()} m · ${r.surface} · ${r.terrain}`,
+                  `${fmtRaceTime(r.duration_s)} · actual ${fmtPace(r.pace)}/km`,
+                  r.adjusted_pace ? `flat-equivalent ${fmtPace(r.adjusted_pace)}/km` : ""].filter(Boolean);
+        },
+      } } },
+      scales: {
+        x: timeAxis(races),
+        y: { reverse: true, suggestedMin: Math.floor(Math.min(...ys) * 2) / 2 - 0.25,
+             suggestedMax: Math.ceil(Math.max(...ys) * 2) / 2 + 0.25,
+             ticks: { callback: v => fmtPace(v) }, title: { display: true, text: "flat-eq. pace /km" } },
+      },
+    },
+  }));
+}
+
+function drawEfficiencyChart() {
+  const all = inBodyPeriod(bodyState.efficiency);
+  const runs = all.filter(r => !r.outlier);
+  const mm = document.getElementById("mm-eff");
+  document.getElementById("eff-sub").textContent = `every flat easy run normalised to ${bodyState.effHr} bpm`;
+  if (!runs.length) { mm.textContent = "no flat easy runs in this period"; return; }
+  // Rolling median of pace at the reference HR over the last 28 days (at least the last 7 runs), to see
+  // the trend through day-to-day noise. Odd runs (flagged by the API) are shown hollow, not counted.
+  const DAY = 86400000;
+  const toPt = r => ({ x: new Date(r.date + "T00:00:00").getTime(), y: r.pace_at_hr, r });
+  const pts = runs.map(toPt), odd = all.filter(r => r.outlier).map(toPt);
+  const trend = pts.map((p, i) => {
+    let win = pts.filter(q => q.x <= p.x && q.x > p.x - 28 * DAY);
+    if (win.length < 7) win = pts.slice(Math.max(0, i - 6), i + 1);
+    const ys = win.map(q => q.y).sort((a, b) => a - b);
+    return { x: p.x, y: ys[Math.floor(ys.length / 2)] };
+  });
+  const best = runs.reduce((a, b) => (b.pace_at_hr < a.pace_at_hr ? b : a));
+  const worst = runs.reduce((a, b) => (b.pace_at_hr > a.pace_at_hr ? b : a));
+  mm.innerHTML = `best <b>${fmtPace(best.pace_at_hr)}/km</b> · ${best.date} – worst <b>${fmtPace(worst.pace_at_hr)}/km</b> · ${worst.date} · ${runs.length} runs`
+    + (odd.length ? ` (${odd.length} odd left out)` : "");
+  const ys = pts.map(p => p.y).sort((a, b) => a - b);
+  bodyState.charts.push(new Chart(document.getElementById("bc-eff"), {
+    type: "scatter",
+    data: { datasets: [
+      { label: "Run", data: pts, pointRadius: 2.5, backgroundColor: "rgba(74,93,58,0.35)", borderColor: "rgba(74,93,58,0.35)" },
+      { label: "28-day trend", type: "line", data: trend, borderColor: THEME.moss, borderWidth: 2.25, pointRadius: 0, tension: 0.3 },
+      { label: "Odd run", data: odd, pointRadius: 2.5, backgroundColor: "transparent", borderColor: "rgba(140,140,140,0.6)", borderWidth: 1 },
+    ] },
+    options: {
+      responsive: true, animation: false,
+      onClick: (evt, els) => { const e = els.find(x => x.datasetIndex !== 1); if (e) openActivity((e.datasetIndex ? odd : pts)[e.index].r.id); },
+      plugins: { tooltip: { callbacks: {
+        title: items => new Date(items[0].parsed.x).toISOString().slice(0, 10),
+        label: ctx => {
+          if (ctx.datasetIndex === 1) return `28-day trend ${fmtPace(ctx.parsed.y)}/km at ${bodyState.effHr} bpm`;
+          const r = ctx.raw.r;
+          return [`${fmtPace(r.pace_at_hr)}/km at ${bodyState.effHr} bpm`, `ran ${r.distance_km} km at ${fmtPace(r.pace)}/km, ${Math.round(r.avg_hr)} bpm`];
+        },
+      } } },
+      scales: {
+        x: timeAxis(runs),
+        // Reversed, and the slowest 2% ignored so one odd run doesn't squash the trend.
+        y: { reverse: true, min: Math.floor(ys[Math.floor(ys.length * 0.01)] * 4) / 4, max: Math.ceil(ys[Math.floor(ys.length * 0.99)] * 4) / 4,
+             ticks: { callback: v => fmtPace(v) } },
+      },
+    },
+  }));
+}
+
 function drawBodyCharts() {
   bodyState.charts.forEach(c => c.destroy());
   bodyState.charts = [];
   renderBodyMinMax();
+  drawRacesChart();
+  drawEfficiencyChart();
   const rows = bodyRows();
   const labels = rows.map(r => r.date);
   const col = c => rows.map(r => r[c] ?? null);
@@ -3198,6 +3616,13 @@ function drawBodyCharts() {
     y: { stacked: true, ticks: { callback: v => `${v} h` } },
     y1: { position: "right", min: 0, max: 100, grid: { display: false } },
   });
+
+  make("bc-maxhr", "line", [
+    dots("Max HR", col("max_hr"), "rgba(165,15,21,0.3)"),
+    line("7-day avg", col("max_hr_ma7"), "#a50f15", { pointRadius: 0, borderWidth: 2.25, spanGaps: false }),
+  ], { y: { ...fit(["max_hr"], 10) } },
+  { plugins: { tooltip: { callbacks: { label: ctx =>
+      `${ctx.dataset.label}  ${ctx.datasetIndex ? ctx.parsed.y.toFixed(1) : Math.round(ctx.parsed.y)} bpm` } } } });
 
   make("bc-vo2", "line", [
     dots("VO2max", col("vo2max"), "rgba(74,93,58,0.35)"),

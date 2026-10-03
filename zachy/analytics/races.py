@@ -29,7 +29,9 @@ from sqlalchemy import extract, func
 from sqlalchemy.orm import Session
 
 from zachy.analytics.terrain import FOOT_TYPES
-from zachy.models import Activity, Lap
+import json
+
+from zachy.models import Activity, CategoryCache, Lap
 
 RACE_TYPES = FOOT_TYPES - {"treadmill_running"}
 STANDARD_DISTANCES = [("5 km", 5.0), ("10 km", 10.0), ("half marathon", 21.0975), ("marathon", 42.195)]
@@ -152,10 +154,31 @@ def auto_category(db: Session, a: Activity) -> tuple[str, list[str]]:
     return "easy", []
 
 
+def cached_auto_category(db: Session, a: Activity) -> tuple[str, list[str]]:
+    """auto_category(), stored in category_cache (cleared around new activities by the sync)."""
+    row = db.get(CategoryCache, a.id)
+    if row is None:
+        category, reasons = auto_category(db, a)
+        row = CategoryCache(activity_id=a.id, category=category, reasons=json.dumps(reasons))
+        db.merge(row)
+        db.commit()
+        return category, reasons
+    return row.category, json.loads(row.reasons or "[]")
+
+
+def clear_category_cache_around(db: Session, day) -> None:
+    """A new activity can change the guess for runs within a year of it (best-of-year rules)."""
+    from datetime import timedelta
+    ids = [i for (i,) in db.query(Activity.id).filter(
+        Activity.date.between(day - timedelta(days=366), day + timedelta(days=366)))]
+    db.query(CategoryCache).filter(CategoryCache.activity_id.in_(ids)).delete(synchronize_session=False)
+    db.commit()
+
+
 def category_status(db: Session, a: Activity, override: str | None) -> dict | None:
     if a.activity_type not in FOOT_TYPES:
         return None
-    auto, reasons = auto_category(db, a)
+    auto, reasons = cached_auto_category(db, a)
     if override in CATEGORIES:
         return {"category": override, "auto": auto, "source": "manual", "reasons": reasons}
     return {"category": auto, "auto": auto, "source": "auto", "reasons": reasons}

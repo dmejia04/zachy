@@ -59,6 +59,7 @@ class LapOut(BaseModel):
     elevation_gain: float | None
     elevation_loss: float | None = None   # computed from FIT records when available
     avg_power: float | None = None        # computed from FIT records when available
+    gap_pace: float | None = None         # personal grade-adjusted pace (min/km)
 
     class Config:
         from_attributes = True

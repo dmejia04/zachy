@@ -6,9 +6,12 @@ from sqlalchemy import extract, func
 from sqlalchemy.orm import Session
 
 from zachy.database import get_db
+import numpy as np
+import numpy as np
 import pandas as pd
 
-from zachy.analytics.gap import adjusted_paces
+from zachy.analytics.elevation import display_clock, remove_jumps
+from zachy.analytics.gap import adjusted_paces, split_paces
 from zachy.analytics.peaks import elevation_extremes, sustained_extremes
 from zachy.analytics.splits import km_splits, lap_stats, load_track
 from zachy.analytics.races import CATEGORIES, category_status
@@ -129,7 +132,7 @@ def get_activity_detail(
 
     timeseries, source = fit_timeseries(db, activity_id), "fit"
     if timeseries:
-        laps = laps_with_fit_stats(laps, timeseries, activity)
+        laps = laps_with_fit_stats(db, laps, timeseries, activity)
     else:
         timeseries, source = chart_timeseries(db, activity), "chart"
     if not timeseries:
@@ -243,14 +246,18 @@ def get_activity_splits(
     track = load_track(db, activity_id)
     if track.empty:
         raise HTTPException(status_code=404, detail="No FIT records for this activity")
-    return {"split_km": km, "splits": km_splits(track, activity, km)}
+    splits = km_splits(track, activity, km)
+    for s, gap in zip(splits, split_paces(db, activity, splits)):
+        s["gap_pace"] = gap   # personal flat-equivalent pace of that km
+    return {"split_km": km, "splits": splits}
 
 
-def laps_with_fit_stats(laps: list[Lap], timeseries: list[dict], activity: Activity) -> list[dict]:
+def laps_with_fit_stats(db: Session, laps: list[Lap], timeseries: list[dict], activity: Activity) -> list[dict]:
     """Laps with elevation gain/loss, power and cadence recomputed from the FIT track (same
-    method as the km splits). Garmin's own lap cadence averages in stopped time, so it's replaced."""
+    method as the km splits), and their personal grade-adjusted pace. Garmin's own lap cadence
+    averages in stopped time, so it's replaced."""
     track = pd.DataFrame(timeseries).reindex(
-        columns=["seconds_elapsed", "elevation", "power", "cadence"]).rename(
+        columns=["seconds_elapsed", "elapsed_s", "elevation", "power", "cadence"]).rename(
         columns={"seconds_elapsed": "timer_s"}).astype(float)
     stats = lap_stats(track, activity, [lap.duration_s for lap in laps])
     out = []
@@ -260,6 +267,12 @@ def laps_with_fit_stats(laps: list[Lap], timeseries: list[dict], activity: Activ
         if i < len(stats):
             row.update({k: v for k, v in stats[i].items() if v is not None})
         out.append(row)
+    # Grade-adjusted pace per lap: each lap as a stretch of distance, like the km splits.
+    ends = np.cumsum([r["distance_km"] or 0 for r in out])
+    pseudo = [{"end_km": float(e), "distance_km": r["distance_km"] or 0, "duration_s": r["duration_s"]}
+              for e, r in zip(ends, out)]
+    for r, gap in zip(out, split_paces(db, activity, pseudo)):
+        r["gap_pace"] = gap
     return out
 
 
@@ -272,16 +285,20 @@ def fit_timeseries(db: Session, activity_id: int) -> list[dict]:
         .order_by(Record.id)
         .all()
     )
+    # Altimeter recalibration jumps removed on the full-resolution track (moves during a pause kept).
+    elevation = remove_jumps([r.elevation for r in rows],
+                             display_clock([r.elapsed_s for r in rows], [r.timer_s for r in rows]))
     return [
         {
             "seconds_elapsed": r.timer_s, "elapsed_s": r.elapsed_s, "distance_km": r.distance_km,
             "speed_ms": r.speed_ms,
             "pace": round(1000 / r.speed_ms / 60, 3) if r.speed_ms else None,
-            "hr": r.hr, "cadence": r.cadence, "elevation": r.elevation,
+            "hr": r.hr, "cadence": r.cadence,
+            "elevation": None if np.isnan(z) else float(z),
             "latitude": r.latitude, "longitude": r.longitude,
             "power": r.power, "temperature": r.temperature,
         }
-        for r in rows
+        for r, z in zip(rows, elevation)
     ]
 
 

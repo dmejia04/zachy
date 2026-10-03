@@ -8,7 +8,7 @@ from zachy.database import SessionLocal
 from zachy.models import SyncRun
 from zachy.analytics.best_efforts import EFFORT_TYPES
 from zachy.analytics.best_efforts import compute_for_activity as compute_best_efforts
-from zachy.analytics.races import auto_category
+from zachy.analytics.races import auto_category, clear_category_cache_around
 from zachy.analytics.workouts import cached_workout
 from zachy.services.fit import process_activity
 from zachy.services.sync import sync_new_activities
@@ -30,6 +30,8 @@ def run_sync(run_id: int) -> None:
         new = sync_new_activities(client, db)
         run.new_activities = len(new)
         db.commit()
+        for day in sorted({a.date for a in new}):
+            clear_category_cache_around(db, day)   # race guesses compare runs within a year
 
         for activity in new:
             if activity.activity_type in RUNNING_TYPES:
