@@ -16,6 +16,7 @@ from zachy.analytics.peaks import elevation_extremes, sustained_extremes
 from zachy.analytics.splits import km_splits, lap_stats, load_track
 from zachy.analytics.races import CATEGORIES, category_status
 from zachy.analytics.terrain import SURFACES, classify, place_from_name
+from zachy.analytics.weather import activity_weather
 from zachy.analytics.workouts import cached_workout
 from zachy.models import FitFile
 from pydantic import BaseModel
@@ -225,11 +226,35 @@ def set_surface(activity_id: int, body: SurfaceIn, db: Session = Depends(get_db)
 def compute_peaks(timeseries: list[dict]) -> dict:
     """Sustained extremes on the full-resolution track (before thinning for the charts)."""
     track = pd.DataFrame(timeseries).rename(columns={"seconds_elapsed": "timer_s"})
-    cols = ["timer_s", "elapsed_s", "distance_km", "speed_ms", "pace", "hr", "cadence", "power", "elevation"]
+    cols = ["timer_s", "elapsed_s", "distance_km", "speed_ms", "pace", "hr", "cadence", "power", "elevation",
+            "temperature"]
     track = track.reindex(columns=cols).astype(float)
     if track["speed_ms"].isna().all() and track["pace"].notna().any():   # old chart data: pace only
         track["speed_ms"] = 1000 / (track["pace"] * 60)
-    return {**sustained_extremes(track), "elevation": elevation_extremes(track)}
+    out = {**sustained_extremes(track), "elevation": elevation_extremes(track)}
+    # Total time including stops, time-weighted mean altitude and the watch's temperature range.
+    if track["elapsed_s"].notna().any():
+        out["elapsed_s"] = float(track["elapsed_s"].max() - track["elapsed_s"].min())
+    dt = track["timer_s"].diff().clip(lower=0, upper=30).shift(-1).fillna(0)
+    z = track["elevation"]
+    if z.notna().any() and (dt[z.notna()] > 0).any():
+        out["alt_mean"] = float((z * dt)[z.notna()].sum() / dt[z.notna()].sum())
+    temp = track["temperature"]
+    if temp.notna().any():
+        out["temperature"] = {"min": float(temp.min()), "max": float(temp.max()), "mean": float(temp.mean())}
+    return out
+
+
+@router.get("/{activity_id}/weather")
+def get_activity_weather(activity_id: int, db: Session = Depends(get_db)):
+    """Temperature, feels-like, humidity and wind at the start (Garmin, nearest station). Cached."""
+    activity = db.query(Activity).filter(Activity.id == activity_id).first()
+    if not activity:
+        raise HTTPException(status_code=404, detail="Activity not found")
+    try:
+        return activity_weather(db, activity)
+    except Exception:
+        raise HTTPException(status_code=503, detail="Garmin weather unavailable")
 
 
 @router.get("/{activity_id}/splits")

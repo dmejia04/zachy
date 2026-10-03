@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <title>Zachy</title>
-<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cpath fill='%231e4d2b' fill-rule='evenodd' d='M8 2h16a6 6 0 0 1 6 6v16a6 6 0 0 1-6 6H8a6 6 0 0 1-6-6V8a6 6 0 0 1 6-6Z M9 8.5h14v3.4L14.2 20.1H23v3.4H9v-3.4l8.8-8.2H9Z'/%3E%3C/svg%3E">
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cmask id='m' maskUnits='userSpaceOnUse' x='0' y='0' width='32' height='32'%3E%3Cpath fill='%23fff' d='M8 2h16a6 6 0 0 1 6 6v16a6 6 0 0 1-6 6H8a6 6 0 0 1-6-6V8a6 6 0 0 1 6-6Z'/%3E%3Cpath fill='%23000' d='M12.88 8.5H26.88L26.02 11.9 15.17 20.1H23.98L23.12 23.5H9.12L9.97 20.1 20.82 11.9H12.03Z M-1 13.6H10a1.5 1.5 0 0 1 0 3H-1Z M-1 19.6H5a1.5 1.5 0 0 1 0 3H-1Z'/%3E%3C/mask%3E%3Crect width='32' height='32' fill='%231e4d2b' mask='url(%23m)'/%3E%3C/svg%3E">
 <style>
   :root {
     --ink: #1f1d18;
@@ -131,7 +131,9 @@
   }
   .stat-label { font-size: 11px; color: var(--muted); text-transform: lowercase; }
   .stat-value { font-size: 20px; font-weight: 500; margin-top: 2px; }
-  .detail-title { font-size: 20px; font-weight: 500; margin: 0 0 4px; }
+  .detail-title { font-size: 26px; font-weight: 500; margin: 0 0 2px; line-height: 1.25; }
+  .detail-title > b { font-weight: 700; }
+  .detail-wsub { font-size: 19px; font-weight: 400; margin: 0 0 6px; font-variant-numeric: tabular-nums; }
   .detail-date { color: var(--muted); font-size: 13px; }
   .loading, .error { color: var(--muted); padding: 40px 0; text-align: center; }
   .section-title {
@@ -184,6 +186,7 @@
   table.laps thead th { position: sticky; top: 0; background: white; }
   #route-map { height: 380px; border-radius: 4px; z-index: 0; }
   @media (max-width: 600px) { #route-map { height: 300px; } }
+  .leaflet-container { font-family: inherit; }
   .leaflet-control-layers { font: inherit; font-size: 12px; }
   .muted-note { color: var(--muted); font-size: 12px; margin-top: 6px; }
   .tabs {
@@ -252,28 +255,29 @@
   .chart-title.t-power   { color: #54278f; }
   .chart-title.t-cadence { color: #d94801; }
   .chart-title .section-sub, .chart-title .minmax { font-size: 12px; }
-  .workout-box { margin-top: 10px; padding: 10px 12px; border-left: 3px solid #d94801;
-                 background: rgba(217, 72, 1, 0.06); border-radius: 4px; font-size: 14px; }
-  .workout-box .wk-type { font-weight: 700; color: #d94801; }
+  .workout-box { margin-top: 10px; padding: 10px 12px; border-left: 3px solid #3f8f3a;
+                 background: rgba(63, 143, 58, 0.07); border-radius: 4px; font-size: 14px; }
+  .workout-box .wk-type { font-weight: 700; color: #2d6b29; }
   .workout-box .wk-sum { font-weight: 600; font-variant-numeric: tabular-nums; }
   .workout-box .muted, .workout-box .wk-src { color: var(--muted); font-size: 12px; }
   .workout-box .wk-extra { font-size: 13px; }
   .detail-title b { font-weight: 700; }
   .detail-title .t-race { color: #a50f15; }
   .detail-place { font-size: 14px; color: var(--ink); opacity: 0.75; margin: 2px 0 4px; }
-  .chart-tools { display: flex; gap: 8px; flex-wrap: wrap; justify-content: flex-end; }
+  .chart-tools { display: flex; gap: 8px; flex-wrap: wrap; justify-content: flex-end; flex-shrink: 0; }
+  .chart-tools button { white-space: nowrap; }
   .zone-model-row { display: flex; align-items: center; gap: 8px; margin: 26px 0 -14px; font-size: 12px; color: var(--muted); }
   .zone-model-row .muted { font-size: 11px; }
   .race-row { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin-top: 8px; }
-  .race-seg button.cat-easy.on { background: #4a9d5b; }
-  .race-seg button.cat-workout.on { background: #d94801; }
+  .race-seg button.cat-easy.on { background: #3d7ebf; }
+  .race-seg button.cat-workout.on { background: #3f8f3a; }
   .race-seg button.cat-race.on { background: #a50f15; }
   .race-note { font-size: 12px; color: var(--muted); }
   .race-note a { color: var(--clay); }
   .tag.tag-race { color: #a50f15; border-color: #a50f15; font-weight: 600; }
-  .tag.tag-workout { color: #d94801; border-color: #d94801; }
+  .tag.tag-workout { color: #2d6b29; border-color: #3f8f3a; }
   .tag.tag-road { color: #555; border-color: #999; }
-  .tag.tag-easy { color: #2e7d32; border-color: #4a9d5b; }
+  .tag.tag-easy { color: #2f6aa6; border-color: #3d7ebf; }
   .tag.tag-trail { color: #4a5d3a; border-color: #4a5d3a; }
   .tag.tag-rolling { color: #fb6a4a; border-color: #fcae91; }
   .tag.tag-mountain { color: #a50f15; border-color: #fb6a4a; }
@@ -283,6 +287,15 @@
   .surface-src { font-size: 11px; color: var(--muted); }
   .stat.terrain-mountain { border-color: #fb6a4a; background: rgba(251, 106, 74, 0.06); }
   .stat.terrain-rolling { border-color: #fcae91; background: rgba(252, 174, 145, 0.08); }
+  .profile-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 14px; }
+  .profile-field { background: white; border: 1px solid var(--line); border-radius: 6px; padding: 12px 14px; }
+  .profile-field label { font-size: 11px; color: var(--muted); display: block; margin-bottom: 6px; }
+  .profile-field input, .profile-field select { font: inherit; font-size: 16px; width: 100%; box-sizing: border-box;
+    border: 1px solid var(--line); border-radius: 6px; padding: 5px 8px; background: white; color: var(--ink); }
+  .profile-field input:focus, .profile-field select:focus { outline: none; border-color: var(--ink); }
+  .profile-field .pf-src { font-size: 11px; color: var(--muted); margin-top: 6px; }
+  .profile-field .pf-src.manual { color: var(--clay); }
+  .profile-derived { margin-top: 22px; display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 14px; }
   .zones-bar { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; }
   .zones-date { font-size: 13px; color: var(--muted); display: flex; align-items: center; gap: 8px; }
   .zones-bar input[type=date], .zone-card input {
@@ -358,6 +371,54 @@
   .kv:last-child { border-bottom: none; }
   .kv span:first-child { color: var(--muted); }
   .month-summary { font-size: 13px; color: var(--muted); margin: 14px 0 4px; }
+  .list-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap; }
+  .list-head .seg { margin-top: 10px; }
+
+  /* Training calendar: one row per week (Mon–Sun), a bubble per run sized by distance. */
+  .cal-wrap { overflow-x: auto; margin-top: 8px; }
+  .cal { min-width: 640px; }
+  .cal-legend { display: flex; flex-wrap: wrap; gap: 14px; font-size: 12px; color: var(--muted); margin: 6px 0 4px; }
+  .cal-legend span { display: inline-flex; align-items: center; gap: 5px; }
+  .cal-legend i { width: 12px; height: 12px; border-radius: 50%; display: inline-block; }
+  .cal-row { display: grid; grid-template-columns: 118px repeat(7, minmax(0, 1fr)); border-bottom: 1px solid var(--line); }
+  .cal-row.cal-days { font-size: 12px; color: var(--muted); padding: 6px 0; }
+  .cal-row.cal-days div { text-align: center; }
+  .cal-week { padding: 12px 8px 12px 0; }
+  .cal-row.has-sub .cal-week { grid-row: span 2; }
+  .cal-week .wk-range { font-size: 15px; font-weight: 600; }
+  .cal-week .wk-km { font-size: 20px; font-weight: 500; margin-top: 6px; font-variant-numeric: tabular-nums; }
+  .cal-week .wk-more { font-size: 11px; color: var(--muted); margin-top: 2px; }
+  .cal-week .wk-bar { height: 3px; background: var(--line); border-radius: 2px; margin-top: 8px; }
+  .cal-week .wk-bar div { height: 100%; background: var(--moss); border-radius: 2px; }
+  .cal-day { display: flex; flex-direction: column; align-items: center; justify-content: flex-start; gap: 6px;
+             padding: 12px 2px 10px; position: relative; }
+  .cal-day.out, .cal-sub.out { opacity: 0.55; }
+  .cal-bwrap { height: 82px; display: flex; align-items: center; justify-content: center; }
+  .cal-sub { border-top: 1px solid var(--line); padding: 6px 2px 8px; display: flex; flex-direction: column;
+             align-items: center; gap: 4px; min-width: 0; }
+  .cal-sub .cal-chip { max-width: 100%; white-space: normal; text-align: center; line-height: 1.3; }
+  .cal-day .dnum { position: absolute; top: 4px; right: 6px; font-size: 10px; color: var(--muted); }
+  .cal-day.today .dnum { color: var(--clay); font-weight: 700; }
+  .cal-day .rest { font-size: 11px; color: #c9c9c9; }
+  .cal-act { display: flex; flex-direction: column; align-items: center; cursor: pointer; max-width: 100%; }
+  .cal-bub { border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #fff;
+             font-weight: 700; font-size: 12px; font-variant-numeric: tabular-nums; transition: transform .12s; }
+  .cal-act:hover .cal-bub { transform: scale(1.06); }
+  .cal-bub span { white-space: nowrap; text-shadow: 0 1px 2px rgba(0,0,0,0.35); }
+  .cal-bub.easy { background-color: #3d7ebf; }
+  .cal-bub.workout { background-color: #3f8f3a; }
+  .cal-bub.race { background-color: #a50f15; box-shadow: 0 0 0 3px #f3c9c9; }
+  .cal-bub.other { background-color: #9aa5b1; }
+  /* Surface on top of the session colour: stripes = treadmill, dots = track, dashed ring = trail. */
+  .cal-bub.treadmill { background-image: repeating-linear-gradient(135deg, transparent 0 5px, rgba(0,0,0,0.22) 5px 8px); }
+  .cal-bub.track { background-image: radial-gradient(rgba(0,0,0,0.28) 1.3px, transparent 1.8px); background-size: 7px 7px; }
+  .cal-bub.trail { outline: 2px dashed rgba(0,0,0,0.35); outline-offset: 2px; }
+  .cal-lbl { font-size: 11px; color: var(--ink); text-align: center; margin-top: 4px; line-height: 1.2;
+             max-width: 110px; overflow: hidden; text-overflow: ellipsis; display: -webkit-box;
+             -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
+  .cal-lbl .elev { color: var(--muted); }
+  .cal-chip { font-size: 11px; color: var(--muted); border: 1px solid var(--line); border-radius: 10px;
+              padding: 1px 7px; cursor: pointer; white-space: nowrap; }
   .month-summary strong { color: var(--ink); font-weight: 500; }
   .compare-row { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin: 0 0 14px; }
   .compare-label { font-size: 12px; color: var(--muted); margin-right: 4px; }
@@ -389,7 +450,7 @@
 <header>
   <div class="header-inner">
     <div>
-      <h1><svg class="logo" viewBox="0 0 32 32" aria-hidden="true"><path fill="currentColor" fill-rule="evenodd" d="M8 2h16a6 6 0 0 1 6 6v16a6 6 0 0 1-6 6H8a6 6 0 0 1-6-6V8a6 6 0 0 1 6-6Z M9 8.5h14v3.4L14.2 20.1H23v3.4H9v-3.4l8.8-8.2H9Z"/></svg>Zachy</h1>
+      <h1><svg class="logo" viewBox="0 0 32 32" aria-hidden="true"><mask id="zachy-logo-mask" maskUnits="userSpaceOnUse" x="0" y="0" width="32" height="32"><path fill="#fff" d="M8 2h16a6 6 0 0 1 6 6v16a6 6 0 0 1-6 6H8a6 6 0 0 1-6-6V8a6 6 0 0 1 6-6Z"/><path fill="#000" d="M12.88 8.5H26.88L26.02 11.9 15.17 20.1H23.98L23.12 23.5H9.12L9.97 20.1 20.82 11.9H12.03Z M-1 13.6H10a1.5 1.5 0 0 1 0 3H-1Z M-1 19.6H5a1.5 1.5 0 0 1 0 3H-1Z"/></mask><rect width="32" height="32" fill="currentColor" mask="url(#zachy-logo-mask)"/></svg>Zachy</h1>
       <p>Running performance tracker</p>
     </div>
     <div class="sync">
@@ -411,14 +472,20 @@
     <button class="tab" data-tab="records" onclick="switchTab('records')">Records</button>
     <button class="tab" data-tab="grade" onclick="switchTab('grade')">Grade</button>
     <button class="tab" data-tab="body" onclick="switchTab('body')">Body</button>
-    <button class="tab" data-tab="zones" onclick="switchTab('zones')">Zones</button>
+    <button class="tab" data-tab="profile" onclick="switchTab('profile')">Profile</button>
   </div>
 
   <div id="panel-activities" class="panel active">
   <div id="list-view">
     <div class="picker" id="year-picker"></div>
     <div class="picker" id="month-picker"></div>
-    <div class="month-summary" id="month-summary"></div>
+    <div class="list-head">
+      <div class="month-summary" id="month-summary"></div>
+      <div class="seg seg-sm" id="list-mode">
+        <button data-v="calendar" onclick="setListMode('calendar')">Calendar</button>
+        <button data-v="list" onclick="setListMode('list')">List</button>
+      </div>
+    </div>
     <div id="list-content" class="loading">Loading activities…</div>
   </div>
 
@@ -457,6 +524,29 @@
       </div>
 
       <div class="muted-note">Running, trail, track, treadmill and ultra runs combined. The current year is partial. Click a bar to see that year by month.</div>
+
+      <div class="yearly-head" style="margin-top:32px;">
+        <div class="section-title" style="margin:0;">Steps per year</div>
+        <div class="yearly-total" id="yearly-total-steps"></div>
+      </div>
+      <div class="card" style="margin-top:10px;"><canvas id="yearly-chart-steps" height="100"></canvas></div>
+
+      <div class="yearly-head" style="margin-top:24px;">
+        <div class="section-title" style="margin:0;">Heart rate per year: <span style="color:#a50f15">average resting</span> · <span style="color:#e6550d">max</span> (bpm)</div>
+        <div class="yearly-total">resting: lower = fitter</div>
+      </div>
+      <div class="card" style="margin-top:10px;"><canvas id="yearly-chart-rhr" height="110"></canvas></div>
+      <div class="muted-note" id="yearly-maxhr-note">Max: the highest heart rate held for 10 s in a run that year (click a point to open it).
+        Readings above 220 − age/2 are treated as watch glitches, and so is one run more than 10 bpm above every other.</div>
+
+      <div class="yearly-head" style="margin-top:24px;">
+        <div class="section-title" style="margin:0;">Aerobic efficiency (pace at <span id="yearly-eff-hr">140</span> bpm)</div>
+        <div class="yearly-total">faster = fitter</div>
+      </div>
+      <div class="card" style="margin-top:10px;"><canvas id="yearly-chart-eff" height="80"></canvas></div>
+      <div class="muted-note">Aerobic efficiency: for every flat easy run (≥5 km, ≥30 min, under 10 m of climbing per km,
+        steady heart rate), its speed is normalised to 140 bpm with your own speed-vs-heart-rate slope;
+        the year's value is the median of those runs, odd ones (HR glitches, snow…) left out. Same as on the Body tab.</div>
     </div>
 
     <div id="monthly-view" style="display:none;">
@@ -522,8 +612,12 @@
     </div>
     <div class="muted-note" id="body-note"></div>
 
+    <div class="section-title mm-row">Running volume<span class="section-sub">dots: each week, Monday to Sunday · light line: last 7 days (sliding)</span><span class="minmax" id="mm-volume"></span></div>
+    <div class="card"><canvas id="bc-volume" height="70"></canvas></div>
     <div class="section-title mm-row">Weight<span class="section-sub">kg</span><span class="minmax" id="mm-weight"></span></div>
     <div class="card"><canvas id="bc-weight" height="70"></canvas></div>
+    <button class="pick" id="body-comp-btn" style="margin-top:10px;" onclick="toggleBodyComp()">Show body composition</button>
+    <div id="body-comp"></div>
     <div class="section-title mm-row">HRV<span class="section-sub">overnight average (ms) · shaded: your balanced range</span><span class="minmax" id="mm-hrv"></span></div>
     <div class="card"><canvas id="bc-hrv" height="70"></canvas></div>
     <div class="section-title mm-row">Resting heart rate<span class="section-sub">bpm</span><span class="minmax" id="mm-rhr"></span></div>
@@ -561,15 +655,25 @@
       <span class="seg seg-sm" id="steps-bucket">
         <button data-b="day" onclick="setStepsBucket('day')">Day</button>
         <button data-b="week" onclick="setStepsBucket('week')">Week</button>
-        <button data-b="month" onclick="setStepsBucket('month')">Month</button>
-        <button data-b="year" onclick="setStepsBucket('year')">Year</button>
       </span>
       <span class="minmax" id="mm-steps"></span></div>
     <div class="card"><canvas id="bc-steps" height="60"></canvas></div>
   </div>
 
-  <div id="panel-zones" class="panel">
-    <div class="section-title" style="margin-top:0;">Training zones</div>
+  <div id="panel-profile" class="panel">
+    <div class="section-title" style="margin-top:0;font-size:16px;">Profile</div>
+    <div class="muted-note" style="margin:0 0 14px;">Read from your Garmin profile (refreshed at each sync).
+      Type a value to override it; empty a field to go back to Garmin's. Weight follows your latest scale reading unless you set it.</div>
+    <div class="profile-grid" id="profile-grid"><div class="loading">Loading…</div></div>
+    <div class="zones-bar" style="margin-top:16px;">
+      <button class="sync-btn" onclick="saveProfile()">Save</button>
+      <button class="pick" onclick="refreshProfileFromGarmin()">Refresh from Garmin</button>
+      <span class="muted-note" id="profile-status" style="margin:0;"></span>
+    </div>
+    <div class="profile-derived" id="profile-derived"></div>
+
+    <!-- Training zones: same page as the profile (both are your settings). -->
+    <div class="section-title" style="margin-top:40px;padding-top:24px;border-top:1px solid var(--line);font-size:16px;">Training zones</div>
     <div class="muted-note" style="margin:0 0 14px;">
       Enter where each zone ends; the next zone starts there. Leave a metric empty if you don't use it.
       A set applies from its date until the next one, so older runs are analysed with the zones you
@@ -601,10 +705,14 @@ const THEME = {
   ink: "#1f1d18", muted: "#7a7263", line: "#e6e6e6", grid: "#efefef",
   moss: "#4a5d3a", clay: "#a8542e", sage: "#b9c4a8", mossMid: "#86957a",
   font: '-apple-system, "Helvetica Neue", Arial, sans-serif',
+  // One type scale for all chart text (px): legend/tooltip/axis titles 12, ticks 11, in-chart value labels 11.
+  type: { body: 12, title: 12, tick: 11, label: 11 },
 };
 
 Chart.defaults.font.family = THEME.font;
-Chart.defaults.font.size = 12;
+Chart.defaults.font.size = THEME.type.body;
+Chart.defaults.scale.ticks.font = { size: THEME.type.tick };
+Chart.defaults.scale.title.font = { size: THEME.type.title };
 Chart.defaults.color = THEME.muted;
 Chart.defaults.animation.duration = 450;
 Chart.defaults.maintainAspectRatio = true;
@@ -639,7 +747,7 @@ Object.assign(Chart.defaults.plugins.tooltip, {
   boxPadding: 4,
   caretSize: 5,
   titleFont: { weight: "600" },
-  footerFont: { weight: "400", size: 11 },
+  footerFont: { weight: "400", size: THEME.type.label },
 });
 
 // 5,254 -> "5.3k", 7,010,946 -> "7M" on axes; small numbers stay as-is.
@@ -687,7 +795,7 @@ function endLabelsPlugin(formatValue) {
       ctx.textBaseline = "middle";
       ctx.lineJoin = "round";
       for (const l of labels) {
-        ctx.font = `${l.bold ? 600 : 500} 12px ${THEME.font}`;
+        ctx.font = `${l.bold ? 600 : 500} ${THEME.type.body}px ${THEME.font}`;
         ctx.strokeStyle = "white";
         ctx.lineWidth = 4;
         ctx.strokeText(l.text, l.x, l.y);
@@ -801,6 +909,155 @@ async function loadList() {
   }
 }
 
+// Calendar (default) or list, remembered in this browser.
+function listMode() {
+  try { return localStorage.getItem("zachy.listMode") || "calendar"; } catch (e) { return "calendar"; }
+}
+function setListMode(m) {
+  try { localStorage.setItem("zachy.listMode", m); } catch (e) {}
+  loadMonthActivities();
+}
+function renderListMode() {
+  document.querySelectorAll("#list-mode button").forEach(b => b.classList.toggle("on", b.dataset.v === listMode()));
+}
+
+const RUN_TYPES = new Set(["running", "trail_running", "ultra_run", "track_running", "treadmill_running"]);
+const monthActivityCache = {};
+
+async function monthActivities(year, month) {
+  const key = `${year}-${month}`;
+  if (!monthActivityCache[key]) {
+    const res = await fetch(`${API}/activities/?year=${year}&month=${month}&limit=500`);
+    monthActivityCache[key] = res.ok ? await res.json() : [];
+  }
+  return monthActivityCache[key];
+}
+
+// Short label under a bubble: what the session was.
+function calendarLabel(a) {
+  if (a.category === "workout") return a.workout ? `${a.workout.type}` : surfaceFartlek(a.surface);
+  if (a.category === "race") return customName(a) || a.place || "Race";
+  if (a.category === "easy") return a.distance_km >= 25 ? "Long run" : "Easy run";
+  return customName(a) || SPORT_LABELS[a.activity_type] || "Run";
+}
+
+// Training calendar for one month: weeks Monday to Sunday (the first and last weeks show the
+// neighbouring days too, faded), one bubble per run — size by distance, colour by session type
+// (easy / workout striped / race), dashed ring for trail. Other sports are small chips.
+async function renderCalendar(year, month, activities) {
+  const iso = d => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+  const first = new Date(year, month - 1, 1), last = new Date(year, month, 0);
+  const start = new Date(first); start.setDate(first.getDate() - ((first.getDay() + 6) % 7));
+  const end = new Date(last); end.setDate(last.getDate() + (7 - ((last.getDay() + 6) % 7)) - 1);
+  // Days of the neighbouring months shown in the first/last week.
+  let all = [...activities];
+  if (start.getMonth() !== first.getMonth()) all = all.concat(await monthActivities(start.getFullYear(), start.getMonth() + 1));
+  if (end.getMonth() !== last.getMonth()) all = all.concat(await monthActivities(end.getFullYear(), end.getMonth() + 1));
+  const today = iso(new Date());
+  const byDay = {};
+  for (const a of all) (byDay[a.date] ||= []).push(a);
+
+  const runs = all.filter(a => RUN_TYPES.has(a.activity_type) && a.distance_km);
+  const maxKm = Math.max(10, ...runs.map(a => a.distance_km));
+  const size = km => Math.round(30 + 48 * Math.sqrt(Math.min(km, maxKm) / maxKm));
+
+  const weeks = [];
+  for (let d = new Date(start); d <= end && iso(d) <= today; d.setDate(d.getDate() + 7)) {   // no future weeks
+    const days = [...Array(7)].map((_, i) => { const x = new Date(d); x.setDate(d.getDate() + i); return x; });
+    const wkRuns = days.flatMap(x => (byDay[iso(x)] || []).filter(a => RUN_TYPES.has(a.activity_type)));
+    weeks.push({ days, km: wkRuns.reduce((s, a) => s + (a.distance_km || 0), 0),
+                 secs: wkRuns.reduce((s, a) => s + (a.duration_s || 0), 0),
+                 gain: wkRuns.reduce((s, a) => s + (a.elevation_gain || 0), 0), n: wkRuns.length });
+  }
+  const maxWeek = Math.max(1, ...weeks.map(w => w.km));
+  const fmtRange = (a, b) => {
+    const m = x => x.toLocaleDateString(undefined, { month: "short" });
+    return a.getMonth() === b.getMonth() ? `${a.getDate()}–${b.getDate()} ${m(b)}` : `${a.getDate()} ${m(a)} – ${b.getDate()} ${m(b)}`;
+  };
+
+  // Other sports of a day: one chip per sport ("Cycling ×2 · 22 km"), opening the first one.
+  const chips = list => {
+    const groups = {};
+    for (const a of list) (groups[a.activity_type] ||= []).push(a);
+    return Object.values(groups).map(g => {
+      const a = g[0];
+      const label = SPORT_LABELS[a.activity_type] || customName(a) || (a.activity_type || "activity").replace(/_/g, " ");
+      const km = g.reduce((s, x) => s + (x.distance_km || 0), 0);
+      const tip = g.map(x => `${x.name || label}${x.distance_km ? ` · ${x.distance_km.toFixed(1)} km` : ""} · ${fmtDuration(x.duration_s)}`).join("\n");
+      return `<span class="cal-chip" onclick="showDetail(${a.id})" title="${tip.replace(/"/g, "&quot;")}">${label}${g.length > 1 ? ` ×${g.length}` : ""}${km >= 1 ? ` · ${km.toFixed(0)} km` : ""}</span>`;
+    }).join("");
+  };
+  // One bubble per day: the main run (race > workout > easy, then the longest). A second real run
+  // (a double) is added into the same bubble; a short one (under 30% of the main run and 5 km or
+  // less) is a warm-up / cool-down and goes below with the other activities.
+  const RANK = { race: 3, workout: 2, easy: 1 };
+  const dayRuns = runs => {
+    const sorted = [...runs].sort((a, b) => (RANK[b.category] || 0) - (RANK[a.category] || 0) || b.distance_km - a.distance_km);
+    const main = sorted[0];
+    const short = r => r.distance_km < 0.3 * main.distance_km && r.distance_km <= 5;
+    return { main, doubles: sorted.slice(1).filter(r => !short(r)), extras: sorted.slice(1).filter(short) };
+  };
+  const runChip = (r, label) => `<span class="cal-chip" onclick="showDetail(${r.id})" title="${(r.name || "").replace(/"/g, "&quot;")} · ${fmtDuration(r.duration_s)}">${label} · ${r.distance_km.toFixed(1)} km</span>`;
+  const act = runs => {
+    const { main: a, doubles, extras } = dayRuns(runs);
+    const all = [a, ...doubles];
+    const km = all.reduce((s, r) => s + r.distance_km, 0);
+    const gain = all.reduce((s, r) => s + (r.elevation_gain || 0), 0);
+    const px = size(km);
+    const cls = ["cal-bub", a.category || "other", ["trail", "treadmill", "track"].includes(a.surface) ? a.surface : ""].join(" ");
+    const hilly = a.terrain === "rolling" || a.terrain === "mountain";
+    const tip = all.map(r => `${cardTitle(r).replace(/<[^>]+>/g, "")}\n${r.distance_km.toFixed(1)} km · ${fmtDuration(r.duration_s)} · ${fmtPace(r.avg_pace)}/km` +
+                (r.elevation_gain ? ` · +${Math.round(r.elevation_gain)} m` : "")).join("\n\n") + (a.place ? `\n${a.place}` : "");
+    return { bubble: `<div class="cal-act" onclick="showDetail(${a.id})" title="${`${a.date}${doubles.length ? " · double" : ""}\n${tip}`.replace(/"/g, "&quot;")}">
+      <div class="cal-bwrap"><div class="${cls}" style="width:${px}px;height:${px}px;"><span>${km >= 10 ? km.toFixed(0) : km.toFixed(1)} km</span></div></div>
+      <div class="cal-lbl">${calendarLabel(a)}${doubles.length ? ` <b>×${all.length}</b>` : ""}${hilly ? `<br><span class="elev">+${Math.round(gain).toLocaleString()} m</span>` : ""}</div>
+    </div>`,
+      extra: doubles.map((r, i) => runChip(r, `run ${i + 2}`)).join("") + extras.map(r => runChip(r, "warm-up")).join("") };
+  };
+
+  const DAYS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
+  return `
+    <div class="cal-legend">
+      <span><i style="background:#3d7ebf"></i>easy run</span>
+      <span><i style="background:#3f8f3a"></i>workout</span>
+      <span><i style="background:#a50f15"></i>race</span>
+      <span style="margin-left:6px;"><i style="background:#fff;outline:2px dashed #999;outline-offset:-1px"></i>trail</span>
+      <span><i style="background:#9aa5b1 repeating-linear-gradient(135deg,transparent 0 3px,rgba(0,0,0,0.3) 3px 5px)"></i>treadmill</span>
+      <span><i style="background:#9aa5b1 radial-gradient(rgba(0,0,0,0.35) 1px,transparent 1.4px) 0 0/5px 5px"></i>track</span>
+      <span>bubble size = distance</span>
+    </div>
+    <div class="cal-wrap"><div class="cal">
+      <div class="cal-row cal-days"><div></div>${DAYS.map(d => `<div>${d}</div>`).join("")}</div>
+      ${[...weeks].reverse().map(w => {   // latest week first, like the list
+        // Circles on the week's line; second runs, warm-ups and other sports underneath, per day.
+        const isRun = a => RUN_TYPES.has(a.activity_type) && a.distance_km;
+        const cells = w.days.map(x => {
+          const k = iso(x), list = byDay[k] || [];
+          const main = list.some(isRun) ? act(list.filter(isRun)) : null;
+          return { x, k, list, main, extra: (main ? main.extra : "") + chips(list.filter(a => !isRun(a))) };
+        });
+        const anyExtra = cells.some(c => c.extra);
+        return `
+        <div class="cal-row${anyExtra ? " has-sub" : ""}">
+          <div class="cal-week">
+            <div class="wk-range">${fmtRange(w.days[0], w.days[6])}</div>
+            <div class="wk-km">${w.km.toFixed(1)} km</div>
+            <div class="wk-more">${!w.n ? "no runs" : `${w.n} run${w.n === 1 ? "" : "s"} · ${fmtDurationPretty(w.secs)}`}${w.gain >= 50 ? ` · +${Math.round(w.gain).toLocaleString()} m` : ""}</div>
+            <div class="wk-bar"><div style="width:${Math.round(w.km / maxWeek * 100)}%"></div></div>
+          </div>
+          ${cells.map(({ x, k, list, main }) => {
+            const out = x.getMonth() !== month - 1;
+            return `<div class="cal-day${out ? " out" : ""}${k === today ? " today" : ""}">
+              <span class="dnum">${k === today ? "today" : x.getDate()}</span>
+              ${main ? main.bubble : !list.length && k < today && !out ? `<div class="cal-bwrap"><span class="rest">rest</span></div>` : ""}
+            </div>`;
+          }).join("")}
+          ${anyExtra ? cells.map(({ x, extra }) => `<div class="cal-sub${x.getMonth() !== month - 1 ? " out" : ""}">${extra}</div>`).join("") : ""}
+        </div>`;
+      }).join("")}
+    </div></div>`;
+}
+
 async function loadMonthActivities() {
   const { year, month } = listState;
   const container = document.getElementById("list-content");
@@ -820,6 +1077,11 @@ async function loadMonthActivities() {
       `${activities.length} activities &middot; ${Math.round(km).toLocaleString()} km &middot; ` +
       `${Math.round(secs / 3600)} h`;
 
+    renderListMode();
+    if (listMode() === "calendar") {
+      container.innerHTML = await renderCalendar(year, month, activities);
+      return;
+    }
     if (!activities.length) {
       container.innerHTML = `<div class="error">No activities in this month.</div>`;
       return;
@@ -881,6 +1143,15 @@ function cardTitle(a) {
   return own && own !== sport ? `${sport} · ${own}` : sport;
 }
 
+// Activity page: a bigger title with its main part in bold; a workout's description goes on its
+// own line below it.
+function detailTitle(a) {
+  if (a.category === "workout" && a.workout) return { title: `<b>${a.workout.type}</b>`, sub: a.workout.summary };
+  let t = cardTitle(a);
+  if (!t.startsWith("<b")) t = t.replace(/^([^·]+)/, m => `<b>${m.trim()}</b> `).replace(/ $/, "");
+  return { title: t, sub: "" };
+}
+
 // Line 3 tags: session type (easy / workout / race), surface (road / trail / treadmill / track),
 // and rolling / mountain when the run wasn't flat.
 const CATEGORY_TAGS = { easy: "easy run", workout: "workout", race: "race" };
@@ -900,6 +1171,69 @@ function fmtSpeedOrPace(a) {
     return `${(a.distance_km / (a.duration_s / 3600)).toFixed(1)} km/h`;
   }
   return a.avg_pace ? `${fmtPace(a.avg_pace)} /km` : "";
+}
+
+// "2 h 51 min", "48 min 12 s": durations to read rather than compare.
+function fmtDurationPretty(s) {
+  if (!s) return "—";
+  s = Math.round(s);
+  const h = Math.floor(s / 3600), m = Math.floor((s % 3600) / 60), sec = s % 60;
+  return h ? `${h} h ${String(m).padStart(2, "0")} min` : m ? `${m} min${sec ? ` ${sec} s` : ""}` : `${sec} s`;
+}
+
+// Activity summary boxes: each main figure with its range underneath (30 s extremes from the
+// charts, total time with stops, altitude range, watch temperature). Weather comes later.
+function summaryBoxes(a) {
+  const p = a.peaks || {};
+  const box = (label, value, sub = "", id = "", tip = "") =>
+    `<div class="stat"${id ? ` id="${id}"` : ""}${tip ? ` title="${tip}"` : ""}><div class="stat-label">${label}</div><div class="stat-value">${value}</div>${sub ? `<div class="stat-sub">${sub}</div>` : ""}</div>`;
+  const stopped = p.elapsed_s && a.duration_s ? p.elapsed_s - a.duration_s : 0;
+  const durSub = p.elapsed_s
+    ? `${fmtDuration(a.duration_s)} moving` + (stopped > 60 ? ` · total <b>${fmtDurationPretty(p.elapsed_s)}</b> (${fmtDurationPretty(stopped)} stopped)` : "")
+    : fmtDuration(a.duration_s);
+  const hrSub = p.hr ? `min <b>${Math.round(p.hr.min)}</b> · max <b>${Math.round(p.hr.max)}</b>`
+    : a.max_hr ? `max <b>${Math.round(a.max_hr)}</b>` : "";
+  const paceSub = p.pace ? `fastest <b>${fmtPace(p.pace.min)}</b> · slowest <b>${fmtPace(p.pace.max)}</b>` : "";
+  const e = p.elevation;
+  const t = p.temperature;
+  return [
+    box("distance", a.distance_km ? a.distance_km.toFixed(2) + " km" : "—"),
+    box("duration", fmtDurationPretty(a.duration_s), durSub),
+    box("avg pace", `${fmtPace(a.avg_pace)} /km`, paceSub, "", "fastest and slowest held for 30 s (as in the pace chart)"),
+    box("avg hr", a.avg_hr ? Math.round(a.avg_hr) + " bpm" : "—", hrSub, "", "lowest and highest held for 30 s (as in the HR chart)"),
+    box("elevation", a.elevation_gain ? `+${Math.round(a.elevation_gain).toLocaleString()} m` : "—",
+        a.elevation_loss ? `loss <b>−${Math.round(a.elevation_loss).toLocaleString()} m</b>` : ""),
+    p.alt_mean != null ? box("mean altitude", `${Math.round(p.alt_mean).toLocaleString()} m`,
+        e ? `min <b>${Math.round(e.alt_min).toLocaleString()}</b> · max <b>${Math.round(e.alt_max).toLocaleString()} m</b>` : "") : "",
+    box("temperature", t ? `${Math.round(t.mean)}°C` : "—",
+        t ? `watch <b>${Math.round(t.min)}–${Math.round(t.max)}°</b>` : "", "stat-temp"),
+    box("weather", "—", "", "stat-weather"),
+    box("calories", a.calories || "—"),
+  ].join("");
+}
+
+// Weather at the start (Garmin, nearest station; cached by the API): temperature, feels-like,
+// humidity and wind. The watch sensor reads warm (body heat), so the station temperature leads.
+async function showWeather(a) {
+  let w = null;
+  try {
+    const res = await fetch(`${API}/activities/${a.id}/weather`);
+    if (res.ok) w = await res.json();
+  } catch (e) {}
+  if (detailState.activity !== a) return;
+  const tBox = document.getElementById("stat-temp"), wBox = document.getElementById("stat-weather");
+  if (!w) {
+    if (wBox) wBox.remove();
+    if (tBox && !a.peaks?.temperature) tBox.remove();
+    return;
+  }
+  const t = a.peaks?.temperature;
+  if (tBox) tBox.innerHTML = `<div class="stat-label">temperature</div><div class="stat-value">${Math.round(w.temp)}°C</div>
+    <div class="stat-sub">feels like <b>${Math.round(w.feels_like ?? w.temp)}°</b>${t ? ` · watch <b>${Math.round(t.min)}–${Math.round(t.max)}°</b>` : ""}</div>`;
+  if (wBox) wBox.innerHTML = `<div class="stat-label">humidity · wind</div><div class="stat-value">${w.humidity ?? "—"}%</div>
+    <div class="stat-sub">wind <b>${w.wind_kmh ?? "—"} km/h</b>${w.wind_dir ? ` ${w.wind_dir}` : ""}${w.gust_kmh ? ` · gusts ${w.gust_kmh}` : ""}${w.description ? ` · ${w.description.toLowerCase()}` : ""}</div>`;
+  wBox?.setAttribute("title", `At the start · ${w.station || "nearest station"} (Garmin)`);
+  tBox?.setAttribute("title", `Station temperature at the start · ${w.station || ""}. The watch sensor reads warmer (body heat).`);
 }
 
 function fmtDuration(s) {
@@ -1052,16 +1386,22 @@ function hexToRgba(hex, alpha) {
 
 // 30 s extremes next to each chart title, and altitude / steepest slope above the profile.
 function renderPeaks(peaks) {
-  const set = (id, html) => { const el = document.getElementById(id); if (el) el.innerHTML = html || ""; };
+  const set = (id, html, tip = "") => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.innerHTML = html || "";
+    if (tip) el.title = tip; else el.removeAttribute("title");
+  };
+  const TIP = "lowest and highest values held for 30 s";
   const where = at => at?.distance_km != null ? `${at.distance_km.toFixed(1)} km` : at ? fmtDuration(at.timer_s) : "";
   const pair = (key, fmt, lo = "min", hi = "max") => {
     const p = peaks?.[key];
-    return p ? `30 s ${lo} <b>${fmt(p.min)}</b> @ ${where(p.min_at)} · ${hi} <b>${fmt(p.max)}</b> @ ${where(p.max_at)}` : "";
+    return p ? `${lo} <b>${fmt(p.min)}</b> @ ${where(p.min_at)} · ${hi} <b>${fmt(p.max)}</b> @ ${where(p.max_at)}` : "";
   };
-  set("pk-hr", pair("hr", v => `${Math.round(v)} bpm`));
-  set("pk-pace", pair("pace", v => `${fmtPace(v)}/km`, "fastest", "slowest"));
-  set("pk-power", pair("power", v => `${Math.round(v)} W`));
-  set("pk-cadence", pair("cadence", v => `${Math.round(v)} spm`));
+  set("pk-hr", pair("hr", v => `${Math.round(v)} bpm`), TIP);
+  set("pk-pace", pair("pace", v => `${fmtPace(v)}/km`, "fastest", "slowest"), TIP);
+  set("pk-power", pair("power", v => `${Math.round(v)} W`), TIP);
+  set("pk-cadence", pair("cadence", v => `${Math.round(v)} spm`), TIP);
   const e = peaks?.elevation;
   if (!e) { set("pk-elev", ""); return; }
   const km = v => `${v.toFixed(1)} km`;
@@ -1375,7 +1715,7 @@ function renderZoneModelPicker() {
   document.querySelectorAll("#zone-model button").forEach(b => b.classList.toggle("on", +b.dataset.m === m));
   const z = detailState.zones;
   const note = document.getElementById("zone-model-note");
-  if (note) note.textContent = !z ? "Zones: none saved yet (Zones tab)."
+  if (note) note.textContent = !z ? "Zones: none saved yet (Profile tab)."
     : `Charts colored with your ${chosenZoneModel()}-zone limits from ${z.valid_from}${z.valid_from > detailState.activity.date ? " (your first set — none existed yet)" : ""}.`;
 }
 
@@ -1532,7 +1872,11 @@ function renderDetailHeader() {
     surface: a.terrain?.surface ?? null, terrain: a.terrain?.terrain ?? null,
     workout: a.workout ?? null,
   };
-  document.getElementById("detail-title").innerHTML = cardTitle(card);
+  const { title, sub } = detailTitle(card);
+  document.getElementById("detail-title").innerHTML = title;
+  const subEl = document.getElementById("detail-wsub");
+  subEl.textContent = sub;
+  subEl.style.display = sub ? "" : "none";
   document.getElementById("detail-place").textContent = a.place || "";
   const tags = cardTags(card).map(t => `<span class="tag tag-${t}">${CATEGORY_TAGS[t] || t}</span>`).join("");
   document.getElementById("detail-tags").innerHTML = `${a.date}${tags ? " &middot; " + tags : ""}`;
@@ -1643,7 +1987,7 @@ function drawLapCharts(laps, hilly = false) {
               label: ctx => d.fmt(values[ctx.raw.lap]),
               footer: items => { const i = zoneOf(values[items[0].raw.lap]); return i == null ? "" : z.zone.names[i]; },
             },
-            footerFont: { weight: "600", size: 12 },
+            footerFont: { weight: "600" },
             footerColor: ctx => {
               const it = ctx.tooltip?.dataPoints?.[0];
               const i = it ? zoneOf(values[it.raw.lap]) : null;
@@ -1844,7 +2188,7 @@ function drawTimeseriesCharts() {
                 return z == null || !zone.names ? "" : zone.names[z];
               },
             },
-            footerFont: { weight: "600", size: 12 },
+            footerFont: { weight: "600" },
             footerColor: ctx => {
               const it = ctx.tooltip?.dataPoints?.[0];
               const z = zone && it ? zone.of(it.parsed.y, it.raw.p) : null;
@@ -1981,17 +2325,13 @@ async function showDetail(id) {
 
     content.innerHTML = `
       <h2 class="detail-title" id="detail-title">${a.name || "Activity"}</h2>
+      <div class="detail-wsub" id="detail-wsub" style="display:none;"></div>
       <div class="detail-place" id="detail-place"></div>
       <div class="detail-date"><span id="detail-tags">${a.date}</span>${a.terrain ? ` &middot; ${renderSurfacePicker(a)}` : ""}</div>
       ${a.category ? `<div class="race-row" id="race-row">${renderCategoryToggle(a)}</div>
       <div class="workout-box" id="workout-box" style="display:none;"></div>` : ""}
       <div class="stat-grid">
-        <div class="stat"><div class="stat-label">distance</div><div class="stat-value">${a.distance_km ? a.distance_km.toFixed(2) + " km" : "—"}</div></div>
-        <div class="stat"><div class="stat-label">duration</div><div class="stat-value">${fmtDuration(a.duration_s)}</div></div>
-        <div class="stat"><div class="stat-label">avg pace</div><div class="stat-value">${fmtPace(a.avg_pace)} /km</div></div>
-        <div class="stat"><div class="stat-label">avg hr</div><div class="stat-value">${a.avg_hr ? Math.round(a.avg_hr) + " bpm" : "—"}</div></div>
-        <div class="stat"><div class="stat-label">elevation gain</div><div class="stat-value">${a.elevation_gain ? Math.round(a.elevation_gain) + " m" : "—"}</div></div>
-        <div class="stat"><div class="stat-label">calories</div><div class="stat-value">${a.calories || "—"}</div></div>
+        ${summaryBoxes(a)}
         ${a.terrain && a.terrain.terrain !== "flat" ? `
         <div class="stat terrain-${a.terrain.terrain}">
           <div class="stat-label">km-effort</div>
@@ -2018,10 +2358,6 @@ async function showDetail(id) {
       <div class="chart-bar">
         <div class="section-title chart-title t-elev">Elevation profile<span class="section-sub" id="elev-sub"></span></div>
         <div class="chart-tools">
-          <span class="seg" id="zone-model" title="Zone model used to color the charts">
-            <button data-m="3" onclick="setZoneModelView(3)">3 zones</button>
-            <button data-m="5" onclick="setZoneModelView(5)">5 zones</button>
-          </span>
           <div class="seg" id="x-toggle">
             <button data-x="distance" onclick="setXMode('distance')">Distance</button>
             <button data-x="time" onclick="setXMode('time')">Time</button>
@@ -2030,10 +2366,11 @@ async function showDetail(id) {
       </div>
       <div class="card" style="margin-top:10px;"><canvas id="ts-elev" height="80"></canvas></div>
       <div class="minmax" id="pk-elev" style="display:block;margin-top:6px;"></div>
-      <div class="muted-note" id="zone-model-note" style="margin-top:2px;"></div>
 
-      <div class="section-title chart-title t-elev">Time on each slope</div>
-      <div id="grad-summary"></div>
+      <div ${hilly ? "" : 'style="display:none;"'}>   <!-- flat runs: nothing to say about slopes -->
+        <div class="section-title chart-title t-elev">Time on each slope</div>
+        <div id="grad-summary"></div>
+      </div>
 
       <div id="vam-section" style="display:none;">
         <div class="section-title mm-row chart-title t-elev">Vertical speed (m/h)<span class="minmax" id="pk-vam"></span></div>
@@ -2042,8 +2379,17 @@ async function showDetail(id) {
         <div id="vam-summary"></div>
       </div>
 
-      <div class="section-title mm-row chart-title t-hr">Heart rate (bpm)<span class="minmax" id="pk-hr"></span></div>
-      <div class="card"><canvas id="ts-hr" height="80"></canvas></div>
+      <div class="chart-bar">
+        <div class="section-title mm-row chart-title t-hr">Heart rate (bpm)<span class="minmax" id="pk-hr"></span></div>
+        <div class="chart-tools">
+            <span class="seg" id="zone-model" title="Zone model used to color the charts">
+              <button data-m="3" onclick="setZoneModelView(3)">3 zones</button>
+              <button data-m="5" onclick="setZoneModelView(5)">5 zones</button>
+            </span>
+        </div>
+      </div>
+      <div class="muted-note" id="zone-model-note" style="margin-top:0;"></div>
+      <div class="card" style="margin-top:8px;"><canvas id="ts-hr" height="80"></canvas></div>
       <div class="half-split" id="hr-split"></div>
       <div id="hr-zones"></div>
 
@@ -2089,6 +2435,7 @@ async function showDetail(id) {
     }
     drawTimeseriesCharts();
     drawRouteMap(a.timeseries);
+    showWeather(a);
     if (a.laps.length) drawLapCharts(a.laps, hilly);
     renderDetailHeader();
     applyCategory();
@@ -2120,10 +2467,80 @@ function switchTab(name) {
     showYearlyOverview();
     if (!yearlyLoaded) loadYearly();
   }
-  if (name === "zones" && !zonesState.loaded) loadZones();
+  if (name === "profile") { loadProfile(); if (!zonesState.loaded) loadZones(); }
   if (name === "body" && !bodyState.loaded) loadBody();
   if (name === "records" && !recordsState.data) loadRecords();
   if (name === "grade") { if (gapState.data) renderGap(); else loadGap(); }
+}
+
+/* ---------- Profile: birth date, height, weight, sex (Garmin, or yours) ---------- */
+const PROFILE_FIELDS = [
+  { key: "birth_date", label: "Birth date", type: "date" },
+  { key: "height_cm", label: "Height (cm)", type: "number", step: "0.5" },
+  { key: "weight_kg", label: "Weight (kg)", type: "number", step: "0.1" },
+  { key: "sex", label: "Sex", type: "select", options: [["", "—"], ["male", "Male"], ["female", "Female"]] },
+];
+let profileData = null;
+
+async function loadProfile() {
+  try { profileData = await (await fetch(`${API}/profile/`)).json(); } catch (e) {
+    document.getElementById("profile-grid").innerHTML = `<div class="error">Could not load the profile.</div>`; return;
+  }
+  renderProfile();
+}
+
+function renderProfile() {
+  const p = profileData;
+  const srcText = f => {
+    const src = p.source[f.key];
+    if (src === "manual") return `<div class="pf-src manual">set by you${p.garmin[f.key] != null ? ` · Garmin: ${p.garmin[f.key]}` : ""}</div>`;
+    if (src) return `<div class="pf-src">from ${src.startsWith("scale") ? `your ${src}` : "Garmin"}</div>`;
+    return `<div class="pf-src">not set</div>`;
+  };
+  document.getElementById("profile-grid").innerHTML = PROFILE_FIELDS.map(f => {
+    const v = p.effective[f.key] ?? "";
+    const input = f.type === "select"
+      ? `<select id="pf-${f.key}">${f.options.map(([val, lbl]) => `<option value="${val}" ${val === v ? "selected" : ""}>${lbl}</option>`).join("")}</select>`
+      : `<input id="pf-${f.key}" type="${f.type}" ${f.step ? `step="${f.step}"` : ""} value="${v}">`;
+    return `<div class="profile-field"><label for="pf-${f.key}">${f.label}</label>${input}${srcText(f)}</div>`;
+  }).join("");
+  const e = p.effective;
+  const bmi = e.height_cm && e.weight_kg ? e.weight_kg / (e.height_cm / 100) ** 2 : null;
+  const box = (label, value, sub) => `<div class="stat"><div class="stat-label">${label}</div><div class="stat-value">${value}</div><div class="stat-sub">${sub}</div></div>`;
+  document.getElementById("profile-derived").innerHTML = [
+    box("age", p.age != null ? `${p.age}` : "—", "from the birth date"),
+    box("max HR ceiling", `${p.max_hr_ceiling} bpm`, "220 − age/2: higher readings are treated as glitches"),
+    bmi ? box("BMI", bmi.toFixed(1), "weight / height²") : "",
+    p.garmin.lthr ? box("lactate threshold HR", `${p.garmin.lthr} bpm`, "from Garmin") : "",
+  ].join("");
+}
+
+async function saveProfile() {
+  const p = profileData, body = {};
+  for (const f of PROFILE_FIELDS) {
+    const raw = document.getElementById(`pf-${f.key}`).value.trim();
+    let v = raw === "" ? null : f.type === "number" ? parseFloat(raw.replace(",", ".")) : raw;
+    // Unchanged from what Garmin (or the scale) says: keep following it rather than freezing a copy.
+    const auto = p.source[f.key] !== "manual" ? p.effective[f.key] : undefined;
+    body[f.key] = v === auto || (v != null && auto != null && String(v) === String(auto)) ? null : v;
+  }
+  const status = document.getElementById("profile-status");
+  const res = await fetch(`${API}/profile/`, { method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) });
+  if (!res.ok) { status.textContent = "Could not save."; return; }
+  profileData = await res.json();
+  renderProfile();
+  status.textContent = "Saved.";
+  yearlyCharts.forEach(c => c.destroy()); yearlyCharts = []; yearlyLoaded = false;   // the max HR ceiling depends on the age
+}
+
+async function refreshProfileFromGarmin() {
+  const status = document.getElementById("profile-status");
+  status.textContent = "Asking Garmin…";
+  const res = await fetch(`${API}/profile/garmin`, { method: "POST" });
+  if (!res.ok) { status.textContent = "Garmin is unavailable right now."; return; }
+  profileData = await res.json();
+  renderProfile();
+  status.textContent = "Updated from Garmin.";
 }
 
 /* ---------- Yearly summary: three metrics, each clickable ---------- */
@@ -2134,6 +2551,8 @@ const METRICS = {
           value: r => r.total_duration_s / 3600 },
   elev: { key: "total_elevation_gain", label: "m",  fmt: v => Math.round(v).toLocaleString(),
           value: r => r.total_elevation_gain },
+  steps:{ key: "steps", label: "steps", fmt: v => Math.round(v).toLocaleString(), value: r => r.steps || 0,
+          allDay: true },   // counted every day, not per run
 };
 
 function buildYearlyChart(canvasId, totalId, rows, metric) {
@@ -2188,7 +2607,7 @@ function buildYearlyChart(canvasId, totalId, rows, metric) {
       afterDatasetsDraw(chart) {
         const { ctx } = chart;
         ctx.save();
-        ctx.font = `500 11px ${THEME.font}`;
+        ctx.font = `500 ${THEME.type.label}px ${THEME.font}`;
         ctx.fillStyle = THEME.ink;
         ctx.textAlign = "center";
         chart.getDatasetMeta(0).data.forEach((bar, i) => {
@@ -2199,6 +2618,116 @@ function buildYearlyChart(canvasId, totalId, rows, metric) {
     }]
   });
   yearlyCharts.push(chart);
+}
+
+// Steps, resting HR and aerobic efficiency per year (Body data, /body/yearly).
+async function loadYearlyBody() {
+  let rows;
+  try { rows = await (await fetch(`${API}/body/yearly`)).json(); } catch (e) { return; }
+  const currentYear = new Date().getFullYear();
+  const labels = rows.map(r => String(r.year));
+  // Values printed above each point / bar.
+  const valueLabels = (id, fmt) => ({
+    id, afterDatasetsDraw(chart) {
+      const { ctx } = chart;
+      ctx.save();
+      ctx.font = `500 ${THEME.type.label}px ${THEME.font}`; ctx.fillStyle = THEME.ink; ctx.textAlign = "center";
+      chart.getDatasetMeta(0).data.forEach((el, i) => {
+        const v = chart.data.datasets[0].data[i];
+        if (v != null) ctx.fillText(fmt(v), el.x, el.y - 8);
+      });
+      ctx.restore();
+    },
+  });
+
+  const steps = rows.map(r => r.steps);
+  const peak = Math.max(...steps.filter(v => v != null));
+  const total = steps.reduce((s, v) => s + (v || 0), 0);
+  document.getElementById("yearly-total-steps").innerHTML = `<strong>${(total / 1e6).toFixed(1)}M</strong> steps all time`;
+  yearlyCharts.push(new Chart(document.getElementById("yearly-chart-steps"), {
+    type: "bar",
+    data: { labels, datasets: [{ data: steps, maxBarThickness: 56,
+      backgroundColor: rows.map((r, i) => r.year === currentYear ? THEME.sage : steps[i] === peak ? THEME.moss : THEME.mossMid) }] },
+    options: {
+      responsive: true, layout: { padding: { top: 20 } },
+      onClick: (evt, els) => { if (els.length) openMonthly(rows[els[0].index].year, "steps"); },
+      onHover: (evt, els) => { evt.native.target.style.cursor = els.length ? "pointer" : "default"; },
+      plugins: { legend: { display: false }, tooltip: { displayColors: false, callbacks: {
+        footer: () => "Click to see months",
+        label: ctx => { const r = rows[ctx.dataIndex];
+          return [`${(r.steps || 0).toLocaleString()} steps`, `${(r.avg_daily_steps || 0).toLocaleString()} a day · ${r.step_days} days counted`]; },
+      } } },
+      scales: { x: { grid: { display: false } }, y: { beginAtZero: true, ticks: { callback: compact, maxTicksLimit: 5 } } },
+    },
+    plugins: [valueLabels("lbl-steps", v => `${(v / 1e6).toFixed(1)}M`)],
+  }));
+
+  // Line with points: resting HR (lower better) and efficiency pace (reversed: faster higher).
+  const lineChart = (id, values, color, fmt, reverse, tip) => {
+    const ok = values.filter(v => v != null);
+    const pad = (Math.max(...ok) - Math.min(...ok)) * 0.25 || 1;
+    yearlyCharts.push(new Chart(document.getElementById(id), {
+      type: "line",
+      data: { labels, datasets: [{ data: values, borderColor: color, backgroundColor: color, borderWidth: 2,
+        pointRadius: rows.map(r => r.year === currentYear ? 4 : 5), tension: 0.25, spanGaps: true,
+        pointBackgroundColor: rows.map(r => r.year === currentYear ? "#fff" : color) }] },
+      options: {
+        responsive: true, layout: { padding: { top: 22, left: 12, right: 12 } },
+        plugins: { legend: { display: false }, tooltip: { displayColors: false, callbacks: { label: ctx => tip(rows[ctx.dataIndex]) } } },
+        scales: { x: { grid: { display: false }, offset: true },
+                  y: { reverse, min: Math.min(...ok) - pad, max: Math.max(...ok) + pad, ticks: { display: false }, grid: { display: false }, border: { display: false } } },
+      },
+      plugins: [valueLabels("lbl-" + id, fmt)],
+    }));
+  };
+  // Resting (left axis) and max (right axis): each on its own scale so both read well.
+  const rhr = rows.map(r => r.resting_hr), mhr = rows.map(r => r.max_hr);
+  const range = (v, pad) => { const ok = v.filter(x => x != null); const p = (Math.max(...ok) - Math.min(...ok)) * pad || 2;
+                              return { min: Math.floor(Math.min(...ok) - p), max: Math.ceil(Math.max(...ok) + p) }; };
+  // Max in the top half, resting in the bottom half: the two lines never cross.
+  const r0 = range(rhr, 0.15), m0 = range(mhr, 0.15);
+  const rr = { min: r0.min, max: r0.max + (r0.max - r0.min) * 1.2 };
+  const mr = { min: m0.min - (m0.max - m0.min) * 1.2, max: m0.max };
+  const pointLabels = {
+    id: "lbl-hr", afterDatasetsDraw(chart) {
+      const { ctx } = chart;
+      ctx.save(); ctx.font = `500 ${THEME.type.label}px ${THEME.font}`; ctx.textAlign = "center";
+      chart.data.datasets.forEach((ds, di) => {
+        ctx.fillStyle = ds.borderColor;
+        chart.getDatasetMeta(di).data.forEach((el, i) => {
+          const v = ds.data[i];
+          if (v != null) ctx.fillText(di ? Math.round(v) : v.toFixed(1), el.x, di ? el.y - 9 : el.y + 17);
+        });
+      });
+      ctx.restore();
+    },
+  };
+  const hrDataset = (data, color, axis) => ({ data, yAxisID: axis, borderColor: color, backgroundColor: color, borderWidth: 2,
+    tension: 0.25, spanGaps: true, pointRadius: 5, pointBackgroundColor: rows.map(r => r.year === currentYear ? "#fff" : color) });
+  yearlyCharts.push(new Chart(document.getElementById("yearly-chart-rhr"), {
+    type: "line",
+    data: { labels, datasets: [hrDataset(rhr, "#a50f15", "y"), hrDataset(mhr, "#e6550d", "y1")] },
+    options: {
+      responsive: true, layout: { padding: { top: 18, bottom: 14 } },
+      onClick: (evt, els) => { const e = els.find(x => x.datasetIndex === 1); if (e && rows[e.index].max_hr_activity) { switchTab("activities"); showDetail(rows[e.index].max_hr_activity); } },
+      onHover: (evt, els) => { evt.native.target.style.cursor = els.some(x => x.datasetIndex === 1) ? "pointer" : "default"; },
+      plugins: { legend: { display: false }, tooltip: { displayColors: false, callbacks: { label: ctx => {
+        const r = rows[ctx.dataIndex];
+        return ctx.datasetIndex
+          ? [`max ${r.max_hr} bpm (held 10 s) · ${r.max_hr_date}`, `ceiling that year: ${r.max_hr_ceiling} bpm`, "click to open the run"]
+          : [`resting ${r.resting_hr} bpm on average`, `${r.resting_hr_days} days measured`];
+      } } } },
+      scales: {
+        x: { grid: { display: false }, offset: true },
+        y: { position: "left", ...rr, display: false },     // each point carries its value
+        y1: { position: "right", ...mr, display: false },
+      },
+    },
+    plugins: [pointLabels],
+  }));
+  document.getElementById("yearly-eff-hr").textContent = rows[0]?.reference_hr ?? 140;
+  lineChart("yearly-chart-eff", rows.map(r => r.efficiency_pace), THEME.moss, v => fmtPace(v), true,
+            r => [`${fmtPace(r.efficiency_pace)}/km at ${r.reference_hr} bpm`, `median of ${r.efficiency_runs} flat easy runs`]);
 }
 
 async function loadYearly() {
@@ -2220,6 +2749,7 @@ async function loadYearly() {
     buildYearlyChart("yearly-chart-km", "yearly-total-km", rows, METRICS.km);
     buildYearlyChart("yearly-chart-hours", "yearly-total-hours", rows, METRICS.hours);
     buildYearlyChart("yearly-chart-elev", "yearly-total-elev", rows, METRICS.elev);
+    loadYearlyBody();
 
     yearlyLoaded = true;
   } catch (e) {
@@ -2351,8 +2881,9 @@ async function renderMonthly() {
   const mainValues = valuesByYear[year];
   const total = mainValues.reduce((s, v) => s + v, 0);
   const runs = rowsByYear[year].reduce((s, r) => s + r.num_runs, 0);
-  document.getElementById("monthly-note").textContent =
-    `${metric.fmt(total)} ${metric.label} across ${runs} runs in ${year}.`;
+  document.getElementById("monthly-note").textContent = metric.allDay
+    ? `${metric.fmt(total)} ${metric.label} in ${year} (all day, every day).`
+    : `${metric.fmt(total)} ${metric.label} across ${runs} runs in ${year}.`;
 
   // Bars: grouped by month, one color per year. Main year first.
   monthlyChart = new Chart(document.getElementById("monthly-chart"), {
@@ -2378,7 +2909,7 @@ async function renderMonthly() {
               const y = years[ctx.datasetIndex];
               const r = rowsByYear[y][ctx.dataIndex];
               const prefix = comparing ? `${y}  ` : "";
-              return `${prefix}${metric.fmt(ctx.parsed.y)} ${metric.label} · ${r.num_runs} runs`;
+              return `${prefix}${metric.fmt(ctx.parsed.y)} ${metric.label}${metric.allDay ? "" : ` · ${r.num_runs} runs`}`;
             }
           }
         }
@@ -2434,7 +2965,7 @@ async function renderMonthly() {
         }
       }
     },
-    plugins: [endLabelsPlugin(v => `${metric.fmt(v)} ${metric.label}`)],
+    plugins: [endLabelsPlugin(v => metric.allDay ? `${(v / 1e6).toFixed(2)}M steps` : `${metric.fmt(v)} ${metric.label}`)],
   });
 
   renderCompareSummary(years, cumulativeByYear, rowsByYear, metric);
@@ -2565,6 +3096,7 @@ async function pollSync() {
       `<br><strong>${n ? `${n} new ${n === 1 ? "activity" : "activities"}` : "Already up to date"}</strong>`);
     if (n) {
       // Refresh what's on screen: the month list, and the yearly charts next time they're opened.
+      Object.keys(monthActivityCache).forEach(k => delete monthActivityCache[k]);
       await loadList();
       yearlyCharts.forEach(c => c.destroy());
       yearlyCharts = [];
@@ -3132,7 +3664,7 @@ function renderRecords() {
 }
 
 /* ---------- Body: daily wellness data from Garmin ---------- */
-const bodyState = { loaded: false, rows: [], latest: null, range: 90, charts: [], stepsBucket: null, stepsChart: null };
+const bodyState = { loaded: false, rows: [], latest: null, range: 90, charts: [], stepsBucket: null, stepsChart: null, showComp: (() => { try { return !!localStorage.getItem("zachy.bodyComp"); } catch (e) { return false; } })() };
 
 function fmtHours(s) {
   if (s == null) return "—";
@@ -3148,17 +3680,19 @@ const titleCase = t => t ? t.charAt(0) + t.slice(1).toLowerCase().replace(/_/g, 
 
 async function loadBody() {
   try {
-    const [rows, latest, races, eff] = await Promise.all([
+    const [rows, latest, races, eff, volume] = await Promise.all([
       fetch(`${API}/wellness/`).then(r => r.json()),
       fetch(`${API}/wellness/latest`).then(r => r.json()),
       fetch(`${API}/body/races`).then(r => r.json()).catch(() => []),
       fetch(`${API}/body/efficiency`).then(r => r.json()).catch(() => ({ runs: [] })),
+      fetch(`${API}/body/volume`).then(r => r.json()).catch(() => []),
     ]);
     bodyState.races = races;
     bodyState.efficiency = eff.runs;
     bodyState.effHr = eff.reference_hr;
     bodyState.rows = rows;
-    for (const c of ["weight_kg", "resting_hr", "max_hr", "vo2max"]) addMovingAverage(rows, c);
+    mergeVolume(rows, volume);
+    for (const c of ["weight_kg", "resting_hr", "max_hr", "vo2max", ...BODY_COMP.map(b => b.col)]) addMovingAverage(rows, c);
     bodyState.latest = latest;
     bodyState.loaded = true;
     renderBodyLatest();
@@ -3166,6 +3700,39 @@ async function loadBody() {
   } catch (e) {
     document.getElementById("body-tiles").innerHTML = `<div class="error">Could not load body data (${e.message}).</div>`;
   }
+}
+
+// Running km per day into the daily rows (days without a wellness row are added), then
+// run_km_7d: the distance run in the 7 days ending on each day (a sliding week).
+function mergeVolume(rows, volume) {
+  const byDate = new Map(rows.map(r => [r.date, r]));
+  for (const v of volume) {
+    if (!byDate.has(v.date)) { const r = { date: v.date }; rows.push(r); byDate.set(v.date, r); }
+    byDate.get(v.date).run_km = v.km;
+  }
+  rows.sort((a, b) => a.date < b.date ? -1 : 1);
+  const DAY = 86400000, time = r => new Date(r.date + "T00:00:00").getTime();
+  let start = 0, sum = 0;
+  rows.forEach(r => {
+    sum += r.run_km || 0;
+    while (time(rows[start]) <= time(r) - 7 * DAY) { sum -= rows[start].run_km || 0; start++; }
+    r.run_km_7d = Math.round(sum * 10) / 10;
+  });
+}
+
+// Body composition from the scale, shown under the weight chart on request.
+const BODY_COMP = [
+  { col: "bmi", label: "BMI", unit: "", digits: 1, color: "#6b5b95" },
+  { col: "body_fat_pct", label: "Body fat", unit: "%", digits: 1, color: "#d4a017" },
+  { col: "body_water_pct", label: "Body water", unit: "%", digits: 1, color: "#4a8fc2" },
+  { col: "muscle_mass_kg", label: "Muscle mass", unit: "kg", digits: 1, color: "#a8542e" },
+  { col: "bone_mass_kg", label: "Bone mass", unit: "kg", digits: 2, color: "#7d7d7d" },
+];
+
+function toggleBodyComp() {
+  bodyState.showComp = !bodyState.showComp;
+  try { localStorage.setItem("zachy.bodyComp", bodyState.showComp ? "1" : ""); } catch (e) {}
+  drawBodyCharts();
 }
 
 // <col>_ma7: average of the readings in the 7 calendar days ending on each day
@@ -3320,6 +3887,8 @@ function renderBodyMinMax() {
   };
   const set = (id, html) => { document.getElementById(`mm-${id}`).innerHTML = html; };
   set("weight", pair("weight_kg", v => `${v.toFixed(1)} kg`));
+  const vol = extremes("run_km_7d");
+  set("volume", vol ? `biggest 7 days <b>${vol.hi.v.toFixed(0)} km</b> · ${day(vol.hi.date)}` : "");
   set("hrv", pair("hrv_night", v => `${Math.round(v)} ms`));
   set("rhr", pair("resting_hr", v => `${Math.round(v)} bpm`));
   set("maxhr", pair("max_hr", v => `${Math.round(v)} bpm`));
@@ -3339,12 +3908,6 @@ const STEP_BUCKETS = {
   day:   { min: 0,   key: d => d.toISOString().slice(0, 10), days: () => 1, label: k => stepsDay(k) },
   week:  { min: 14,  key: d => { const m = new Date(d); m.setUTCDate(m.getUTCDate() - ((m.getUTCDay() + 6) % 7)); return m.toISOString().slice(0, 10); },
            days: () => 7, label: k => `week of ${stepsDay(k)}` },
-  month: { min: 60,  key: d => d.toISOString().slice(0, 7),
-           days: k => new Date(+k.slice(0, 4), +k.slice(5, 7), 0).getDate(),
-           label: k => new Date(k + "-01T00:00:00").toLocaleDateString(undefined, { month: "short", year: "numeric" }) },
-  year:  { min: 730, key: d => d.toISOString().slice(0, 4),
-           days: k => ((+k % 4 === 0 && +k % 100 !== 0) || +k % 400 === 0) ? 366 : 365,
-           label: k => k },
 };
 
 // "Sep 8", or "Sep 8, 2025" when the period spans more than a year.
@@ -3361,7 +3924,7 @@ function stepsPeriodDays() {
 }
 
 function defaultStepsBucket() {
-  return !bodyState.range ? "month" : bodyState.range >= 365 ? "week" : "day";
+  return !bodyState.range || bodyState.range >= 365 ? "week" : "day";   // months and years: Yearly tab
 }
 
 function setStepsBucket(b) {
@@ -3589,6 +4152,53 @@ function drawBodyCharts() {
     line("7-day avg", col("weight_kg_ma7"), THEME.clay, { pointRadius: 0, borderWidth: 2.25, spanGaps: false }),
   ], { y: { ...fit(["weight_kg"], 1), ticks: { callback: v => `${v} kg` } } },
   { plugins: { tooltip: { callbacks: { label: ctx => `${ctx.dataset.label}  ${ctx.parsed.y.toFixed(1)} kg` } } } });
+
+  // Running volume: 7-day sliding total (line), and each calendar week's total (Monday–Sunday)
+  // as a dot on its Sunday (on the week's row when the chart is drawn weekly).
+  const monday = iso => { const d = new Date(iso + "T00:00:00"); d.setDate(d.getDate() - ((d.getDay() + 6) % 7));
+                          return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`; };
+  const weekKm = new Map();
+  for (const r of bodyDailyRows()) if (r.run_km) weekKm.set(monday(r.date), (weekKm.get(monday(r.date)) || 0) + r.run_km);
+  const daily = rows.length === bodyDailyRows().length;
+  const weekly = labels.map((d, i) => {
+    const last = i === labels.length - 1 || monday(labels[i + 1]) !== monday(d);   // last row of its week
+    return (daily ? last : true) ? Math.round((weekKm.get(monday(d)) || 0) * 10) / 10 : null;
+  });
+  make("bc-volume", "line", [
+    { label: "Last 7 days", data: col("run_km_7d"), borderColor: "rgba(47,106,166,0.45)", backgroundColor: "rgba(47,106,166,0.07)",
+      fill: "origin", borderWidth: 1.5, pointRadius: 0, tension: 0.2, order: 1 },
+    { label: "Week (Mon–Sun)", data: weekly, spanGaps: true, tension: 0, borderWidth: 1.5, order: 0, pointRadius: weekKm.size > 60 ? 1.6 : 3.5, pointHoverRadius: 5,
+      borderColor: weekKm.size > 60 ? "rgba(31,29,24,0.55)" : THEME.ink, backgroundColor: weekKm.size > 60 ? "rgba(31,29,24,0.55)" : THEME.ink },
+  ], { y: { beginAtZero: true, ticks: { callback: v => `${v} km` } } },
+  { plugins: { tooltip: { callbacks: { label: ctx => ctx.datasetIndex === 0
+      ? `last 7 days ${ctx.parsed.y.toFixed(1)} km (${(ctx.parsed.y / 7).toFixed(1)} km/day)`
+      : `week of ${monday(labels[ctx.dataIndex])}: ${ctx.parsed.y.toFixed(1)} km` } } } });
+
+  // Body composition (BMI, fat, water, muscle, bone): hidden until asked for.
+  const comp = document.getElementById("body-comp");
+  document.getElementById("body-comp-btn").textContent = bodyState.showComp ? "Hide body composition" : "Show body composition (BMI, fat, water, muscle, bone)";
+  comp.innerHTML = !bodyState.showComp ? "" : BODY_COMP.map(b => `
+    <div class="section-title mm-row">${b.label}${b.unit ? `<span class="section-sub">${b.unit}</span>` : ""}<span class="minmax" id="mm-${b.col}"></span></div>
+    <div class="card"><canvas id="bc-${b.col}" height="55"></canvas></div>`).join("");
+  if (bodyState.showComp) {
+    const daily = bodyDailyRows();
+    for (const b of BODY_COMP) {
+      const fmt = v => `${v.toFixed(b.digits)}${b.unit ? " " + b.unit : ""}`;
+      const vals = daily.filter(r => r[b.col] != null);
+      if (vals.length) {
+        const lo = vals.reduce((a, r) => r[b.col] < a[b.col] ? r : a), hi = vals.reduce((a, r) => r[b.col] > a[b.col] ? r : a);
+        const day = iso => new Date(iso + "T00:00:00").toLocaleDateString(undefined, longRange
+          ? { month: "short", day: "numeric", year: "numeric" } : { month: "short", day: "numeric" });
+        document.getElementById(`mm-${b.col}`).innerHTML = `min <b>${fmt(lo[b.col])}</b> · ${day(lo.date)} – max <b>${fmt(hi[b.col])}</b> · ${day(hi.date)}`;
+      }
+      const step = b.digits === 2 ? 0.1 : 0.5;
+      make(`bc-${b.col}`, "line", [
+        dots(b.label, col(b.col), hexToRgba(b.color, 0.35)),
+        line("7-day avg", col(`${b.col}_ma7`), b.color, { pointRadius: 0, borderWidth: 2.25, spanGaps: false }),
+      ], { y: { ...fit([b.col], step), ticks: { callback: v => fmt(v) } } },
+      { plugins: { tooltip: { callbacks: { label: ctx => `${ctx.dataset.label}  ${fmt(ctx.parsed.y)}` } } } });
+    }
+  }
 
   make("bc-hrv", "line", [
     line("Balanced high", col("hrv_base_high"), "rgba(74,157,91,0.25)", { borderWidth: 0, pointRadius: 0, fill: "+1", backgroundColor: "rgba(74,157,91,0.12)" }),

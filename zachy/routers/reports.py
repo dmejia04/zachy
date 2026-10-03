@@ -1,5 +1,8 @@
 from fastapi import APIRouter, Depends
+from sqlalchemy import extract, func
 from sqlalchemy.orm import Session
+
+from zachy.models import Wellness
 
 from zachy.database import get_db
 from zachy.analytics.overview import yearly_summary, monthly_summary, get_running_activities_df
@@ -11,9 +14,18 @@ router = APIRouter()
 def get_monthly_summary(year: int, db: Session = Depends(get_db)):
     """Month-by-month running distance, time, and elevation for one year."""
     df = monthly_summary(db, year)
-    if df.empty:
+    rows = df.to_dict(orient="records") if not df.empty else []
+    # Steps per month from the daily wellness data (a year can have steps but no runs).
+    steps = dict(db.query(extract("month", Wellness.date), func.sum(Wellness.steps))
+                 .filter(extract("year", Wellness.date) == year).group_by(extract("month", Wellness.date)).all())
+    if not rows and not steps:
         return []
-    return df.to_dict(orient="records")
+    if not rows:
+        rows = [{"month": m, "total_distance_km": 0, "total_duration_s": 0, "total_elevation_gain": 0, "num_runs": 0}
+                for m in range(1, 13)]
+    for r in rows:
+        r["steps"] = int(steps.get(r["month"]) or 0)
+    return rows
 
 
 @router.get("/yearly", response_model=list[YearlySummaryOut])

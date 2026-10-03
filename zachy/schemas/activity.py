@@ -48,6 +48,7 @@ class MonthlySummaryOut(BaseModel):
     total_duration_s: float
     total_elevation_gain: float
     num_runs: int
+    steps: int = 0          # all steps that month (watch, every day), not only running
 
 class LapOut(BaseModel):
     lap_number: int | None

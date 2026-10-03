@@ -96,3 +96,98 @@ def _speed_per_beat(runs: list[dict]) -> float:
     if len(runs) < 30 or den == 0:
         return sum(r["ef"] for r in runs) / max(len(runs), 1)
     return num / den
+
+
+def yearly(db: Session) -> list[dict]:
+    """Per year: total steps (and days the watch counted), average resting HR, and aerobic
+    efficiency — the median pace at 140 bpm of that year's flat easy runs (odd runs left out)."""
+    from zachy.models import Wellness
+    years: dict[int, dict] = {}
+    for day, steps, rhr in db.query(Wellness.date, Wellness.steps, Wellness.resting_hr):
+        y = years.setdefault(day.year, {"steps": 0, "step_days": 0, "rhr": []})
+        if steps:
+            y["steps"] += steps
+            y["step_days"] += 1
+        if rhr:
+            y["rhr"].append(rhr)
+    max_hr = yearly_max_hr(db)
+    reference, runs = aerobic_efficiency(db)
+    paces: dict[int, list[float]] = {}
+    for r in runs:
+        if not r["outlier"]:
+            paces.setdefault(int(r["date"][:4]), []).append(r["pace_at_hr"])
+    out = []
+    for year in sorted(set(years) | set(paces) | set(max_hr)):
+        y = years.get(year, {"steps": 0, "step_days": 0, "rhr": []})
+        p = sorted(paces.get(year, []))
+        out.append({
+            "year": year, "steps": y["steps"] or None, "step_days": y["step_days"],
+            "avg_daily_steps": round(y["steps"] / y["step_days"]) if y["step_days"] else None,
+            "resting_hr": round(sum(y["rhr"]) / len(y["rhr"]), 1) if y["rhr"] else None,
+            "resting_hr_days": len(y["rhr"]),
+            "efficiency_pace": p[len(p) // 2] if p else None, "efficiency_runs": len(p),
+            "reference_hr": reference,
+            **max_hr.get(year, {"max_hr": None}),
+        })
+    return out
+
+
+_max_hr_cache: dict = {}   # recomputed when activities or the birth date change
+SUSTAINED_HR_S = 10   # a max heart rate has to be held this long (10 s median) to count
+
+
+def _sustained_max_hr(db: Session, activity_id: int) -> float | None:
+    """Highest 10-second median heart rate in the FIT records: single-sample spikes don't count."""
+    import pandas as pd
+    from zachy.models import Record
+    hr = [h for (h,) in db.query(Record.hr).filter(Record.activity_id == activity_id).order_by(Record.id)]
+    s = pd.Series(hr, dtype=float).dropna()
+    if len(s) < SUSTAINED_HR_S:
+        return None
+    return float(s.rolling(SUSTAINED_HR_S).median().max())
+
+
+def yearly_max_hr(db: Session) -> dict[int, dict]:
+    """Highest believable heart rate of each year, from runs (wrist readings on bikes and in the gym
+    lock onto cadence or glitch too often). Rules:
+    - held for 10 s (median of the FIT records), so one-second spikes don't count;
+    - under the ceiling 220 - age/2 (analytics/profile.py); higher is a glitch;
+    - one run standing more than 10 bpm above every other that year is dropped as a spike.
+    Runs without FIT records use the watch's max."""
+    from sqlalchemy import func
+    from zachy.analytics.profile import max_hr_ceiling, profile
+    from zachy.analytics.terrain import FOOT_TYPES
+    key = (db.query(func.count(Activity.id), func.max(Activity.id)).one(), profile(db)["effective"]["birth_date"])
+    if _max_hr_cache.get("key") == key:
+        return _max_hr_cache["value"]
+    by_year: dict[int, list] = {}
+    for a in db.query(Activity).filter(Activity.max_hr.isnot(None), Activity.activity_type.in_(FOOT_TYPES)):
+        by_year.setdefault(a.date.year, []).append(a)
+    out = {}
+    for year, acts in by_year.items():
+        ceiling = max_hr_ceiling(db, year)
+        values = []
+        for a in sorted(acts, key=lambda a: -a.max_hr)[:20]:   # the top candidates are enough
+            v = _sustained_max_hr(db, a.id)
+            v = a.max_hr if v is None else v
+            if v <= ceiling:
+                values.append((v, a))
+        values.sort(key=lambda x: -x[0])
+        while len(values) >= 2 and values[0][0] - values[1][0] > 10:
+            values.pop(0)
+        if values:
+            v, a = values[0]
+            out[year] = {"max_hr": round(v), "max_hr_date": a.date.isoformat(), "max_hr_activity": a.id,
+                         "max_hr_ceiling": ceiling}
+    _max_hr_cache.update(key=key, value=out)
+    return out
+
+
+def daily_volume(db: Session) -> list[dict]:
+    """Running distance per day (all foot activities, treadmill included)."""
+    from sqlalchemy import func
+    from zachy.analytics.terrain import FOOT_TYPES
+    rows = (db.query(Activity.date, func.sum(Activity.distance_km), func.sum(Activity.duration_s))
+            .filter(Activity.activity_type.in_(FOOT_TYPES), Activity.distance_km > 0)
+            .group_by(Activity.date).order_by(Activity.date))
+    return [{"date": d.isoformat(), "km": round(km, 2), "secs": secs or 0} for d, km, secs in rows]
