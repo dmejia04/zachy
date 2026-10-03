@@ -22,6 +22,11 @@ class ActivityOut(BaseModel):
     training_effect_anaerobic: float | None
     calories: int | None
     steps: int | None
+    category: str | None = None   # race | workout | easy — automatic guess or your override (analytics/races.py)
+    place: str | None = None      # from the activity name ("Toulouse Running" -> Toulouse)
+    surface: str | None = None    # road | trail | treadmill | track (analytics/terrain.py)
+    terrain: str | None = None    # flat | rolling | mountain
+    workout: dict | None = None   # {"type", "summary", ...} for workouts (analytics/workouts.py)
 
     class Config:
         from_attributes = True
@@ -83,3 +88,7 @@ class ActivityDetailOut(ActivityOut):
     timeseries_source: str                # "fit" (original file) | "chart" (old 2,000-point data) | "none"
     timeseries_points: int                # points before downsampling
     peaks: dict | None = None             # 30 s extremes + altitude/gradient extremes (analytics/peaks.py)
+    terrain: dict | None = None           # flat/rolling/mountain, m/km, km-effort, trail/road (analytics/terrain.py)
+    category: dict | None = None          # race/workout/easy, auto guess, source, reasons (analytics/races.py)
+    place: str | None = None              # from the activity name ("Toulouse Running" -> Toulouse)
+    gap: dict | None = None               # flat-equivalent pace per method (analytics/gap.py)

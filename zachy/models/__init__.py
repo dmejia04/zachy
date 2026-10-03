@@ -6,5 +6,9 @@ from zachy.models.sync_run import SyncRun
 from zachy.models.fit import FitFile, Record
 from zachy.models.zone_settings import ZoneSettings
 from zachy.models.wellness import Wellness
+from zachy.models.activity_override import ActivityOverride
+from zachy.models.workout_summary import WorkoutSummary
+from zachy.models.best_effort import BestEffort
+from zachy.models.gap_model import GapModel
 
-__all__ = ["Activity", "Lap", "Timeseries", "BodyMetric", "SyncRun", "FitFile", "Record", "ZoneSettings", "Wellness"]
+__all__ = ["Activity", "Lap", "Timeseries", "BodyMetric", "SyncRun", "FitFile", "Record", "ZoneSettings", "Wellness", "ActivityOverride", "WorkoutSummary", "BestEffort", "GapModel"]

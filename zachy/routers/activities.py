@@ -8,9 +8,16 @@ from sqlalchemy.orm import Session
 from zachy.database import get_db
 import pandas as pd
 
+from zachy.analytics.gap import adjusted_paces
 from zachy.analytics.peaks import elevation_extremes, sustained_extremes
 from zachy.analytics.splits import km_splits, lap_stats, load_track
-from zachy.models import Activity, Lap, Record, Timeseries
+from zachy.analytics.races import CATEGORIES, category_status
+from zachy.analytics.terrain import SURFACES, classify, place_from_name
+from zachy.analytics.workouts import cached_workout
+from zachy.models import FitFile
+from pydantic import BaseModel
+
+from zachy.models import Activity, ActivityOverride, Lap, Record, Timeseries
 from zachy.schemas.activity import ActivityOut, ActivityDetailOut, TimeseriesPointOut
 
 router = APIRouter()
@@ -38,7 +45,22 @@ def list_activities(
             start, end = date(year, 1, 1), date(year + 1, 1, 1)
         query = query.filter(Activity.date >= start, Activity.date < end)
 
-    return query.offset(offset).limit(limit).all()
+    activities = query.offset(offset).limit(limit).all()
+    overrides = {o.activity_id: o for o in db.query(ActivityOverride)
+                 .filter(ActivityOverride.activity_id.in_([a.id for a in activities]))}
+    out = []
+    for a in activities:
+        row = ActivityOut.model_validate(a).model_dump()
+        override = overrides.get(a.id)
+        status = category_status(db, a, getattr(override, "category", None))
+        row["category"] = status["category"] if status else None
+        row["workout"] = cached_workout(db, a) if row["category"] == "workout" else None
+        t = classify(a.activity_type, a.distance_km, a.elevation_gain, getattr(override, "surface", None),
+                     detected_track=bool(row["workout"] and row["workout"]["on_track"]))
+        row["surface"], row["terrain"] = (t["surface"], t["terrain"]) if t else (None, None)
+        row["place"] = place_from_name(a.name)
+        out.append(row)
+    return out
 
 
 @router.get("/months")
@@ -124,7 +146,77 @@ def get_activity_detail(
         "timeseries_source": source,
         "timeseries_points": total,
         "peaks": peaks,
+        "terrain": activity_terrain(db, activity),
+        "category": (category := activity_category(db, activity)),
+        "place": place_from_name(activity.name),
+        "gap": adjusted_paces(db, activity) if source == "fit" else None,
+        # Workout structure (cached), so the page header can say "Track intervals · 12 × 400 m…".
+        "workout": cached_workout(db, activity) if category and category["category"] == "workout" else None,
     }
+
+
+@router.get("/{activity_id}/workout")
+def get_workout(activity_id: int, db: Session = Depends(get_db)):
+    """What the workout was, read from the laps of the original FIT file — e.g.
+    {"type": "Intervals", "summary": "12 × 400 m r 1:00 @ 3:06/km", "warmup": "10.5 km", ...}.
+    null when the laps show no structure."""
+    activity = db.query(Activity).filter(Activity.id == activity_id).first()
+    fit = db.get(FitFile, activity_id) if activity else None
+    if not fit or fit.status != "ok":
+        raise HTTPException(status_code=404, detail="No FIT file for this activity")
+    return cached_workout(db, activity)
+
+
+def activity_category(db: Session, activity: Activity) -> dict | None:
+    override = db.get(ActivityOverride, activity.id)
+    return category_status(db, activity, override.category if override else None)
+
+
+class CategoryIn(BaseModel):
+    category: str | None   # "race" | "workout" | "easy", or null = back to the automatic guess
+
+
+@router.put("/{activity_id}/category")
+def set_category(activity_id: int, body: CategoryIn, db: Session = Depends(get_db)):
+    """Set race / workout / easy for one activity (null = automatic again)."""
+    activity = db.query(Activity).filter(Activity.id == activity_id).first()
+    if not activity:
+        raise HTTPException(status_code=404, detail="Activity not found")
+    if body.category not in (None, *CATEGORIES):
+        raise HTTPException(status_code=422, detail="category must be race, workout, easy or null")
+    override = db.get(ActivityOverride, activity_id) or ActivityOverride(activity_id=activity_id)
+    override.category = body.category
+    db.merge(override)
+    db.commit()
+    return activity_category(db, activity)
+
+
+def activity_terrain(db: Session, activity: Activity) -> dict | None:
+    override = db.get(ActivityOverride, activity.id)
+    category = category_status(db, activity, override.category if override else None)
+    workout = cached_workout(db, activity) if category and category["category"] == "workout" else None
+    return classify(activity.activity_type, activity.distance_km, activity.elevation_gain,
+                    override.surface if override else None,
+                    detected_track=bool(workout and workout["on_track"]))
+
+
+class SurfaceIn(BaseModel):
+    surface: str | None   # "road", "trail", "track", "treadmill", or null to go back to automatic
+
+
+@router.put("/{activity_id}/surface")
+def set_surface(activity_id: int, body: SurfaceIn, db: Session = Depends(get_db)):
+    """Override trail/road for one activity (null = automatic again)."""
+    activity = db.query(Activity).filter(Activity.id == activity_id).first()
+    if not activity:
+        raise HTTPException(status_code=404, detail="Activity not found")
+    if body.surface not in (None, *SURFACES):
+        raise HTTPException(status_code=422, detail=f"surface must be one of {SURFACES} or null")
+    override = db.get(ActivityOverride, activity_id) or ActivityOverride(activity_id=activity_id)
+    override.surface = body.surface
+    db.merge(override)
+    db.commit()
+    return activity_terrain(db, activity)
 
 
 def compute_peaks(timeseries: list[dict]) -> dict:
