@@ -288,8 +288,6 @@
   .surface-pick { font: inherit; font-size: 12px; color: var(--ink); border: 1px solid var(--line);
                   border-radius: 6px; padding: 1px 4px; background: white; }
   .surface-src { font-size: 11px; color: var(--muted); }
-  .stat.terrain-mountain { border-color: #fb6a4a; background: rgba(251, 106, 74, 0.06); }
-  .stat.terrain-rolling { border-color: #fcae91; background: rgba(252, 174, 145, 0.08); }
   .profile-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 14px; }
   .profile-field { background: white; border: 1px solid var(--line); border-radius: 6px; padding: 12px 14px; }
   .profile-field label { font-size: 11px; color: var(--muted); display: block; margin-bottom: 6px; }
@@ -298,6 +296,7 @@
   .profile-field input:focus, .profile-field select:focus { outline: none; border-color: var(--ink); }
   .profile-field .pf-src { font-size: 11px; color: var(--muted); margin-top: 6px; }
   .profile-field .pf-src.manual { color: var(--clay); }
+  .pf-wide { grid-column: 1 / -1; margin-top: 0; }
   .pf-group { grid-column: 1 / -1; font-size: 14px; font-weight: 500; margin-top: 10px; }
   .pf-group .muted-note { font-weight: 400; margin-left: 6px; }
   .profile-derived { margin-top: 22px; display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 14px; }
@@ -361,8 +360,13 @@
   .rec-pace { font-size: 12px; font-weight: 400; color: var(--muted); margin-left: 8px; }
   .rec-unit { font-size: 13px; font-weight: 500; }
   .rec-meta { font-size: 12px; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  .race-legend { display: flex; flex-wrap: wrap; gap: 12px; font-size: 12px; color: var(--muted); margin: 4px 0 6px; align-items: center; }
-  .race-legend span { display: inline-flex; align-items: center; gap: 4px; }
+  table.laps .dyn-col { background: rgba(140,107,177,0.06); }
+  .gait-head { display: flex; flex-wrap: wrap; gap: 4px 16px; align-items: center; font-size: 12.5px; margin-top: 2px; }
+  .gait-head span { display: inline-flex; align-items: center; gap: 5px; color: var(--muted); }
+  .gait-head span b { color: var(--ink); }
+  .gait-head i { width: 10px; height: 10px; border-radius: 2px; display: inline-block; }
+  .temp-band { font-size: 11px; font-weight: 600; color: white; border-radius: 8px; padding: 1px 7px; vertical-align: middle; margin-left: 4px; }
+  .range-bar { display: flex; justify-content: flex-end; margin: 4px 0 -6px; }
   .body-tiles { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 12px; margin: 12px 0 16px; }
   .body-tiles .stat-value { font-size: 19px; }
   .stat-sub { font-size: 11px; color: var(--muted); margin-top: 2px; }
@@ -431,6 +435,11 @@
                align-items: baseline; gap: 4px 12px; }
   .perf-head .section-sub { font-size: 13px; font-weight: 400; }
   .perf-sep { margin-top: 44px; padding-top: 22px; border-top: 1px solid var(--line); }
+  .speed-head { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; justify-content: space-between; margin-top: 12px; }
+  .speed-head select { font: inherit; font-size: 14px; padding: 5px 8px; border: 1px solid var(--line); border-radius: 6px; background: white; max-width: 100%; }
+  .cad-scale { display: flex; align-items: center; gap: 8px; font-size: 11px; color: var(--muted); }
+  .cad-scale i { display: block; width: 180px; height: 6px; border-radius: 3px;
+                 background: linear-gradient(90deg, rgb(64,196,99) 0%, rgb(64,196,99) 42%, rgb(61,126,255) 58%, rgb(92,61,255) 83%, rgb(255,64,129) 100%); }
   .overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.35); z-index: 2000; display: flex; align-items: flex-start;
              justify-content: center; padding: 40px 16px; overflow-y: auto; }
   .overlay-box { background: var(--bg, white); border-radius: 10px; padding: 18px 20px; max-width: 760px; width: 100%;
@@ -453,7 +462,6 @@
   .cal-row.cal-days { font-size: 12px; color: var(--muted); padding: 6px 0; }
   .cal-row.cal-days div { text-align: center; }
   .cal-week { padding: 12px 8px 12px 0; }
-  .cal-row.has-sub .cal-week { grid-row: span 2; }
   .cal-week .wk-range { font-size: 15px; font-weight: 600; }
   .cal-week .wk-km { font-size: 20px; font-weight: 500; margin-top: 6px; font-variant-numeric: tabular-nums; }
   .cal-week .wk-more { font-size: 11px; color: var(--muted); margin-top: 2px; }
@@ -468,6 +476,8 @@
   .cal-bwrap { height: 82px; display: flex; align-items: center; justify-content: center; }
   .cal-sub { border-top: 1px solid var(--line); padding: 6px 2px 8px; display: flex; flex-direction: column;
              align-items: center; gap: 4px; min-width: 0; }
+  .cal-sub-label { align-items: flex-start; justify-content: center; font-size: 11px; color: var(--muted);
+                   text-transform: lowercase; letter-spacing: 0.02em; }
   .cal-sub .cal-chip { max-width: 100%; white-space: normal; text-align: center; line-height: 1.3; }
   .cal-day .dnum { position: absolute; top: 4px; right: 6px; font-size: 10px; color: var(--muted); }
   .cal-day.today .dnum { color: var(--clay); font-weight: 700; }
@@ -546,6 +556,7 @@
     <button class="tab" data-tab="performance" onclick="switchTab('performance')">Performance</button>
     <button class="tab" data-tab="records" onclick="switchTab('records')">Records</button>
     <button class="tab" data-tab="grade" onclick="switchTab('grade')">Grade</button>
+    <button class="tab" data-tab="progress" onclick="switchTab('progress')">Progress</button>
     <button class="tab" data-tab="body" onclick="switchTab('body')">Body</button>
     <button class="tab" data-tab="profile" onclick="switchTab('profile')">Profile</button>
   </div>
@@ -680,7 +691,7 @@
   </div>
 
   <div id="panel-grade" class="panel">
-    <div class="section-title" style="margin-top:0;">Grade-adjusted pace: five models compared</div>
+    <div class="section-title" style="margin-top:0;">Grade-adjusted pace: six models compared</div>
     <div class="muted-note" style="margin:0 0 12px;">
       Each model says how many flat metres one metre on a slope is worth (1.0 = flat). A run's
       flat-equivalent pace is its moving time divided by its slope-weighted distance.
@@ -690,6 +701,7 @@
       <button data-v="race" onclick="setGapView('race')">Race model</button>
       <button data-v="years" onclick="setGapView('years')">Your curve by year</button>
       <button data-v="walk" onclick="setGapView('walk')">Walk vs run</button>
+      <button data-v="speed" onclick="setGapView('speed')">Speed vs slope</button>
     </div>
     <div class="card"><canvas id="gap-chart" height="170"></canvas></div>
     <div class="gap-table" id="gap-table"></div>
@@ -697,25 +709,63 @@
     <div class="muted-note" id="gap-note"></div>
   </div>
 
-  <div id="panel-body" class="panel">
+  <div id="panel-progress" class="panel">
     <div class="chart-bar" style="margin-top:0;">
-      <div class="section-title">Latest<span class="section-sub" id="body-latest-date"></span></div>
-      <div class="seg" id="body-range">
-        <button data-r="30" onclick="setBodyRange(30)">30 d</button>
-        <button data-r="90" onclick="setBodyRange(90)">90 d</button>
-        <button data-r="365" onclick="setBodyRange(365)">1 y</button>
-        <button data-r="0" onclick="setBodyRange(0)">All</button>
-      </div>
+      <div class="section-title">Progress<span class="section-sub">fitness and performance</span></div>
     </div>
-    <div class="body-tiles" id="body-tiles"><div class="loading">Loading…</div></div>
     <div class="body-cards">
       <div class="card"><div class="stat-label">race predictions</div><div id="body-race"></div></div>
       <div class="card"><div class="stat-label">lactate threshold &amp; power</div><div id="body-lt"></div></div>
     </div>
+    <div class="body-tiles" id="progress-tiles"><div class="loading">Loading…</div></div>
+    <div class="range-bar">
+  <div class="seg" id="progress-range">
+        <button data-r="30" onclick="setBodyRange(30)">30 d</button>
+        <button data-r="90" onclick="setBodyRange(90)">90 d</button>
+        <button data-r="ytd" onclick="setBodyRange('ytd')">YTD</button>
+        <button data-r="365" onclick="setBodyRange(365)">1 y</button>
+        <button data-r="0" onclick="setBodyRange(0)">All</button>
+      </div>
+    </div>
+    <div class="section-title mm-row">Running volume
+      <span class="seg seg-sm" id="volume-measure">
+        <button data-m="km" onclick="setVolumeMeasure('km')">km</button>
+        <button data-m="gain" onclick="setVolumeMeasure('gain')">elevation</button>
+        <button data-m="time" onclick="setVolumeMeasure('time')">time</button>
+      </span><span class="section-sub">dots: each week, Monday to Sunday · light line: last 7 days (sliding)</span><span class="minmax" id="mm-volume"></span></div>
+    <div class="card"><canvas id="bc-volume" height="70"></canvas></div>
+    <div class="section-title mm-row">Training load<span class="section-sub">acute (7 d) vs chronic (28 d) · bars: readiness</span><span class="minmax" id="mm-load"></span></div>
+    <div class="card"><canvas id="bc-load" height="80"></canvas></div>
+    <div class="section-title mm-row">VO2max<span class="minmax" id="mm-vo2"></span></div>
+    <div class="card"><canvas id="bc-vo2" height="70"></canvas></div>
+    <div class="section-title mm-row">Aerobic efficiency<span class="section-sub"><span id="eff-sub">pace at your typical easy heart rate on flat easy runs</span> · higher = fitter</span><span class="minmax" id="mm-eff"></span></div>
+    <div class="card"><canvas id="bc-eff" height="110"></canvas></div>
+    <div class="section-title mm-row">Endurance score<span class="section-sub">weekly · Garmin rates 8,600+ as elite for you</span><span class="minmax" id="mm-endurance"></span></div>
+    <div class="card"><canvas id="bc-endurance" height="70"></canvas></div>
+    <div class="section-title mm-row">Hill score<span class="section-sub">overall, with its strength and endurance parts</span><span class="minmax" id="mm-hill"></span></div>
+    <div class="card"><canvas id="bc-hill" height="70"></canvas></div>
+    <div class="section-title mm-row">Race predictions<span class="section-sub">Garmin's predicted pace /km · points: your road races at those distances</span><span class="minmax" id="mm-race"></span></div>
+    <div class="card"><canvas id="bc-race" height="80"></canvas></div>
+  </div>
+
+  <div id="panel-body" class="panel">
+    <div class="section-title" style="margin-top:0;">Profile<span class="section-sub"><a href="#" onclick="switchTab('profile'); return false;">edit</a></span></div>
+    <div class="body-tiles" id="body-profile"></div>
+    <div class="chart-bar">
+      <div class="section-title">Latest<span class="section-sub" id="body-latest-date"></span></div>
+    </div>
+    <div class="body-tiles" id="body-tiles"><div class="loading">Loading…</div></div>
+    <div class="range-bar">
+  <div class="seg" id="body-range">
+        <button data-r="30" onclick="setBodyRange(30)">30 d</button>
+        <button data-r="90" onclick="setBodyRange(90)">90 d</button>
+        <button data-r="ytd" onclick="setBodyRange('ytd')">YTD</button>
+        <button data-r="365" onclick="setBodyRange(365)">1 y</button>
+        <button data-r="0" onclick="setBodyRange(0)">All</button>
+      </div>
+    </div>
     <div class="muted-note" id="body-note"></div>
 
-    <div class="section-title mm-row">Running volume<span class="section-sub">dots: each week, Monday to Sunday · light line: last 7 days (sliding)</span><span class="minmax" id="mm-volume"></span></div>
-    <div class="card"><canvas id="bc-volume" height="70"></canvas></div>
     <div class="section-title mm-row">Weight<span class="section-sub">kg</span><span class="minmax" id="mm-weight"></span></div>
     <div class="card"><canvas id="bc-weight" height="70"></canvas></div>
     <button class="pick" id="body-comp-btn" style="margin-top:10px;" onclick="toggleBodyComp()">Show body composition</button>
@@ -728,29 +778,6 @@
     <div class="card"><canvas id="bc-maxhr" height="70"></canvas></div>
     <div class="section-title mm-row">Sleep<span class="section-sub">hours by stage · line: sleep score</span><span class="minmax" id="mm-sleep"></span></div>
     <div class="card"><canvas id="bc-sleep" height="80"></canvas></div>
-    <div class="section-title mm-row">VO2max<span class="minmax" id="mm-vo2"></span></div>
-    <div class="card"><canvas id="bc-vo2" height="70"></canvas></div>
-    <div class="section-title mm-row">Aerobic efficiency<span class="section-sub"><span id="eff-sub">pace at your typical easy heart rate on flat easy runs</span> · higher = fitter</span><span class="minmax" id="mm-eff"></span></div>
-    <div class="card"><canvas id="bc-eff" height="110"></canvas></div>
-    <div class="section-title mm-row">Endurance score<span class="section-sub">weekly · Garmin rates 8,600+ as elite for you</span><span class="minmax" id="mm-endurance"></span></div>
-    <div class="card"><canvas id="bc-endurance" height="70"></canvas></div>
-    <div class="section-title mm-row">Hill score<span class="section-sub">overall, with its strength and endurance parts</span><span class="minmax" id="mm-hill"></span></div>
-    <div class="card"><canvas id="bc-hill" height="70"></canvas></div>
-    <div class="section-title mm-row">Training load<span class="section-sub">acute (7 d) vs chronic (28 d) · bars: readiness</span><span class="minmax" id="mm-load"></span></div>
-    <div class="card"><canvas id="bc-load" height="80"></canvas></div>
-    <div class="section-title mm-row">Race predictions<span class="section-sub">pace /km</span><span class="minmax" id="mm-race"></span></div>
-    <div class="card"><canvas id="bc-race" height="80"></canvas></div>
-    <div id="body-races-section">
-      <div class="section-title mm-row">Races<span class="section-sub">height: flat-equivalent pace · size: distance · click to open</span></div>
-      <div class="race-legend">
-        <span><svg width="12" height="12"><circle cx="6" cy="6" r="5" fill="#9aa5b1"/></svg> road</span>
-        <span><svg width="12" height="12"><polygon points="6,1 11,11 1,11" fill="#9aa5b1"/></svg> trail</span>
-        <span><span class="zone-dot" style="background:#4a8fc2"></span>flat</span>
-        <span><span class="zone-dot" style="background:#e0a43a"></span>rolling</span>
-        <span><span class="zone-dot" style="background:#a50f15"></span>mountain</span>
-      </div>
-      <div class="card"><canvas id="bc-races" height="90"></canvas></div>
-    </div>
     <div class="section-title mm-row">Stress &amp; body battery<span class="minmax" id="mm-stress"></span></div>
     <div class="card"><canvas id="bc-stress" height="70"></canvas></div>
     <div class="section-title mm-row">Steps
@@ -772,7 +799,6 @@
       <button class="pick" onclick="refreshProfileFromGarmin()">Refresh from Garmin</button>
       <span class="muted-note" id="profile-status" style="margin:0;"></span>
     </div>
-    <div class="profile-derived" id="profile-derived"></div>
 
     <!-- Training zones: same page as the profile (both are your settings). -->
     <div class="section-title" style="margin-top:40px;padding-top:24px;border-top:1px solid var(--line);font-size:16px;">Training zones</div>
@@ -1145,7 +1171,8 @@ async function renderCalendar(year, month, activities) {
     <div class="cal-wrap"><div class="cal">
       <div class="cal-row cal-days"><div></div>${DAYS.map(d => `<div>${d}</div>`).join("")}</div>
       ${[...weeks].reverse().map(w => {   // latest week first, like the list
-        // Circles on the week's line; second runs, warm-ups and other sports underneath, per day.
+        // Circles on the week's line; underneath, per day, the cross training (other sports) along
+        // with second runs and warm-ups.
         const isRun = a => RUN_TYPES.has(a.activity_type) && a.distance_km;
         const cells = w.days.map(x => {
           const k = iso(x), list = byDay[k] || [];
@@ -1170,7 +1197,7 @@ async function renderCalendar(year, month, activities) {
               ${main ? main.bubble : !list.length && k < today && !out ? `<div class="cal-bwrap"><span class="rest">rest</span></div>` : ""}
             </div>`;
           }).join("")}
-          ${anyExtra ? cells.map(({ x, extra }) => `<div class="cal-sub${x.getMonth() !== month - 1 ? " out" : ""}">${extra}</div>`).join("") : ""}
+          ${anyExtra ? `<div class="cal-sub cal-sub-label">cross training</div>` + cells.map(({ x, extra }) => `<div class="cal-sub${x.getMonth() !== month - 1 ? " out" : ""}">${extra}</div>`).join("") : ""}
         </div>`;
       }).join("")}
     </div></div>`;
@@ -1311,6 +1338,31 @@ function fmtDurationPretty(s) {
   return h ? `${h} h ${String(m).padStart(2, "0")} min` : m ? `${m} min${sec ? ` ${sec} s` : ""}` : `${sec} s`;
 }
 
+// Flat-equivalent pace card: one model per activity — the race model on races, your personal
+// (heart-rate) model otherwise — with a link that opens every model's value below.
+function gapCard(a) {
+  const g = a.gap;
+  if (!g) return "";
+  const race = a.category?.category === "race";
+  const key = race && g.race ? "race" : g.personal ? "personal" : g.race ? "race" : g.minetti ? "minetti" : null;
+  if (!key) return "";
+  const label = { race: "race model", personal: "personal model", minetti: "Minetti" }[key];
+  const diff = g.actual && g[key] ? Math.round((g.actual - g[key]) * 60) : 0;
+  return `<div class="stat"><div class="stat-label">flat-equivalent pace</div>
+    <div class="stat-value">${fmtPace(g[key])} /km</div>
+    <div class="stat-sub">${label}${diff > 0 ? ` · ${fmtDuration(diff)}/km faster than actual` : ""} ·
+      <a href="#" onclick="toggleGapAll(this); return false;">other models</a></div></div>`;
+}
+
+function toggleGapAll(link) {
+  const el = document.getElementById("gap-all");
+  if (!el) return;
+  const show = el.style.display === "none";
+  el.style.display = show ? "" : "none";
+  link.textContent = show ? "hide models" : "other models";
+  if (show) el.scrollIntoView({ behavior: "smooth", block: "nearest" });
+}
+
 // Activity summary boxes: each main figure with its range underneath (30 s extremes from the
 // charts, total time with stops, altitude range, watch temperature). Weather comes later.
 function summaryBoxes(a) {
@@ -1343,6 +1395,7 @@ function summaryBoxes(a) {
     a.relative_effort != null ? box("relative effort", `${Math.round(a.relative_effort)}`,
         `${effortWord(a.relative_effort)}${a.relative_effort_method === "average" ? " · from the average HR" : ""}`, "",
         "Heart-rate load (TRIMP, like Strava's Relative Effort): each minute weighted by how close your heart rate is to your max. Easy hour ≈ 50–80, hard race 200+") : "",
+    gapCard(a),
     box("calories", a.calories || "—"),
   ].join("");
 }
@@ -1374,7 +1427,7 @@ async function showEffort(a) {
       te.innerHTML = `<div class="stat-label">training effect</div>
         <div class="stat-value">${TE_LABELS[e?.label] || (e?.label ? titleCase(e.label) : teWord(aer))}</div>
         ${bar("aerobic", aer, "#3d7ebf")}${bar("anaerobic", ana || 0, "#a50f15")}
-        <div class="stat-sub">${e?.load != null ? `load <b>${Math.round(e.load)}</b>` : ""}${e?.stamina_start != null ? ` · stamina ${Math.round(e.stamina_start)} → ${Math.round(e.stamina_end)}%` : ""}${e?.body_battery != null ? ` · body battery ${e.body_battery > 0 ? "+" : ""}${e.body_battery}` : ""}</div>`;
+        <div class="stat-sub">${e?.load != null ? `load <b>${Math.round(e.load)}</b>` : ""}${e?.stamina_start != null ? ` · stamina ${Math.round(e.stamina_start)} → ${Math.round(e.stamina_end)}%` : ""}${e?.body_battery != null ? ` · body battery ${e.body_battery > 0 ? "+" : ""}${e.body_battery}` : ""}${e?.impact_load ? ` · impact load ${Math.round(e.impact_load).toLocaleString()}` : ""}</div>`;
       te.title = `Aerobic ${aer.toFixed(1)}: ${teWord(aer)} · anaerobic ${(ana || 0).toFixed(1)}: ${teWord(ana || 0)} (Garmin, 0–5)`;
     }
   }
@@ -1404,7 +1457,9 @@ async function showWeather(a) {
     return;
   }
   const t = a.peaks?.temperature;
-  if (tBox) tBox.innerHTML = `<div class="stat-label">temperature</div><div class="stat-value">${Math.round(w.temp)}°C</div>
+  const band = dynZone("temperature", w.temp), bz = DYN_ZONES.temperature;
+  if (tBox) tBox.innerHTML = `<div class="stat-label">temperature</div><div class="stat-value">${Math.round(w.temp)}°C
+      <span class="temp-band" style="background:${bz.colors[band]}">${bz.names[band]}</span></div>
     <div class="stat-sub">feels like <b>${Math.round(w.feels_like ?? w.temp)}°</b>${t ? ` · watch <b>${Math.round(t.min)}–${Math.round(t.max)}°</b>` : ""}</div>`;
   if (wBox) wBox.innerHTML = `<div class="stat-label">humidity · wind</div><div class="stat-value">${w.humidity ?? "—"}%</div>
     <div class="stat-sub">wind <b>${w.wind_kmh ?? "—"} km/h</b>${w.wind_dir ? ` ${w.wind_dir}` : ""}${w.gust_kmh ? ` · gusts ${w.gust_kmh}` : ""}${w.description ? ` · ${w.description.toLowerCase()}` : ""}</div>`;
@@ -1526,33 +1581,79 @@ function lapVam(l) {
   return (l.elevation_gain - l.elevation_loss) / l.duration_s * 3600;
 }
 
-function renderLaps(laps, avgHr, hilly = false) {
-  if (!laps.length) return `<div class="muted-note">No lap data.</div>`;
-  const hasPower = laps.some(l => l.avg_power);
-  const hasVam = hilly && laps.some(l => lapVam(l) != null);
-  const rows = laps.map(l => {
-    const hard = avgHr && l.avg_hr && l.avg_hr > avgHr * 1.15;
-    return `<tr class="${hard ? "hard" : ""}">
-      <td>${l.lap_number ?? "—"}</td>
-      <td>${l.distance_km != null ? l.distance_km.toFixed(2) : "—"}</td>
-      <td>${fmtDuration(l.duration_s)}</td>
-      <td>${fmtPace(l.avg_pace)}</td>
-      <td>${l.avg_hr ? Math.round(l.avg_hr) : "—"}</td>
-      <td>${l.avg_cadence ? Math.round(l.avg_cadence) : "—"}</td>
-      ${hasPower ? `<td>${l.avg_power ? Math.round(l.avg_power) : "—"}</td>` : ""}
-      <td>${l.elevation_gain != null ? Math.round(l.elevation_gain) : "—"}</td>
-      <td>${l.elevation_loss != null ? Math.round(l.elevation_loss) : "—"}</td>
-      ${hasVam ? (v => `<td style="color:${v == null ? "inherit" : VAM_BANDS[vamBand(v)].color};font-weight:500;">${v == null ? "—" : (v > 0 ? "+" : "") + Math.round(v)}</td>`)(lapVam(l)) : ""}
-    </tr>`;
-  }).join("");
+// Lap GAP: the race model on races, the personal (heart-rate) model otherwise.
+const lapGapKey = () => detailState.activity?.category?.category === "race" ? "gap_race_pace" : "gap_pace";
+
+// One table for laps and km splits: same columns, same order. The extra columns (from the FIT
+// file: % running, running dynamics, stamina, performance condition) come with the extra-data button.
+const EXTRA_COLS = [["run_pct", "% run", v => `${Math.round(v)}%`], ["gct", "GCT ms", v => Math.round(v)], ["vo", "osc. cm", v => v.toFixed(1)],
+                    ["vr", "ratio %", v => v.toFixed(1)], ["step", "step m", v => v.toFixed(2)], ["normalized_power", "NP W", v => Math.round(v)],
+                    ["stamina_end", "stamina end", v => `${Math.round(v)}%`], ["perf_condition", "perf. cond.", v => (v > 0 ? "+" : "") + v.toFixed(1)]];
+
+function renderSplitTable(kind, items, { avgHr = null, hilly = false, extra = null } = {}) {
+  if (!items.length) return `<div class="muted-note">${kind === "lap" ? "No lap data." : "No distance recorded for this activity."}</div>`;
+  const lap = kind === "lap";
+  const rows = items.map((x, i) => ({ src: x, n: lap ? x.lap_number : x.split, km: x.distance_km, secs: x.duration_s,
+    pace: lap ? x.avg_pace : x.pace, gap: x[lapGapKey()], hr: x.avg_hr, maxhr: x.max_hr, cad: x.avg_cadence, power: x.avg_power,
+    gain: x.elevation_gain, loss: x.elevation_loss, vam: hilly ? lapVam(x) : null, ex: extra?.[i] || {} }));
+  const has = f => rows.some(r => f(r) != null);
+  const cols = [
+    [lap ? "lap" : "km", r => lap ? (r.n ?? "—") : (r.km >= 0.99 ? r.n : `${r.n} <span class="muted">(${r.km.toFixed(2)} km)</span>`), true],
+    ...(lap ? [["km", r => r.km != null ? r.km.toFixed(2) : "—", true]] : []),
+    ["time", r => fmtDuration(r.secs), true],
+    ["pace /km", r => fmtPace(r.pace), true],
+    [`GAP /km`, r => r.gap != null ? fmtPace(r.gap) : "—", has(r => r.gap), "gap-col",
+     `grade-adjusted pace, ${lapGapKey() === "gap_race_pace" ? "race model" : "personal model"}`],
+    ["avg hr", r => r.hr ? Math.round(r.hr) : "—", true],
+    ["max hr", r => r.maxhr ? Math.round(r.maxhr) : "—", has(r => r.maxhr)],
+    ["cadence", r => r.cad ? Math.round(r.cad) : "—", true],
+    ["power", r => r.power ? Math.round(r.power) : "—", has(r => r.power)],
+    ["elev +m", r => r.gain != null ? Math.round(r.gain) : "—", true],
+    ["elev −m", r => r.loss != null ? Math.round(r.loss) : "—", true],
+    ["VAM m/h", r => r.vam == null ? "—" : `<span style="color:${VAM_BANDS[vamBand(r.vam)].color};font-weight:500">${r.vam > 0 ? "+" : ""}${Math.round(r.vam)}</span>`, has(r => r.vam)],
+    ...(extra ? EXTRA_COLS.filter(([k]) => rows.some(r => r.ex[k] != null))
+                          .map(([k, h, f]) => [h, r => r.ex[k] == null ? "—" : f(r.ex[k]), true, "dyn-col"]) : []),
+  ].filter(c => c[2]);
+  // Highlights: fastest / slowest full km; laps with heart rate well above the average.
+  const full = lap ? [] : rows.filter(r => r.km >= 0.99 && r.pace);
+  const fastest = full.length ? Math.min(...full.map(r => r.pace)) : null, slowest = full.length ? Math.max(...full.map(r => r.pace)) : null;
+  const cls = r => lap ? (avgHr && r.hr && r.hr > avgHr * 1.15 ? "hard" : "") : (r.pace === fastest ? "fast" : r.pace === slowest ? "slow" : "");
   return `
-    <div class="laps-wrap">
-      <table class="laps">
-        <thead><tr><th>lap</th><th>km</th><th>time</th><th>pace /km</th><th>hr</th><th>cadence</th>${hasPower ? "<th>power</th>" : ""}<th>elev +m</th><th>elev −m</th>${hasVam ? "<th>VAM m/h</th>" : ""}</tr></thead>
-        <tbody>${rows}</tbody>
+    <div class="laps-wrap" ${lap ? "" : 'style="max-height:420px;"'}>
+      <table class="laps ${lap ? "" : "splits"}">
+        <thead><tr>${cols.map(c => `<th class="${c[3] || ""}" ${c[4] ? `title="${c[4]}"` : ""}>${c[0]}</th>`).join("")}</tr></thead>
+        <tbody>${rows.map(r => `<tr class="${cls(r)}">${cols.map(c => `<td class="${c[3] || ""}">${c[1](r)}</td>`).join("")}</tr>`).join("")}</tbody>
       </table>
     </div>
-    <div class="muted-note">Shaded rows: heart rate more than 15% above the activity average.</div>`;
+    <div class="muted-note">${lap ? "Shaded rows: heart rate more than 15% above the activity average."
+      : `Moving time per km from the original FIT file. <span style="color:#556b1f;font-weight:700;">Green</span>: fastest km, <span style="color:#8b0000;font-weight:700;">red</span>: slowest. Elevation is filtered for altitude noise and adds up to the activity's totals.`}
+      GAP: ${lapGapKey() === "gap_race_pace" ? "race model" : "personal model"}.</div>`;
+}
+
+function renderLaps(laps, avgHr, hilly = false, extra = null) {
+  return renderSplitTable("lap", laps, { avgHr, hilly, extra });
+}
+
+function renderKmSplits(splits, extra = null) {
+  const t = detailState.activity?.terrain;
+  return renderSplitTable("km", splits, { hilly: !!(t && t.terrain !== "flat"), extra });
+}
+
+// The extra columns for km splits, from the FIT data (by distance): averages of the running
+// dynamics, % of time running, stamina at the end of the km, mean performance condition.
+function kmExtras(splits, d) {
+  if (!d?.series) return null;
+  const S = d.series, x = d.distance_km, t = d.timer_s;
+  return splits.map(sp => {
+    const from = sp.end_km - sp.distance_km, idx = [];
+    for (let i = 0; i < x.length; i++) if (x[i] >= from && x[i] < sp.end_km) idx.push(i);
+    const mean = k => { const v = idx.map(i => S[k]?.[i]).filter(v => v != null); return v.length ? v.reduce((a, b) => a + b, 0) / v.length : null; };
+    const last = k => { for (let j = idx.length - 1; j >= 0; j--) if (S[k]?.[idx[j]] != null) return S[k][idx[j]]; return null; };
+    let run = 0, all = 0;
+    if (S.gait) idx.forEach(i => { const dt = Math.max(0, Math.min(30, (t[i + 1] ?? t[i]) - t[i])); all += dt; if (S.gait[i] === 2) run += dt; });
+    return { run_pct: all ? run / all * 100 : null, gct: mean("gct"), vo: mean("vo"), vr: mean("vr"), step: mean("step"),
+             stamina_end: last("stamina"), perf_condition: mean("perf_condition") };
+  });
 }
 
 function hexToRgba(hex, alpha) {
@@ -1979,6 +2080,7 @@ function applyCategory() {
   const laps = document.getElementById("laps-section");
   if (laps) laps.style.display = detailState.activity?.category?.category === "easy" ? "none" : "";
   showWorkout();
+  showSpeedSlope(detailState.activity);   // follows the race / not race choice
 }
 
 // Workouts: what the session was, guessed from the laps (fetched once per activity).
@@ -2074,14 +2176,15 @@ function surfaceFartlek(surface) {
 // columns touching, colored by zone. Drawn as a filled step line (Chart.js has no variable-width bars).
 let splitCharts = [];
 
-function drawLapCharts(laps, hilly = false) {
+function drawLapCharts(laps, hilly = false, extra = null) {
   splitCharts.forEach(c => c.destroy());
   splitCharts = [];
   const box = document.getElementById("lap-charts");
   if (laps.length < 2) { box.innerHTML = ""; return; }   // one lap = nothing to compare
 
   // Column edges: cumulative distance, or cumulative time if some lap has no distance.
-  const byDistance = laps.every(l => l.distance_km > 0);
+  // Columns follow the Distance / Time toggle (time when some lap has no distance).
+  const byDistance = detailState.xMode !== "time" && laps.every(l => l.distance_km > 0);
   const widths = laps.map(l => byDistance ? l.distance_km : (l.duration_s || 0));
   const starts = widths.map((_, i) => widths.slice(0, i).reduce((a, b) => a + b, 0));
   const total = starts.at(-1) + widths.at(-1);
@@ -2091,22 +2194,35 @@ function drawLapCharts(laps, hilly = false) {
     { metric: "hr",      title: "Avg heart rate",  key: "avg_hr",      fmt: v => `${Math.round(v)} bpm`, color: THEME.clay },
     { metric: "power",   title: "Avg power",       key: "avg_power",   fmt: v => `${Math.round(v)} W`, color: "#54278f" },
     { metric: "cadence", title: "Avg cadence",     key: "avg_cadence", fmt: v => `${Math.round(v)} spm`, color: "#d94801" },
-    ...(hilly ? [{ metric: "gap", title: "Grade-adjusted pace", key: "gap_pace", fmt: v => `${fmtPace(v)} /km`, color: THEME.moss }] : []),
+    ...(hilly ? [{ metric: "gap", title: `Grade-adjusted pace (${lapGapKey() === "gap_race_pace" ? "race model" : "personal model"})`,
+                   key: lapGapKey(), fmt: v => `${fmtPace(v)} /km`, color: THEME.moss }] : []),
     ...(hilly ? [{ metric: "vam", title: "Vertical speed", key: "vam",
                    fmt: v => `${v > 0 ? "+" : ""}${Math.round(v).toLocaleString()} m/h`, color: THEME.muted }] : []),
-  ].filter(d => laps.some(l => (d.key === "vam" ? lapVam(l) : l[d.key]) != null));
+    // On demand (lap button): running dynamics, stamina, performance condition per lap.
+    ...(extra ? [["gct", "Ground contact time", v => `${Math.round(v)} ms`], ["vo", "Vertical oscillation", v => `${v.toFixed(1)} cm`],
+                 ["vr", "Vertical ratio", v => `${v.toFixed(1)}%`], ["step", "Step length", v => `${v.toFixed(2)} m`],
+                 ["stamina_end", "Stamina at the end of the lap", v => `${Math.round(v)}%`],
+                 ["perf_condition", "Performance condition", v => `${v > 0 ? "+" : ""}${v.toFixed(1)}`],
+                 ["temperature", "Average temperature", v => `${Math.round(v)} °C`]]
+      .map(([k, title, fmt]) => ({ metric: `dyn_${k}`, title, key: `dyn_${k}`, fmt, color: "#8c6bb1", zoneKey: k === "stamina_end" ? null : k })) : []),
+  ].filter(d => laps.some(l => (d.key === "vam" ? lapVam(l) : (d.key.startsWith("dyn_") ? extra?.[laps.indexOf(l)]?.[d.key.slice(4)] : l[d.key])) != null));
+  if (extra) laps.forEach((l, i) => { for (const k of ["gct", "vo", "vr", "step", "stamina_end", "perf_condition", "temperature"]) l[`dyn_${k}`] = extra[i]?.[k] ?? null; });
   laps.forEach(l => { l.vam = lapVam(l); });
   box.innerHTML = defs.map(d => `
-    <div class="section-title chart-title t-${d.metric === "vam" ? "elev" : d.metric === "gap" ? "pace" : d.metric}">${d.title} <span class="section-sub">by lap · column width = lap ${byDistance ? "distance" : "time"}</span></div>
+    <div class="section-title chart-title t-${d.metric === "vam" ? "elev" : d.metric === "gap" ? "pace" : d.metric}" ${d.metric.startsWith("dyn_") ? 'style="color:#5a4a8a"' : ""}>${d.title} <span class="section-sub">by lap · column width = lap ${byDistance ? "distance" : "time"}</span></div>
     <div class="card"><canvas id="sc-${d.metric}" height="70"></canvas></div>`).join("");
 
   for (const d of defs) {
     const values = laps.map(l => l[d.key] ?? null);
     const z = d.metric === "vam"
       ? { zone: { of: vamBand, colors: VAM_BANDS.map(b => b.color), names: VAM_BANDS.map(b => b.name) } }
+      : d.metric.startsWith("dyn_") ? (d.zoneKey && DYN_ZONES[d.zoneKey]
+          ? { zone: { of: v => dynZone(d.zoneKey, v), colors: DYN_ZONES[d.zoneKey].colors, names: DYN_ZONES[d.zoneKey].names } }
+          : d.zoneKey === "step" ? { zone: { of: v => v, colors: null, names: [] }, step: true } : null)
       : zoneSpec(d.metric === "gap" ? "pace" : d.metric);   // GAP is a pace: pace zones
     const zoneOf = v => (z && v != null ? z.zone.of(v) : null);
-    const colorOf = v => { const i = zoneOf(v); return i == null ? d.color : z.zone.colors[i]; };
+    const colorOf = v => { if (z?.step) return v == null ? d.color : stepHex(v);
+                           const i = zoneOf(v); return i == null ? d.color : z.zone.colors[i]; };
 
     // Axis that hugs the data. Pace is reversed (faster = taller) and capped at 1.5× the median
     // lap pace so recoveries/stops don't flatten everything; those still show as a small step.
@@ -2127,11 +2243,12 @@ function drawLapCharts(laps, hilly = false) {
       y = { min: lo, max: hi, ticks: { callback: v => `${v > 0 ? "+" : ""}${Math.round(v).toLocaleString()}` },
             afterBuildTicks: axis => { axis.ticks = roundTicks(lo, hi, step); } };
     } else {
-      // Round steps (10, 20, 50, 100…) with a little room under the lowest column.
-      const step = niceStep(Math.max(known.at(-1) - known[0], 10) / 4);
-      const lo = Math.max(0, Math.floor((known[0] - step) / step) * step);
+      // Round steps (10, 20, 50, 100… or 0.1, 0.2… for small values) with room under the lowest column.
+      const small = Math.abs(known.at(-1)) < 30;
+      const step = niceStep(Math.max(known.at(-1) - known[0], small ? 0.4 : 10) / 4);
+      const lo = known[0] < 0 ? Math.floor((known[0] - step) / step) * step : Math.max(0, Math.floor((known[0] - step) / step) * step);
       const hi = Math.ceil(known.at(-1) / step) * step + step;
-      y = { min: lo, max: hi, ticks: { callback: v => Math.round(v) },
+      y = { min: lo, max: hi, ticks: { callback: v => step < 1 ? +v.toFixed(2) : Math.round(v) },
             afterBuildTicks: axis => { axis.ticks = roundTicks(lo, hi, step); } };
     }
 
@@ -2187,6 +2304,13 @@ function drawLapCharts(laps, hilly = false) {
   }
 }
 
+// Km splits table, with the extra columns when the extra-data button is on.
+function renderKmBody() {
+  const body = document.getElementById("km-splits-body"), a = detailState.activity;
+  if (!body || !detailState.kmSplits) return;
+  body.innerHTML = renderKmSplits(detailState.kmSplits, detailState.showDyn ? kmExtras(detailState.kmSplits, a.dyn) : null);
+}
+
 async function toggleKmSplits(id) {
   const box = document.getElementById("km-splits");
   const btn = document.getElementById("splits-btn");
@@ -2207,50 +2331,13 @@ async function toggleKmSplits(id) {
       return;
     }
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
-    body.innerHTML = renderKmSplits((await res.json()).splits);
+    detailState.kmSplits = (await res.json()).splits;
+    renderKmBody();
     body.dataset.loaded = String(id);
     box.scrollIntoView({ behavior: "smooth", block: "start" });
   } catch (e) {
     body.innerHTML = `<div class="error">Could not load splits (${e.message}).</div>`;
   }
-}
-
-function renderKmSplits(splits) {
-  if (!splits.length) return `<div class="muted-note">No distance recorded for this activity.</div>`;
-  const hasPower = splits.some(s => s.avg_power);
-  const t = detailState.activity?.terrain;
-  const hasGap = !!(t && t.terrain !== "flat") && splits.some(s => s.gap_pace);
-  // Fastest and slowest full kilometres get highlighted.
-  const full = splits.filter(s => s.distance_km >= 0.99 && s.pace);
-  const fastest = full.length ? Math.min(...full.map(s => s.pace)) : null;
-  const slowest = full.length ? Math.max(...full.map(s => s.pace)) : null;
-  const n = v => v == null ? "—" : Math.round(v);
-  const rows = splits.map(s => {
-    const cls = s.pace === fastest ? "fast" : s.pace === slowest ? "slow" : "";
-    const km = s.distance_km >= 0.99 ? s.split : `${s.split} <span class="muted">(${s.distance_km.toFixed(2)} km)</span>`;
-    return `<tr class="${cls}">
-      <td>${km}</td>
-      <td>${fmtDuration(s.duration_s)}</td>
-      <td>${fmtPace(s.pace)}</td>
-      ${hasGap ? `<td class="gap-col">${fmtPace(s.gap_pace)}</td>` : ""}
-      <td>${n(s.avg_hr)}</td>
-      <td>${n(s.max_hr)}</td>
-      <td>${n(s.avg_cadence)}</td>
-      ${hasPower ? `<td>${n(s.avg_power)}</td>` : ""}
-      <td>${n(s.elevation_gain)}</td>
-      <td>${n(s.elevation_loss)}</td>
-    </tr>`;
-  }).join("");
-  return `
-    <div class="laps-wrap" style="max-height:420px;">
-      <table class="laps splits">
-        <thead><tr><th>km</th><th>time</th><th>pace /km</th>${hasGap ? `<th title="grade-adjusted pace, personal model">GAP /km</th>` : ""}<th>avg hr</th><th>max hr</th><th>cadence</th>
-          ${hasPower ? "<th>power</th>" : ""}<th>elev +m</th><th>elev −m</th></tr></thead>
-        <tbody>${rows}</tbody>
-      </table>
-    </div>
-    <div class="muted-note">Moving time per km from the original FIT file. <span style="color:#556b1f;font-weight:700;">Green</span>: fastest km, <span style="color:#8b0000;font-weight:700;">red</span>: slowest.
-      Elevation is filtered for altitude noise and adds up to the activity's totals.</div>`;
 }
 
 // The activity being shown, and which x-axis its charts use ("distance" or "time").
@@ -2259,6 +2346,214 @@ const detailState = { activity: null, points: [], xMode: "distance" };
 function setXMode(mode) {
   detailState.xMode = mode;
   drawTimeseriesCharts();
+  if (detailState.showDyn) drawDynamics();
+  const a = detailState.activity;
+  if (a?.laps?.length) renderLapExtras();                      // lap charts: columns by distance or time
+  for (const id of ["gait-chart", "gait-chart-dyn"]) if (gaitCharts[id] && a.gait) drawGaitProfile(a.gait, id);
+}
+
+/* ---------- On demand: running dynamics and Garmin's extra metrics (from the FIT file) ---------- */
+// Garmin's colour zones (percentile of runners) for the running dynamics, and its performance
+// condition scale. Step length has no Garmin scale: coloured by length, no distribution.
+const GARMIN_ZONE_COLORS = ["#c43fd0", "#22b8e6", "#3cc93c", "#f5a623", "#e8253a"];
+const PCT_NAMES = [">95%", "70–95%", "30–69%", "5–29%", "<5%"];
+const DYN_ZONES = {
+  gct: { cuts: [208, 241, 273, 306], names: PCT_NAMES, colors: GARMIN_ZONE_COLORS,
+         ranges: ["< 208 ms", "208–240 ms", "241–272 ms", "273–305 ms", "> 305 ms"] },
+  vo: { cuts: [6.4, 8.1, 9.7, 11.5], names: PCT_NAMES, colors: GARMIN_ZONE_COLORS,
+        ranges: ["< 6.4 cm", "6.4–8.1 cm", "8.1–9.7 cm", "9.7–11.5 cm", "> 11.5 cm"] },
+  vr: { cuts: [6.1, 7.45, 8.65, 10.15], names: PCT_NAMES, colors: GARMIN_ZONE_COLORS,
+        ranges: ["< 6.1%", "6.1–7.4%", "7.5–8.6%", "8.7–10.1%", "> 10.1%"] },
+  // Endurance performance vs air temperature: fastest around 5–12 °C (marathon studies), slower
+  // as it warms (Ely et al. 2007; El Helou et al. 2012).
+  temperature: { cuts: [0, 5, 12, 18, 24, 30], names: ["freezing", "cold", "ideal", "mild", "warm", "hot", "very hot"],
+                 colors: ["#4a6fd8", "#7fb3e6", "#3cc93c", "#b5d33c", "#f5a623", "#e8253a", "#8b0d1f"],
+                 ranges: ["< 0 °C", "0–5 °C", "5–12 °C", "12–18 °C", "18–24 °C", "24–30 °C", "> 30 °C"] },
+  perf_condition: { cuts: [-10.5, -1.5, 1.5, 10.5], names: ["Poor", "Fair", "Baseline", "Good", "Excellent"],
+                    colors: ["#e8253a", "#f5a623", "#9aa5b1", "#3cc93c", "#22b8e6"],
+                    ranges: ["−20 to −11", "−10 to −2", "−1 to 1", "2 to 10", "> 10"] },
+};
+const dynZone = (key, v) => { const z = DYN_ZONES[key]; if (v == null || !z) return null; const i = z.cuts.findIndex(c => v < c); return i === -1 ? z.cuts.length : i; };
+const stepColor = v => cadColor(80 + Math.max(0, Math.min(1, (v - 0.6) / 0.9)) * 120);   // 0.6 m green → 1.5 m pink
+const stepHex = v => "#" + stepColor(v).match(/\d+/g).slice(0, 3).map(n => (+n).toString(16).padStart(2, "0")).join("");
+
+const DYN_CHARTS = [
+  { key: "gct", title: "Ground contact time", unit: "ms", digits: 0, dots: true, note: "lower = quicker steps · colours: Garmin's zones (percentile of runners)" },
+  { key: "vo", title: "Vertical oscillation", unit: "cm", digits: 1, dots: true, note: "bounce per step · Garmin's zones" },
+  { key: "vr", title: "Vertical ratio", unit: "%", digits: 1, dots: true, note: "oscillation ÷ step length · lower = more efficient · Garmin's zones" },
+  { key: "step", title: "Step length", unit: "m", digits: 2, dots: true, note: "coloured by length" },
+  { key: "stamina", title: "Stamina", unit: "%", color: "#a50f15", digits: 0, with: "stamina_potential", note: "Garmin: current (filled) and potential (dashed)" },
+  { key: "body_battery", title: "Body battery", unit: "", color: "#4a8fc2", digits: 0 },
+  { key: "perf_condition", title: "Performance condition", unit: "", color: "#3f8f3a", digits: 0, note: "Garmin's real-time vs your usual fitness · appears after 6–20 min" },
+  { key: "temperature", title: "Temperature", unit: "°C", color: "#e0a43a", digits: 0, note: "watch sensor (reads warmer than the air) · colours: performance scale, ideal 5–12 °C" },
+];
+let dynCharts = [];
+
+async function loadDynamics() {
+  const a = detailState.activity;
+  if (a.dyn !== undefined) return a.dyn;
+  try { const res = await fetch(`${API}/activities/${a.id}/dynamics`); a.dyn = res.ok ? await res.json() : null; }
+  catch (e) { a.dyn = null; }
+  return a.dyn;
+}
+
+// One button for all the extra data: the charts, and the extra columns / charts of laps and km splits.
+async function toggleDynamics() {
+  const btn = document.getElementById("dyn-btn");
+  detailState.showDyn = !detailState.showDyn;
+  if (detailState.showDyn) { btn.textContent = "Reading the FIT file…"; btn.disabled = true;
+    await Promise.all([loadDynamics(), loadGait(detailState.activity)]); btn.disabled = false; }
+  btn.textContent = detailState.showDyn ? "Hide running dynamics & Garmin metrics" : "Show running dynamics & Garmin metrics";
+  if (detailState.showDyn) drawDynamics();
+  else { dynCharts.forEach(c => c.destroy()); dynCharts = []; document.getElementById("dyn-section").innerHTML = ""; }
+  renderLapExtras();
+  renderKmBody();
+}
+
+function drawDynamics() {
+  dynCharts.forEach(c => c.destroy()); dynCharts = [];
+  const d = detailState.activity.dyn, box = document.getElementById("dyn-section");
+  if (!d) { box.innerHTML = `<div class="muted-note">No FIT file with these metrics for this activity.</div>`; return; }
+  const charts = DYN_CHARTS.filter(c => d.series[c.key]);
+  if (!charts.length) { box.innerHTML = `<div class="muted-note">This watch didn't record running dynamics or stamina for this activity.</div>`; return; }
+  const byDist = detailState.xMode === "distance" && d.distance_km.some(v => v > 0.05);
+  const xs = byDist ? d.distance_km : d.timer_s;
+  const smooth = a => a.map((_, i) => { const w = a.slice(Math.max(0, i - 2), i + 3).filter(v => v != null); return w.length ? w.reduce((s, v) => s + v, 0) / w.length : null; });
+  const a = detailState.activity, gaitShownAbove = a.terrain?.surface === "trail" && a.terrain?.terrain === "mountain";
+  box.innerHTML = (gaitShownAbove || !a.gait ? "" : `<div style="margin-top:18px">${gaitBlock(a.gait, "gait-chart-dyn")}</div>`) +
+    charts.map(c => `<div class="section-title mm-row chart-title" style="color:${c.color || "#5a4a8a"}">${c.title}${c.unit ? ` (${c.unit})` : ""}
+      ${c.note ? `<span class="section-sub">${c.note}</span>` : ""}<span class="minmax" id="dyn-mm-${c.key}"></span></div>
+    <div class="card"><canvas id="dyn-${c.key}" height="70"></canvas></div><div id="dyn-dist-${c.key}"></div>`).join("");
+  for (const c of charts) {
+    const raw = d.series[c.key], ok = raw.filter(v => v != null);
+    const fmt = v => v.toFixed(c.digits) + (c.unit ? ` ${c.unit}` : "");
+    if (ok.length) document.getElementById(`dyn-mm-${c.key}`).innerHTML =
+      `avg <b>${fmt(ok.reduce((s, v) => s + v, 0) / ok.length)}</b> · min <b>${fmt(Math.min(...ok))}</b> · max <b>${fmt(Math.max(...ok))}</b>`;
+    let datasets, yScale = { ticks: { maxTicksLimit: 5 } };
+    if (c.dots) {   // dots, coloured by zone (or by length for step), like the speed vs slope chart
+      const pts = xs.map((x, i) => ({ x, y: raw[i] })).filter(p => p.y != null);
+      const color = v => c.key === "step" ? stepColor(v) : hexToRgba(DYN_ZONES[c.key].colors[dynZone(c.key, v)], 0.75);
+      datasets = [{ type: "scatter", data: pts, pointRadius: 1.8, borderWidth: 0, backgroundColor: pts.map(p => color(p.y)) }];
+      const sorted = ok.slice().sort((a, b) => a - b);
+      yScale = { min: sorted[Math.floor(sorted.length * 0.01)], max: sorted[Math.floor(sorted.length * 0.99)], ticks: { maxTicksLimit: 5 } };
+    } else {        // lines, area filled under the curve
+      const vals = smooth(raw);
+      datasets = [{ data: xs.map((x, i) => ({ x, y: vals[i] })), borderColor: c.color, backgroundColor: hexToRgba(c.color, 0.18),
+                    fill: "origin", borderWidth: 1.5, pointRadius: 0, spanGaps: true }];
+      if (DYN_ZONES[c.key]) {   // performance condition: line and area in the colour of its scale
+        const zc = v => DYN_ZONES[c.key].colors[dynZone(c.key, v)];
+        datasets[0].segment = { borderColor: ctx => zc((ctx.p0.parsed.y + ctx.p1.parsed.y) / 2),
+                                backgroundColor: ctx => hexToRgba(zc((ctx.p0.parsed.y + ctx.p1.parsed.y) / 2), 0.28) };
+        datasets[0].borderWidth = 2;
+      }
+      if (c.with && d.series[c.with]) datasets.push({ data: xs.map((x, i) => ({ x, y: d.series[c.with][i] })), borderColor: hexToRgba(c.color, 0.45),
+                                                      borderWidth: 1.5, pointRadius: 0, borderDash: [4, 3], spanGaps: true, fill: false });
+      if (c.key === "stamina" || c.key === "body_battery") yScale = { min: 0, max: 100, ticks: { maxTicksLimit: 5 } };
+    }
+    dynCharts.push(new Chart(document.getElementById(`dyn-${c.key}`), {
+      type: "line", data: { datasets },
+      options: { responsive: true, animation: false, events: c.dots ? [] : undefined,
+        interaction: { mode: "index", intersect: false },
+        plugins: { legend: { display: false }, tooltip: { enabled: !c.dots, callbacks: {
+          title: items => byDist ? `${items[0].parsed.x.toFixed(2)} km` : fmtHM(items[0].parsed.x),
+          label: ctx => ctx.parsed.y == null ? "" : fmt(ctx.parsed.y) } } },
+        scales: { x: { type: "linear", min: 0, max: xs[xs.length - 1], grid: { display: false },
+                       ticks: { maxTicksLimit: 8, callback: v => byDist ? `${Math.round(v)} km` : fmtHM(v) } }, y: yScale } },
+    }));
+    if (DYN_ZONES[c.key]) dynDistribution(c.key, raw, d.timer_s);
+  }
+  if (!gaitShownAbove && a.gait) drawGaitProfile(a.gait, "gait-chart-dyn");
+}
+
+// Running / walking / standing along the distance, as a strip with one line of totals — the same
+// numbers everywhere (backend gait(): every second of moving time).
+const GAIT = [{ k: 2, name: "running", color: "#3d7eff" }, { k: 1, name: "walking", color: "#2e9e58" }, { k: 0, name: "standing", color: "#b8b3a8" }];
+// Elevation profile with the line and area coloured by running / walking / standing (the gait
+// stretches from the backend, so the colours match the totals). Drawn into `canvasId`.
+function gaitBlock(g, canvasId) {
+  if (!g?.segments?.length) return "";
+  const total = g.seconds.run + g.seconds.walk + g.seconds.idle || 1;
+  const secs = { 2: g.seconds.run, 1: g.seconds.walk, 0: g.seconds.idle };
+  return `<div class="section-title mm-row chart-title" style="color:#3d4a6b">Running · walking · standing
+      <span class="section-sub">elevation profile coloured by how you moved</span></div>
+    <div class="gait-head">${GAIT.map(x => `<span><i style="background:${x.color}"></i>${x.name} <b>${Math.round(secs[x.k] / total * 100)}%</b> ${fmtDurationPretty(secs[x.k])}</span>`).join("")}</div>
+    <div class="card" style="margin-top:8px"><canvas id="${canvasId}" height="70"></canvas></div>
+    <div class="muted-note" style="margin-top:2px">Cadence under ${g.walk_cadence} steps/min = walking, speed under ${g.idle_speed} m/s = standing (moving time).</div>`;
+}
+
+let gaitCharts = {};
+function drawGaitProfile(g, canvasId) {
+  gaitCharts[canvasId]?.destroy();
+  const el = document.getElementById(canvasId);
+  const pts = detailState.points.filter(p => p.distance_km != null && p.elevation != null);
+  if (!el || !pts.length) return;
+  const segs = g.segments, byTime = detailState.xMode === "time";
+  let j = 0;
+  const kAt = x => { while (j < segs.length - 1 && x >= segs[j][1]) j++; return segs[j][2]; };   // gait stretches are by distance
+  const data = pts.map(p => ({ x: byTime ? p.seconds_elapsed : p.distance_km, y: p.elevation, k: kAt(p.distance_km) }));
+  const color = k => GAIT.find(x => x.k === k)?.color || "#999";
+  const zs = data.map(d => d.y), lo = Math.min(...zs), hi = Math.max(...zs), pad = Math.max(20, (hi - lo) * 0.08);
+  gaitCharts[canvasId] = new Chart(el, {
+    type: "line",
+    data: { datasets: [{ data, fill: "origin", borderWidth: 1.6, pointRadius: 0, tension: 0,
+      segment: { borderColor: ctx => color(ctx.p0.raw.k), backgroundColor: ctx => hexToRgba(color(ctx.p0.raw.k), 0.35) } }] },
+    options: { responsive: true, animation: false, interaction: { mode: "nearest", axis: "x", intersect: false },
+      plugins: { legend: { display: false }, tooltip: { displayColors: false, callbacks: {
+        title: items => byTime ? fmtHM(items[0].parsed.x) : `${items[0].parsed.x.toFixed(2)} km`,
+        label: ctx => `${Math.round(ctx.parsed.y)} m · ${GAIT.find(x => x.k === ctx.raw.k)?.name}` } } },
+      scales: { x: { type: "linear", min: 0, max: data.at(-1).x, grid: { display: false },
+                     ticks: { maxTicksLimit: 8, callback: v => byTime ? fmtHM(v) : `${Math.round(v)} km` } },
+                y: { min: Math.floor((lo - pad) / 50) * 50, max: Math.ceil((hi + pad) / 50) * 50, ticks: { maxTicksLimit: 4, callback: v => `${v} m` } } } },
+  });
+}
+
+async function loadGait(a) {
+  if (a.gait !== undefined) return a.gait;
+  try { const res = await fetch(`${API}/activities/${a.id}/gait`); a.gait = res.ok ? await res.json() : null; } catch (e) { a.gait = null; }
+  return a.gait;
+}
+
+// By default under the elevation profile on mountain trail runs.
+async function showGaitDefault(a) {
+  const box = document.getElementById("gait-default");
+  if (!box) return;
+  const show = a.terrain?.surface === "trail" && a.terrain?.terrain === "mountain";
+  box.innerHTML = "";
+  if (!show) return;
+  const g = await loadGait(a);
+  if (detailState.activity !== a || !g) return;
+  box.innerHTML = gaitBlock(g, "gait-chart");
+  drawGaitProfile(g, "gait-chart");
+}
+
+// Time in each of Garmin's zones (moving time between points), as a bar + legend.
+function dynDistribution(key, values, t) {
+  const z = DYN_ZONES[key], secs = z.colors.map(() => 0);
+  for (let i = 0; i < values.length - 1; i++) {
+    const k = dynZone(key, values[i]), dt = t[i + 1] - t[i];
+    if (k != null && dt > 0 && dt < 60) secs[k] += dt;
+  }
+  const total = secs.reduce((a, b) => a + b, 0) || 1;
+  const order = key === "perf_condition" ? [4, 3, 2, 1, 0] : z.colors.map((_, i) => i);   // best first (temperature: cold → hot)
+  document.getElementById(`dyn-dist-${key}`).innerHTML = `<div class="tiz">
+    <div class="tiz-bar">${order.map(i => secs[i] ? `<div style="flex:${secs[i]};background:${z.colors[i]}" title="${z.names[i]}"></div>` : "").join("")}</div>
+    ${order.map(i => `<div class="tiz-row"><span class="zone-dot" style="background:${z.colors[i]}"></span>
+      <span class="tiz-name">${z.names[i]}</span><span class="tiz-range">${z.ranges[i]}</span>
+      <span class="tiz-time">${fmtDuration(Math.round(secs[i]))}</span><span class="tiz-pct">${Math.round(secs[i] / total * 100)}%</span></div>`).join("")}
+    <div class="muted-note" style="margin-top:4px;">${key === "perf_condition" ? "Garmin's performance condition scale"
+      : key === "temperature" ? "Endurance performance is best around 5–12 °C and drops as it warms (Ely 2007, El Helou 2012). Watch sensor: a few degrees above the air."
+      : "Garmin's zones: share of runners in each zone (magenta = better than 95% of runners)"}</div></div>`;
+}
+
+// Lap table and lap charts, with the extra columns / charts when the extra-data button is on.
+function renderLapExtras() {
+  const a = detailState.activity, card = document.getElementById("laps-card");
+  if (!card) return;
+  detailState.showLapDyn = detailState.showDyn;
+  const hilly = !!(a.terrain && a.terrain.terrain !== "flat");
+  const extra = detailState.showLapDyn && a.dyn?.laps?.length === a.laps.length ? a.dyn.laps : null;
+  document.getElementById("laps-card").innerHTML = renderLaps(a.laps, a.avg_hr, hilly, extra);
+  drawLapCharts(a.laps, hilly, extra);
 }
 
 // Axis labels for moving time: "45 min", "1:30", "10 h".
@@ -2514,14 +2809,14 @@ async function showDetail(id) {
       <div class="stat-grid">
         ${summaryBoxes(a)}
         ${a.terrain && a.terrain.terrain !== "flat" ? `
-        <div class="stat terrain-${a.terrain.terrain}">
+        <div class="stat">
           <div class="stat-label">km-effort</div>
           <div class="stat-value">${a.terrain.km_effort.toFixed(1)}</div>
           <div class="stat-sub">${Math.round(a.terrain.gain_per_km)} m/km · ${a.terrain.terrain === "mountain" ? "Mountain" : "Rolling"}</div>
         </div>` : ""}
       </div>
 
-      ${a.gap && a.terrain && a.terrain.terrain !== "flat" ? renderGapBlock(a.gap) : ""}
+      ${a.gap ? `<div id="gap-all" style="display:none">${renderGapBlock(a.gap)}</div>` : ""}
 
       ${hasSplits ? `
       <div style="margin-top:20px;">
@@ -2559,6 +2854,8 @@ async function showDetail(id) {
         <div class="section-title chart-title t-elev">Time at each vertical speed</div>
         <div id="vam-summary"></div>
       </div>
+
+
 
       <div class="chart-bar">
         <div class="section-title mm-row chart-title t-hr">Heart rate (bpm)<span class="minmax" id="pk-hr"></span></div>
@@ -2598,18 +2895,31 @@ async function showDetail(id) {
         <div id="cadence-zones"></div>
       </div>
       <div class="muted-note" id="ts-source"></div>
+      <button class="pick" id="dyn-btn" style="margin-top:14px;" onclick="toggleDynamics()">Show running dynamics &amp; Garmin metrics</button>
+      <div id="dyn-section"></div>
 
 
+
+      <div id="gait-default"></div>
+
+      <div id="speed-slope-section" style="display:none;">
+        <div class="chart-bar"><div class="section-title chart-title t-elev">Speed vs slope<span class="section-sub">running and walking along the race</span></div>${CAD_SCALE}</div>
+        <div class="card" style="margin-top:8px;"><canvas id="speed-slope-chart" height="110"></canvas></div>
+        <div id="speed-slope-boxes"></div>
+      </div>
 
       ${a.laps.length ? `
       <div id="laps-section">
         <div class="section-title">Laps (${a.laps.length})</div>
-        <div class="card">${renderLaps(a.laps, a.avg_hr, hilly)}</div>
+        <div class="card" id="laps-card">${renderLaps(a.laps, a.avg_hr, hilly)}</div>
         <div id="lap-charts"></div>
       </div>` : ""}
     `;
 
     detailState.activity = a;
+    detailState.showDyn = detailState.showLapDyn = false;   // extra metrics: on demand, off for each new activity
+    detailState.kmSplits = null;
+    dynCharts.forEach(c => c.destroy()); dynCharts = [];
     detailState.points = a.timeseries;
     if (hilly && !gapState.data) {   // the GAP chart needs your personal grade model
       try { gapState.data = await (await fetch(`${API}/gap/models`)).json(); } catch (e) {}
@@ -2618,6 +2928,7 @@ async function showDetail(id) {
     drawRouteMap(a.timeseries);
     showWeather(a);
     showEffort(a);
+    showGaitDefault(a);
     if (a.laps.length) drawLapCharts(a.laps, hilly);
     renderDetailHeader();
     applyCategory();
@@ -2650,7 +2961,11 @@ function switchTab(name) {
     if (!yearlyLoaded) loadYearly();
   }
   if (name === "profile") { loadProfile(); if (!zonesState.loaded) loadZones(); }
-  if (name === "body" && !bodyState.loaded) loadBody();
+  if (name === "body") renderBodyProfile();
+  if (name === "body" || name === "progress") {
+    bodyState.page = name;
+    if (!bodyState.loaded) loadBody(); else setBodyRange(bodyState.ranges[name]);
+  }
   if (name === "records" && !recordsState.data) loadRecords();
   if (name === "performance") loadPerformance();
   if (name === "races") { if (racesState.data) renderRaces(); else loadRaces(); }
@@ -2698,7 +3013,7 @@ function renderProfile() {
       ? `<select id="pf-${f.key}">${f.options.map(([val, lbl]) => `<option value="${val}" ${val === v ? "selected" : ""}>${lbl}</option>`).join("")}</select>`
       : `<input id="pf-${f.key}" type="${f.type}" ${f.step ? `step="${f.step}"` : ""} ${f.placeholder ? `placeholder="${f.placeholder}"` : ""} value="${v}">`;
     const head = f.setting && !PROFILE_FIELDS[i - 1].setting
-      ? `<div class="pf-group">Analysis settings <span class="muted-note">used by the aerobic efficiency and max heart rate charts</span></div>`
+      ? `<div class="profile-derived pf-wide" id="profile-derived"></div><div class="pf-group">Analysis settings <span class="muted-note">used by the aerobic efficiency and max heart rate charts</span></div>`
       : f.link && !PROFILE_FIELDS[i - 1].link
       ? `<div class="pf-group">Results pages <span class="muted-note">your official results, matched to your races</span>
            <button class="pick" style="margin-left:8px;" onclick="importResults()">Import results</button>
@@ -3952,13 +4267,15 @@ async function deleteZoneSet() {
 
 /* ---------- Grade-adjusted pace (GAP): four models ---------- */
 const GAP_METHODS = [
-  { key: "race",      label: "Race model",  color: "#1f4e8c",
+  { key: "race",      label: "Race model",  color: "#6a3d9a",
     text: "Fitted on your trail races of 1.5–6 h so they come out as flat as possible (constant effort): what a slope costs you when racing — walking the steep climbs, how you descend. Heart rate and fatigue are taken out first." },
-  { key: "personal",  label: "Personal",    color: "#a50f15",
+  { key: "personal",  label: "Personal",    color: "#1b9e77",
     text: "Fitted from your own runs: heartbeats per metre on each slope ÷ heartbeats per metre on the flat in the same run (fitness, heat and fatigue cancel out). Your body, your descending skill." },
+  { key: "garmin",    label: "Garmin",      color: "#007cc3",
+    text: "Garmin's own curve, unpublished: read back from your watch, which records your grade-adjusted speed next to your real speed every second. Their ratio at each slope, over your recent hilly runs." },
   { key: "strava",    label: "Strava-like", color: "#fc4c02",
     text: "Strava fits its curve on millions of runs with heart rate, but doesn't publish it. This is an approximation of the shape in their 2017 write-up (cheapest around −10%)." },
-  { key: "minetti",   label: "Minetti",     color: "#4a8fc2",
+  { key: "minetti",   label: "Minetti",     color: "#d4a017",
     text: "Energy cost of running on slopes measured in the lab (Minetti et al., 2002). Physiological, but steep descents come out almost free — real descents cost braking and focus." },
   { key: "km_effort", label: "km-effort",   color: "#7a7263",
     text: "ITRA standard: 100 m of climbing = 1 km, descents count as flat. Simple and good for comparing race courses, but blind to steepness and descents." },
@@ -4074,7 +4391,7 @@ function renderRaceModel(d) {
       <button class="pick" onclick="refitRace(this)">Fit it now</button></div>`;
     return;
   }
-  const order = ["race", "personal", "strava", "km_effort", "minetti"];
+  const order = ["race", "personal", "garmin", "strava", "km_effort", "minetti"].filter(k => rm.summary[k]);
   const M = Object.fromEntries(GAP_METHODS.map(m => [m.key, m]));
   const sum = rm.summary;
   gapState.raceId ||= rm.races[0]?.id;
@@ -4115,7 +4432,7 @@ async function drawRaceGap(id) {
   const x = p.done.map(v => Math.round(v * r.distance_km * 10) / 10);
   // Rolling 1 km (5 segments) so the lines are readable.
   const smooth = a => a.map((_, i) => { const w = a.slice(Math.max(0, i - 2), i + 3); return w.reduce((s, v) => s + v, 0) / w.length; });
-  const keys = ["race", "personal", "strava", "minetti"].filter(k => p.gap[k]);
+  const keys = ["race", "personal", "garmin", "strava", "minetti"].filter(k => p.gap[k]);
   const all = keys.flatMap(k => smooth(p.gap[k])).sort((a, b) => a - b);
   gapState.chart = new Chart(document.getElementById("gap-chart"), {
     type: "line",
@@ -4134,6 +4451,132 @@ async function drawRaceGap(id) {
              ticks: { callback: v => fmtPace(v) }, title: { display: true, text: "grade-adjusted pace /km" } },
         y1: { position: "right", grid: { display: false }, ticks: { callback: v => `${v}%` }, title: { display: true, text: "slope" } } } },
   });
+}
+
+// Speed vs slope of one race, every 10 s, coloured by cadence: where you switch to walking.
+const CAD_STOPS = [[80, [64, 196, 99]], [130, [64, 196, 99]], [150, [61, 126, 255]], [180, [92, 61, 255]], [200, [255, 64, 129]]];
+function cadColor(c, a = 0.75) {
+  const s = CAD_STOPS;
+  if (c <= s[0][0]) return `rgba(${s[0][1]},${a})`;
+  for (let i = 1; i < s.length; i++) if (c <= s[i][0]) {
+    const f = (c - s[i - 1][0]) / (s[i][0] - s[i - 1][0]);
+    return `rgba(${s[i][1].map((v, k) => Math.round(s[i - 1][1][k] + (v - s[i - 1][1][k]) * f))},${a})`;
+  }
+  return `rgba(${s[s.length - 1][1]},${a})`;
+}
+
+// Speed vs slope boxes: running / walking time, the switch zone, walking speed on climbs.
+function speedSlopeBoxes(d) {
+  const total = d.run_s + d.walk_s + (d.idle_s || 0), pct = x => total ? Math.round(x / total * 100) : 0;
+  return `<div class="official" style="margin-top:12px">
+      <div class="stat"><div class="stat-label">running</div><div class="stat-value" style="color:#3d7eff">${pct(d.run_s)}%</div><div class="stat-sub">${fmtDurationPretty(d.run_s)}</div></div>
+      <div class="stat"><div class="stat-label">walking</div><div class="stat-value" style="color:#2e9e58">${pct(d.walk_s)}%</div><div class="stat-sub">${fmtDurationPretty(d.walk_s)}${d.idle_s ? ` · standing ${pct(d.idle_s)}% (${fmtDurationPretty(d.idle_s)})` : ""}</div></div>
+      <div class="stat"><div class="stat-label">switch to walking</div><div class="stat-value">${d.transition ? `+${d.transition[0]}% → +${d.transition[1]}%` : "—"}</div><div class="stat-sub">slopes where you walk 25% → 75% of the time</div></div>
+      <div class="stat"><div class="stat-label">walking speed on climbs</div><div class="stat-value">${d.walk_speed ?? "—"} km/h</div><div class="stat-sub">median, slopes above +5%</div></div>
+    </div>
+    <div class="muted-note">One point every ${d.window_s} s of moving time, coloured by cadence. Walking = cadence under ${d.cadence_threshold} steps/min.</div>`;
+}
+
+// The scatter (painted dots, no tooltip) with the average speed curve, the switch band and the walking-speed line.
+function drawSpeedSlope(canvas, d) {
+  const band = {
+    id: "speedBand", beforeDatasetsDraw(chart) {
+      const { ctx, chartArea: a, scales: { x, y } } = chart;
+      ctx.save();
+      if (d.transition) {
+        const x0 = x.getPixelForValue(d.transition[0]), x1 = x.getPixelForValue(d.transition[1]);
+        ctx.fillStyle = "rgba(224,164,58,0.18)"; ctx.fillRect(x0, a.top, x1 - x0, a.bottom - a.top);
+        ctx.strokeStyle = "rgba(224,164,58,0.8)"; ctx.setLineDash([4, 3]);
+        [x0, x1].forEach(px => { ctx.beginPath(); ctx.moveTo(px, a.top); ctx.lineTo(px, a.bottom); ctx.stroke(); });
+        ctx.fillStyle = "#b07a1a"; ctx.font = `600 11px ${THEME.font}`; ctx.textAlign = "center";
+        ctx.fillText("switch to walking", (x0 + x1) / 2, a.top + 12);
+      }
+      if (d.walk_speed) {
+        const py = y.getPixelForValue(d.walk_speed);
+        ctx.strokeStyle = "rgba(46,158,88,0.9)"; ctx.setLineDash([6, 4]);
+        ctx.beginPath(); ctx.moveTo(a.left, py); ctx.lineTo(a.right, py); ctx.stroke();
+        ctx.fillStyle = "#2e9e58"; ctx.font = `600 11px ${THEME.font}`; ctx.textAlign = "right";
+        ctx.fillText(`walking ${d.walk_speed} km/h`, a.right - 4, py - 5);
+      }
+      ctx.restore();
+    },
+  };
+  // Average speed per 1% of slope (enough points), smoothed over ±1%: the line you hover.
+  const bins = new Map();
+  for (const [g, v, c] of d.points) { const k = Math.round(g); if (!bins.has(k)) bins.set(k, []); bins.get(k).push([v, c]); }
+  const mean = a => a.reduce((s, v) => s + v, 0) / a.length;
+  const avg = [...bins.entries()].filter(([, vs]) => vs.length >= 8).sort((a, b) => a[0] - b[0])
+    .map(([g, vs]) => ({ x: g, y: mean(vs.map(p => p[0])), cad: mean(vs.map(p => p[1])) }));
+  const curve = avg.map((p, i) => { const w = avg.slice(Math.max(0, i - 1), i + 2);
+    return { x: p.x, y: mean(w.map(q => q.y)), cad: mean(w.map(q => q.cad)) }; });
+  // The dots are painted underneath (not a dataset), so hovering only ever reads the curve.
+  const dots = {
+    id: "speedDots", beforeDatasetsDraw(chart) {
+      const { ctx, chartArea: a, scales: { x, y } } = chart;
+      ctx.save(); ctx.beginPath(); ctx.rect(a.left, a.top, a.right - a.left, a.bottom - a.top); ctx.clip();
+      for (const [g, v, c] of d.points) {
+        ctx.fillStyle = cadColor(c); ctx.beginPath(); ctx.arc(x.getPixelForValue(g), y.getPixelForValue(v), 2.2, 0, 2 * Math.PI); ctx.fill();
+      }
+      ctx.restore();
+    },
+  };
+  return new Chart(canvas, {
+    type: "line",
+    data: { datasets: [{ label: "average speed", data: curve, borderColor: "#1f1d18", borderWidth: 2.5, pointRadius: 0,
+      pointHoverRadius: 5, pointHoverBackgroundColor: "#1f1d18", tension: 0.3 }] },
+    options: { responsive: true, animation: false, interaction: { mode: "nearest", axis: "x", intersect: false },
+      plugins: { legend: { display: false }, tooltip: { displayColors: false, callbacks: {
+        title: items => `${items[0].parsed.x > 0 ? "+" : ""}${items[0].parsed.x}% slope`,
+        label: ctx => [`average ${ctx.parsed.y.toFixed(1)} km/h (${fmtPace(60 / ctx.parsed.y)}/km)`, `average cadence ${Math.round(ctx.raw.cad)} spm`] } } },
+      scales: { x: { type: "linear", min: -40, max: 40, ticks: { stepSize: 10, callback: v => `${v > 0 ? "+" : ""}${v}%` }, title: { display: true, text: "slope" } },
+                y: { min: 0, max: Math.max(12, Math.ceil(d.points.map(p => p[1]).sort((a, b) => a - b)[Math.floor(d.points.length * 0.995)] + 1)),
+                     title: { display: true, text: "speed (km/h)" } } } },
+    plugins: [band, dots],
+  });
+}
+
+const CAD_SCALE = `<div class="cad-scale"><span>80 spm</span><i></i><span>200 spm</span></div>`;
+
+async function renderSpeedSlope() {
+  if (gapState.chart) { gapState.chart.destroy(); gapState.chart = null; }
+  document.getElementById("gap-methods").innerHTML = "";
+  document.getElementById("gap-note").innerHTML = "";
+  const table = document.getElementById("gap-table");
+  if (!racesState.data) {
+    table.innerHTML = `<div class="loading">Loading races…</div>`;
+    try { racesState.data = await (await fetch(`${API}/races/`)).json(); } catch (e) { table.innerHTML = ""; return; }
+    if (gapState.view !== "speed") return;
+  }
+  const races = racesState.data.filter(r => r.surface === "trail");
+  gapState.speedId ||= races[0]?.id;
+  let d;
+  try { d = await (await fetch(`${API}/gap/speed-slope/${gapState.speedId}`)).json(); } catch (e) { d = null; }
+  if (gapState.view !== "speed") return;
+  table.innerHTML = `
+    <div class="speed-head">
+      <select onchange="gapState.speedId=+this.value; renderGap()">${races.map(r =>
+        `<option value="${r.id}" ${r.id === gapState.speedId ? "selected" : ""}>${r.date} · ${r.result?.race || raceName(r)} · ${Math.round(r.distance_km)} km</option>`).join("")}</select>
+      ${CAD_SCALE}
+    </div>
+    ${d?.points ? speedSlopeBoxes(d) : `<div class="muted-note">No cadence or GPS data for this race.</div>`}`;
+  if (d?.points) gapState.chart = drawSpeedSlope(document.getElementById("gap-chart"), d);
+}
+
+// On the activity page: mountain trail races only.
+let speedSlopeChart = null;
+async function showSpeedSlope(a) {
+  const box = document.getElementById("speed-slope-section");
+  if (!box) return;
+  if (speedSlopeChart) { speedSlopeChart.destroy(); speedSlopeChart = null; }
+  const show = a.category?.category === "race" && a.terrain?.surface === "trail" && a.terrain?.terrain === "mountain";
+  box.style.display = show ? "" : "none";
+  if (!show) return;
+  let d;
+  try { const res = await fetch(`${API}/gap/speed-slope/${a.id}`); d = res.ok ? await res.json() : null; } catch (e) { d = null; }
+  if (detailState.activity !== a) return;
+  if (!d?.points) { box.style.display = "none"; return; }
+  document.getElementById("speed-slope-boxes").innerHTML = speedSlopeBoxes(d);
+  speedSlopeChart = drawSpeedSlope(document.getElementById("speed-slope-chart"), d);
 }
 
 async function refitRace(btn) {
@@ -4231,6 +4674,7 @@ function renderGap() {
   if (gapState.view === "years") return renderGapYears(d);
   if (gapState.view === "walk") return renderWalkRun(d);
   if (gapState.view === "race") return renderRaceModel(d);
+  if (gapState.view === "speed") return renderSpeedSlope();
   if (gapState.chart) gapState.chart.destroy();
   const bins = d.personal?.bins || [];
   const maxCount = Math.max(1, ...bins.map(b => b.count));
@@ -4239,11 +4683,12 @@ function renderGap() {
     data: { datasets: [
       ...GAP_METHODS.map(m => ({
         label: m.label, borderColor: m.color, backgroundColor: m.color, pointRadius: 0,
-        borderWidth: m.key === "personal" || m.key === "race" ? 3 : 1.75, borderDash: m.key === "km_effort" ? [5, 4] : [],
+        borderWidth: m.key === "personal" || m.key === "race" ? 3.5 : 1.2,   // your two models stand out
+        borderDash: m.key === "km_effort" ? [5, 4] : m.key === "minetti" ? [9, 4] : [],
         data: d.grades.map((g, i) => ({ x: g, y: d.curves[m.key][i] })).filter(p => p.y != null),
       })),
-      { label: "Your data (median per 1%)", type: "scatter", backgroundColor: "rgba(165,15,21,0.25)",
-        borderColor: "rgba(165,15,21,0.5)", pointRadius: bins.map(b => 2 + 4 * Math.sqrt(b.count / maxCount)),
+      { label: "Your data (median per 1%)", type: "scatter", backgroundColor: "rgba(27,158,119,0.25)",
+        borderColor: "rgba(27,158,119,0.5)", pointRadius: bins.map(b => 2 + 4 * Math.sqrt(b.count / maxCount)),
         data: bins.map(b => ({ x: b.grade, y: b.median, n: b.count })) },
     ] },
     options: {
@@ -4372,7 +4817,9 @@ function renderRecords() {
 }
 
 /* ---------- Body: daily wellness data from Garmin ---------- */
-const bodyState = { loaded: false, rows: [], latest: null, range: 90, charts: [], stepsBucket: null, stepsChart: null, showComp: (() => { try { return !!localStorage.getItem("zachy.bodyComp"); } catch (e) { return false; } })() };
+// Body and Progress share the data; each page keeps its own period.
+const bodyState = { loaded: false, rows: [], latest: null, range: 90, ranges: { body: 90, progress: 90 }, page: "body",
+                    charts: [], stepsBucket: null, stepsChart: null, showComp: false, races: [] };
 
 function fmtHours(s) {
   if (s == null) return "—";
@@ -4388,14 +4835,15 @@ const titleCase = t => t ? t.charAt(0) + t.slice(1).toLowerCase().replace(/_/g, 
 
 async function loadBody() {
   try {
-    const [rows, latest, races, eff, volume] = await Promise.all([
+    const [rows, latest, eff, volume, races] = await Promise.all([
       fetch(`${API}/wellness/`).then(r => r.json()),
       fetch(`${API}/wellness/latest`).then(r => r.json()),
-      fetch(`${API}/body/races`).then(r => r.json()).catch(() => []),
       fetch(`${API}/body/efficiency`).then(r => r.json()).catch(() => ({ runs: [] })),
       fetch(`${API}/body/volume`).then(r => r.json()).catch(() => []),
+      racesState.data ? racesState.data : fetch(`${API}/races/`).then(r => r.json()).catch(() => null),
     ]);
-    bodyState.races = races;
+    if (races) racesState.data ||= races;
+    bodyState.races = (races || []).filter(r => r.ffa && ["5k", "10k", "half", "marathon"].includes(r.ffa.distance));
     bodyState.efficiency = eff.runs;
     bodyState.effHr = eff.reference_hr;
     bodyState.rows = rows;
@@ -4404,29 +4852,56 @@ async function loadBody() {
     bodyState.latest = latest;
     bodyState.loaded = true;
     renderBodyLatest();
-    setBodyRange(bodyState.range);
+    setBodyRange(bodyState.ranges[bodyState.page]);
   } catch (e) {
-    document.getElementById("body-tiles").innerHTML = `<div class="error">Could not load body data (${e.message}).</div>`;
+    for (const id of ["body-tiles", "progress-tiles"])
+      document.getElementById(id).innerHTML = `<div class="error">Could not load the data (${e.message}).</div>`;
   }
 }
 
-// Running km per day into the daily rows (days without a wellness row are added), then
-// run_km_7d: the distance run in the 7 days ending on each day (a sliding week).
+// Profile cards on top of the Body page: age, height, BMI, lactate threshold heart rate.
+async function renderBodyProfile() {
+  const el = document.getElementById("body-profile");
+  try { profileData = await (await fetch(`${API}/profile/`)).json(); } catch (e) { el.innerHTML = ""; return; }
+  const p = profileData, e = p.effective;
+  const bmi = e.height_cm && e.weight_kg ? e.weight_kg / (e.height_cm / 100) ** 2 : null;
+  const bmiWord = b => b < 18.5 ? "under" : b < 25 ? "normal" : b < 30 ? "over" : "obese";
+  const lthr = bodyState.latest?.lt_hr?.value ?? p.garmin.lthr;
+  const tile = (label, value, sub) => `<div class="stat"><div class="stat-label">${label}</div><div class="stat-value">${value ?? "—"}</div><div class="stat-sub">${sub}</div></div>`;
+  el.innerHTML = [
+    tile("age", p.age, e.birth_date ? `born ${e.birth_date}` : "set it in the Profile"),
+    tile("height", e.height_cm ? `${Math.round(e.height_cm)} cm` : null, p.source.height_cm === "manual" ? "set by you" : "from Garmin"),
+    tile("BMI", bmi ? bmi.toFixed(1) : null, bmi ? `${bmiWord(bmi)} weight · ${e.weight_kg} kg` : "needs height and weight"),
+    tile("lactate threshold HR", lthr ? `${Math.round(lthr)} bpm` : null, "from Garmin"),
+  ].join("");
+}
+
+// Running km, climb and hours per day into the daily rows (days without a wellness row are
+// added), then <measure>_7d: the total of the 7 days ending on each day (a sliding week).
+const VOLUME_MEASURES = {
+  km: { col: "run_km", label: "km", fmt: v => `${v.toFixed(0)} km`, axis: v => `${v} km` },
+  gain: { col: "run_gain", label: "elevation", fmt: v => `+${Math.round(v).toLocaleString()} m`, axis: v => `${v.toLocaleString()} m` },
+  time: { col: "run_h", label: "time", fmt: v => fmtHours(v * 3600), axis: v => `${v} h` },
+};
 function mergeVolume(rows, volume) {
   const byDate = new Map(rows.map(r => [r.date, r]));
   for (const v of volume) {
     if (!byDate.has(v.date)) { const r = { date: v.date }; rows.push(r); byDate.set(v.date, r); }
-    byDate.get(v.date).run_km = v.km;
+    Object.assign(byDate.get(v.date), { run_km: v.km, run_gain: v.gain || 0, run_h: (v.secs || 0) / 3600 });
   }
   rows.sort((a, b) => a.date < b.date ? -1 : 1);
   const DAY = 86400000, time = r => new Date(r.date + "T00:00:00").getTime();
-  let start = 0, sum = 0;
-  rows.forEach(r => {
-    sum += r.run_km || 0;
-    while (time(rows[start]) <= time(r) - 7 * DAY) { sum -= rows[start].run_km || 0; start++; }
-    r.run_km_7d = Math.round(sum * 10) / 10;
-  });
+  for (const col of ["run_km", "run_gain", "run_h"]) {
+    let start = 0, sum = 0;
+    rows.forEach(r => {
+      sum += r[col] || 0;
+      while (time(rows[start]) <= time(r) - 7 * DAY) { sum -= rows[start][col] || 0; start++; }
+      r[`${col}_7d`] = Math.round(sum * 10) / 10;
+    });
+  }
 }
+
+function setVolumeMeasure(m) { bodyState.volume = m; drawBodyCharts(); }
 
 // Body composition from the scale, shown under the weight chart on request.
 const BODY_COMP = [
@@ -4437,9 +4912,8 @@ const BODY_COMP = [
   { col: "bone_mass_kg", label: "Bone mass", unit: "kg", digits: 2, color: "#7d7d7d" },
 ];
 
-function toggleBodyComp() {
+function toggleBodyComp() {   // off by default, on demand
   bodyState.showComp = !bodyState.showComp;
-  try { localStorage.setItem("zachy.bodyComp", bodyState.showComp ? "1" : ""); } catch (e) {}
   drawBodyCharts();
 }
 
@@ -4459,10 +4933,14 @@ function addMovingAverage(rows, col) {
   });
 }
 
-function setBodyRange(days) {
+// key: a number of days, 0 = all, or "ytd" = since January 1st.
+function setBodyRange(key) {
+  const now = new Date();
+  const days = key === "ytd" ? Math.floor((now - new Date(now.getFullYear(), 0, 1)) / 86400000) + 1 : key;
+  bodyState.ranges[bodyState.page] = key;
   bodyState.range = days;
   bodyState.stepsBucket = null;   // each period starts on its natural grouping (see defaultStepsBucket)
-  document.querySelectorAll("#body-range button").forEach(b => b.classList.toggle("on", +b.dataset.r === days));
+  document.querySelectorAll(`#${bodyState.page}-range button`).forEach(b => b.classList.toggle("on", b.dataset.r === String(key)));
   drawBodyCharts();
 }
 
@@ -4506,11 +4984,13 @@ function renderBodyLatest() {
          `<div class="stat-sub">${titleCase(v("hrv_status"))}${v("hrv_weekly") ? ` · 7 d ${Math.round(v("hrv_weekly"))}` : ""}</div>`),
     tile("sleep", fmtHours(last.sleep_s),
          `<div class="stat-sub">score ${last.sleep_score ?? "—"} · ${titleCase(last.sleep_quality)}</div>`),
+    tile("body battery", v("bb_at_wake") != null ? `${v("bb_at_wake")}` : null, `<div class="stat-sub">at wake</div>`),
+  ].join("");
+  document.getElementById("progress-tiles").innerHTML = [
     tile("vo2max", v("vo2max") != null ? v("vo2max").toFixed(1) : null, delta("vo2max", d => d.toFixed(1), true)),
     tile("readiness", v("readiness_score"), `<div class="stat-sub">${titleCase(v("readiness_level"))}</div>`),
     tile("training status", titleCase(v("training_status")),
          v("acwr") != null ? `<div class="stat-sub">load ratio ${v("acwr").toFixed(1)}</div>` : ""),
-    tile("body battery", v("bb_at_wake") != null ? `${v("bb_at_wake")}` : null, `<div class="stat-sub">at wake</div>`),
     tile("endurance score", v("endurance_score")?.toLocaleString(), when("endurance_score")),
     tile("hill score", v("hill_score"),
          v("hill_strength") != null ? `<div class="stat-sub">strength ${v("hill_strength")} · endurance ${v("hill_endurance")}</div>` : ""),
@@ -4595,8 +5075,8 @@ function renderBodyMinMax() {
   };
   const set = (id, html) => { document.getElementById(`mm-${id}`).innerHTML = html; };
   set("weight", pair("weight_kg", v => `${v.toFixed(1)} kg`));
-  const vol = extremes("run_km_7d");
-  set("volume", vol ? `biggest 7 days <b>${vol.hi.v.toFixed(0)} km</b> · ${day(vol.hi.date)}` : "");
+  const VM = VOLUME_MEASURES[bodyState.volume || "km"], vol = extremes(`${VM.col}_7d`);
+  set("volume", vol ? `biggest 7 days <b>${VM.fmt(vol.hi.v)}</b> · ${day(vol.hi.date)}` : "");
   set("hrv", pair("hrv_night", v => `${Math.round(v)} ms`));
   set("rhr", pair("resting_hr", v => `${Math.round(v)} bpm`));
   set("maxhr", pair("max_hr", v => `${Math.round(v)} bpm`));
@@ -4727,47 +5207,6 @@ function timeAxis(list) {
 
 const TERRAIN_COLORS = { flat: "#4a8fc2", rolling: "#e0a43a", mountain: "#a50f15" };
 
-function drawRacesChart() {
-  const races = inBodyPeriod(bodyState.races);
-  const section = document.getElementById("body-races-section");
-  if (!races.length) { section.style.display = "none"; return; }   // no race in this period
-  section.style.display = "";
-  const maxKm = Math.max(...races.map(r => r.distance_km));
-  const data = races.map(r => ({ x: new Date(r.date + "T00:00:00").getTime(), y: r.adjusted_pace || r.pace, r }));
-  const ys = data.map(d => d.y);
-  bodyState.charts.push(new Chart(document.getElementById("bc-races"), {
-    type: "scatter",
-    data: { datasets: [{
-      data,
-      pointStyle: data.map(d => d.r.surface === "trail" ? "triangle" : "circle"),
-      pointRadius: data.map(d => 4 + 10 * Math.sqrt(d.r.distance_km / maxKm)),
-      pointHoverRadius: data.map(d => 6 + 10 * Math.sqrt(d.r.distance_km / maxKm)),
-      backgroundColor: data.map(d => hexToRgba(TERRAIN_COLORS[d.r.terrain] || "#9aa5b1", 0.7)),
-      borderColor: data.map(d => TERRAIN_COLORS[d.r.terrain] || "#9aa5b1"),
-    }] },
-    options: {
-      responsive: true, animation: false,
-      onClick: (evt, els) => { if (els.length) openActivity(data[els[0].index].r.id); },
-      onHover: (evt, els) => { evt.native.target.style.cursor = els.length ? "pointer" : "default"; },
-      plugins: { legend: { display: false }, tooltip: { displayColors: false, callbacks: {
-        title: items => { const r = items[0].raw.r; return `${r.date} · ${r.place || r.name}`; },
-        label: ctx => {
-          const r = ctx.raw.r;
-          return [`${r.distance_km.toFixed(1)} km · +${r.elevation_gain.toLocaleString()} m · ${r.surface} · ${r.terrain}`,
-                  `${fmtRaceTime(r.duration_s)} · actual ${fmtPace(r.pace)}/km`,
-                  r.adjusted_pace ? `flat-equivalent ${fmtPace(r.adjusted_pace)}/km` : ""].filter(Boolean);
-        },
-      } } },
-      scales: {
-        x: timeAxis(races),
-        y: { reverse: true, suggestedMin: Math.floor(Math.min(...ys) * 2) / 2 - 0.25,
-             suggestedMax: Math.ceil(Math.max(...ys) * 2) / 2 + 0.25,
-             ticks: { callback: v => fmtPace(v) }, title: { display: true, text: "flat-eq. pace /km" } },
-      },
-    },
-  }));
-}
-
 function drawEfficiencyChart() {
   const all = inBodyPeriod(bodyState.efficiency);
   const runs = all.filter(r => !r.outlier);
@@ -4822,7 +5261,6 @@ function drawBodyCharts() {
   bodyState.charts.forEach(c => c.destroy());
   bodyState.charts = [];
   renderBodyMinMax();
-  drawRacesChart();
   drawEfficiencyChart();
   const rows = bodyRows();
   const labels = rows.map(r => r.date);
@@ -4845,7 +5283,7 @@ function drawBodyCharts() {
     bodyState.charts.push(new Chart(document.getElementById(id), {
       type, data: { labels, datasets },
       options: {
-        responsive: true, animation: false, spanGaps: true,
+        responsive: true, animation: false, spanGaps: true, onClick: extra.onClick,
         plugins: { legend: { display: datasets.length > 1 && !extra.noLegend } , ...(extra.plugins || {}) },
         scales: { x, ...scales },
       },
@@ -4865,22 +5303,24 @@ function drawBodyCharts() {
   // as a dot on its Sunday (on the week's row when the chart is drawn weekly).
   const monday = iso => { const d = new Date(iso + "T00:00:00"); d.setDate(d.getDate() - ((d.getDay() + 6) % 7));
                           return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`; };
+  const VM = VOLUME_MEASURES[bodyState.volume || "km"];
+  document.querySelectorAll("#volume-measure button").forEach(b => b.classList.toggle("on", b.dataset.m === (bodyState.volume || "km")));
   const weekKm = new Map();
-  for (const r of bodyDailyRows()) if (r.run_km) weekKm.set(monday(r.date), (weekKm.get(monday(r.date)) || 0) + r.run_km);
+  for (const r of bodyDailyRows()) if (r[VM.col]) weekKm.set(monday(r.date), (weekKm.get(monday(r.date)) || 0) + r[VM.col]);
   const daily = rows.length === bodyDailyRows().length;
   const weekly = labels.map((d, i) => {
     const last = i === labels.length - 1 || monday(labels[i + 1]) !== monday(d);   // last row of its week
     return (daily ? last : true) ? Math.round((weekKm.get(monday(d)) || 0) * 10) / 10 : null;
   });
   make("bc-volume", "line", [
-    { label: "Last 7 days", data: col("run_km_7d"), borderColor: "rgba(47,106,166,0.45)", backgroundColor: "rgba(47,106,166,0.07)",
+    { label: "Last 7 days", data: col(`${VM.col}_7d`), borderColor: "rgba(47,106,166,0.45)", backgroundColor: "rgba(47,106,166,0.07)",
       fill: "origin", borderWidth: 1.5, pointRadius: 0, tension: 0.2, order: 1 },
     { label: "Week (Mon–Sun)", data: weekly, spanGaps: true, tension: 0, borderWidth: 1.5, order: 0, pointRadius: weekKm.size > 60 ? 1.6 : 3.5, pointHoverRadius: 5,
       borderColor: weekKm.size > 60 ? "rgba(31,29,24,0.55)" : THEME.ink, backgroundColor: weekKm.size > 60 ? "rgba(31,29,24,0.55)" : THEME.ink },
-  ], { y: { beginAtZero: true, ticks: { callback: v => `${v} km` } } },
+  ], { y: { beginAtZero: true, ticks: { callback: VM.axis } } },
   { plugins: { tooltip: { callbacks: { label: ctx => ctx.datasetIndex === 0
-      ? `last 7 days ${ctx.parsed.y.toFixed(1)} km (${(ctx.parsed.y / 7).toFixed(1)} km/day)`
-      : `week of ${monday(labels[ctx.dataIndex])}: ${ctx.parsed.y.toFixed(1)} km` } } } });
+      ? `last 7 days ${VM.fmt(ctx.parsed.y)}`
+      : `week of ${monday(labels[ctx.dataIndex])}: ${VM.fmt(ctx.parsed.y)}` } } } });
 
   // Body composition (BMI, fat, water, muscle, bone): hidden until asked for.
   const comp = document.getElementById("body-comp");
@@ -4966,16 +5406,38 @@ function drawBodyCharts() {
   // Plotted as pace (comparable across distances); the tooltip shows the predicted finish time.
   const pace = (c, km) => rows.map(r => r[c] ? r[c] / 60 / km : null);
   const race = (label, c, km, color) => line(label, pace(c, km), color, { pointRadius: 0, times: col(c) });
+  // Your road races at those distances, as points on the matching line (official time when known).
+  const RACE_KEYS = [["5k", "5K", "race_5k_s", 5, "#c8553d"], ["10k", "10K", "race_10k_s", 10, "#e0a43a"],
+                     ["half", "Half", "race_half_s", 21.0975, "#4a9d5b"], ["marathon", "Marathon", "race_marathon_s", 42.195, "#4a8fc2"]];
+  const weeklyRows = rows.length !== bodyDailyRows().length;
+  const labelIndex = iso => {
+    let key = iso;
+    if (weeklyRows) { const d = new Date(iso); d.setDate(d.getDate() - ((d.getDay() + 6) % 7)); key = d.toISOString().slice(0, 10); }   // as bodyRows()
+    return labels.indexOf(key);
+  };
+  const racePoints = RACE_KEYS.map(([k, label, , km, color]) => {
+    const data = labels.map(() => null), info = labels.map(() => null);
+    for (const r of bodyState.races.filter(r => r.ffa.distance === k)) {
+      const i = labelIndex(r.date);
+      if (i >= 0) { data[i] = r.ffa.time_s / 60 / km; info[i] = r; }
+    }
+    return { label: `your ${label}`, data, info, type: "line", showLine: false, pointRadius: 6, pointHoverRadius: 8,
+             pointStyle: "rectRot", borderColor: "white", borderWidth: 1.5, backgroundColor: color };
+  }).filter(ds => ds.data.some(v => v != null));
   make("bc-race", "line", [
-    race("5K", "race_5k_s", 5, "#c8553d"),
-    race("10K", "race_10k_s", 10, "#e0a43a"),
-    race("Half", "race_half_s", 21.0975, "#4a9d5b"),
-    race("Marathon", "race_marathon_s", 42.195, "#4a8fc2"),
+    ...RACE_KEYS.map(([, label, c, km, color]) => race(label, c, km, color)),
+    ...racePoints,
   ], { y: { reverse: true, ticks: { callback: v => fmtPace(v) } } }, {
-    plugins: { tooltip: { callbacks: {
-      // 5K/10K as m:ss, half/marathon as h:mm:ss, plus the pace
-      label: ctx => `${ctx.dataset.label}  ${fmtRaceTime(ctx.dataset.times[ctx.dataIndex])}  (${fmtPace(ctx.parsed.y)}/km)`,
+    plugins: { legend: { labels: { filter: i => !i.text.startsWith("your ") } }, tooltip: { callbacks: {
+      // 5K/10K as m:ss, half/marathon as h:mm:ss, plus the pace; a race point: its name and time
+      label: ctx => {
+        if (ctx.dataset.info) { const r = ctx.dataset.info[ctx.dataIndex];
+          return `${ctx.dataset.label}: ${raceName(r)} ${fmtRaceTime(r.ffa.time_s)} (${fmtPace(ctx.parsed.y)}/km)${r.ffa.level ? ` · FFA ${r.ffa.level}` : ""}`; }
+        return `${ctx.dataset.label} predicted  ${fmtRaceTime(ctx.dataset.times[ctx.dataIndex])}  (${fmtPace(ctx.parsed.y)}/km)`;
+      },
     } } },
+    onClick: (evt, els, chart) => { const e = els.find(x => chart.data.datasets[x.datasetIndex].info?.[x.index]);
+      if (e) openRace(chart.data.datasets[e.datasetIndex].info[e.index].id); },
   });
 
   make("bc-stress", "line", [

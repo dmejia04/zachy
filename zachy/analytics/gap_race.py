@@ -13,7 +13,7 @@ learns what a slope costs you *when racing* — walking the steep climbs, how yo
    f is a smooth curve (values every 5% of slope, joined linearly, with a penalty on bends) and
    f(0) = 0; the cost factor is exp(−f): how many flat metres one metre at that slope is worth.
    The race level absorbs each race's intensity; β and γ take out pushing harder and fatigue.
-4. Checks, comparing every model (km-effort, Minetti, Strava-like, heart-rate, race):
+4. Checks, comparing every model (km-effort, Minetti, Strava-like, Garmin, heart-rate, race):
    - flatness: per race, the spread of the grade-adjusted pace (std of its logarithm, in %),
      the race model being refitted without that race (leave one race out);
    - road check: each model's flat-equivalent distance of a race, run through Riegel from your
@@ -169,7 +169,8 @@ def _road_reference(db: Session, day) -> tuple[float, float] | None:
 def evaluate_and_store(db: Session) -> dict:
     """Fit the race model on all selected races, check every model, store the result."""
     from zachy.analytics.gap import costs, personal_model
-    hr_model = personal_model(db)
+    from zachy.analytics.gap_garmin import garmin_model
+    hr_model, garmin = personal_model(db), garmin_model(db)
     races = candidate_races(db)
     data, info = {}, {}
     for r in races:
@@ -180,7 +181,8 @@ def evaluate_and_store(db: Session) -> dict:
         raise ValueError(f"Only {len(data)} usable races (need 5)")
     model = fit(data)
 
-    fixed = {m: (lambda g, m=m: costs(g, hr_model)[m]) for m in ("km_effort", "minetti", "strava", "personal")}
+    fixed = {m: (lambda g, m=m: costs(g, hr_model, garmin=garmin)[m])
+             for m in ("km_effort", "minetti", "strava", "personal", *(["garmin"] if garmin else []))}
     per_race, road = [], {m: [] for m in [*fixed, "race"]}
     for aid, s in data.items():
         loro = fit({k: v for k, v in data.items() if k != aid})        # without this race
@@ -237,7 +239,8 @@ def race_profile(db: Session, activity_id: int) -> dict | None:
     model = race_model(db)
     if s is None or not model:
         return None
-    c = costs(s.grade.to_numpy(), personal_model(db))
+    from zachy.analytics.gap_garmin import garmin_model
+    c = costs(s.grade.to_numpy(), personal_model(db), garmin=garmin_model(db))
     c["race"] = cost_race(s.grade.to_numpy(), model)
     out = {"done": s.done.round(4).tolist(), "grade": (s.grade * 100).round(1).tolist(),
            "pace": (1000 / s.speed / 60).round(3).tolist(), "hr": s.hr.round().tolist(), "gap": {}}

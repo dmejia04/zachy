@@ -110,7 +110,8 @@ def km_splits(df: pd.DataFrame, activity: Activity, split_km: float = 1.0) -> li
 
 def lap_stats(df: pd.DataFrame, activity: Activity, lap_durations: list) -> list[dict]:
     """Per lap, from the FIT track split at cumulative lap (moving) times: elevation gain/loss,
-    and time-weighted average power and cadence while moving (zeros = stopped, left out)."""
+    max heart rate, and time-weighted average power and cadence while moving (zeros = stopped,
+    left out)."""
     df = df.dropna(subset=["timer_s"]).reset_index(drop=True)
     if df.empty or not lap_durations:
         return []
@@ -131,7 +132,9 @@ def lap_stats(df: pd.DataFrame, activity: Activity, lap_durations: list) -> list
     for i in range(len(bounds)):
         m = which == i
         power, cadence = moving_mean("power", m), moving_mean("cadence", m)
-        out.append({"elevation_gain": round(float(gain[m].sum()), 1),
+        hr = df["hr"].to_numpy()[m] if "hr" in df else np.array([])
+        max_hr = float(np.nanmax(hr)) if hr.size and np.isfinite(hr).any() else None
+        out.append({"max_hr": max_hr, "elevation_gain": round(float(gain[m].sum()), 1),
                     "elevation_loss": round(float(loss[m].sum()), 1),
                     "avg_power": round(power, 1) if power is not None else None,
                     "avg_cadence": round(cadence, 1) if cadence is not None else None})

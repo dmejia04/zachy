@@ -1,7 +1,8 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 
-from zachy.analytics.gap import curves, fit_personal
+from zachy.analytics.gap import curves, fit_personal, speed_vs_slope
+from zachy.analytics.gap_garmin import fit_garmin
 from zachy.analytics.gap_race import evaluate_and_store, race_profile
 from zachy.database import get_db
 
@@ -38,3 +39,22 @@ def race_gap_profile(activity_id: int, db: Session = Depends(get_db)):
     if out is None:
         raise HTTPException(status_code=404, detail="Not usable for the race model")
     return out
+
+
+@router.get("/speed-slope/{activity_id}")
+def speed_slope(activity_id: int, db: Session = Depends(get_db)):
+    """Speed against slope every 10 s of a run, with cadence; run / walk time and the switch zone."""
+    out = speed_vs_slope(db, activity_id)
+    if out is None:
+        raise HTTPException(status_code=404, detail="No cadence or GPS data for this activity")
+    return out
+
+
+@router.post("/models/garmin")
+def refit_garmin(db: Session = Depends(get_db)):
+    """Rebuild Garmin's curve from your recent hilly runs' FIT files (takes several minutes)."""
+    try:
+        m = fit_garmin(db)
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+    return {k: m[k] for k in ("runs", "seconds", "fitted_at")}

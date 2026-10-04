@@ -60,9 +60,11 @@ class LapOut(BaseModel):
     avg_hr: float | None
     avg_cadence: float | None
     elevation_gain: float | None
+    max_hr: float | None = None           # computed from FIT records when available
     elevation_loss: float | None = None   # computed from FIT records when available
     avg_power: float | None = None        # computed from FIT records when available
     gap_pace: float | None = None         # personal grade-adjusted pace (min/km)
+    gap_race_pace: float | None = None    # race-model grade-adjusted pace (min/km)
 
     class Config:
         from_attributes = True

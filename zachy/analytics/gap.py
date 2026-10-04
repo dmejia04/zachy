@@ -1,4 +1,4 @@
-"""Grade-adjusted pace: five ways to turn a hilly run into a flat-equivalent pace.
+"""Grade-adjusted pace: six ways to turn a hilly run into a flat-equivalent pace.
 
 Every method is expressed the same way so they can be compared: a cost factor per slope — how
 many flat metres one metre at that slope is worth (1.0 on the flat). The flat-equivalent distance
@@ -12,6 +12,7 @@ of a run is the sum of its metres × cost factor; adjusted pace = moving time ÷
 - Personal: fitted from your runs — heartbeats per metre on each slope divided by heartbeats per
   metre on the flat in the same run (so fitness, heat and fatigue cancel out), one-minute windows,
   median per 1% slope bin, smoothed.
+- Garmin: Garmin's own curve, read back from the grade-adjusted speed your watch records (gap_garmin.py).
 - Race model: fitted from your trail races so they come out as flat as possible (gap_race.py).
 """
 
@@ -26,9 +27,9 @@ from zachy.analytics.elevation import moving_elevation
 from zachy.models import Activity, FitFile, GapModel, Record
 
 MAX_GRADE = 0.45
-METHODS = ["km_effort", "minetti", "strava", "personal", "race"]
-LABELS = {"km_effort": "km-effort", "minetti": "Minetti", "strava": "Strava-like", "personal": "Personal",
-          "race": "Race model"}
+METHODS = ["km_effort", "minetti", "strava", "garmin", "personal", "race"]
+LABELS = {"km_effort": "km-effort", "minetti": "Minetti", "strava": "Strava-like", "garmin": "Garmin",
+          "personal": "Personal", "race": "Race model"}
 
 
 # ---------- the four cost curves (slope as a fraction, e.g. 0.10 = 10%) ----------
@@ -54,11 +55,13 @@ def cost_personal(g, model: dict | None):
     return np.interp(np.clip(g, grades[0], grades[-1]), grades, model["factors"])
 
 
-def costs(g, model: dict | None, race: dict | None = None) -> dict:
-    """Every model's cost factor per slope. race: the race model (gap_race.py), if fitted."""
+def costs(g, model: dict | None, race: dict | None = None, garmin: dict | None = None) -> dict:
+    """Every model's cost factor per slope. race: the race model (gap_race.py); garmin: Garmin's
+    curve as reconstructed from your FIT files (gap_garmin.py) — each only if fitted."""
+    from zachy.analytics.gap_garmin import cost_garmin
     from zachy.analytics.gap_race import cost_race
-    return {"km_effort": cost_km_effort(g), "minetti": cost_minetti(g),
-            "strava": cost_strava(g), "personal": cost_personal(g, model), "race": cost_race(g, race)}
+    return {"km_effort": cost_km_effort(g), "minetti": cost_minetti(g), "strava": cost_strava(g),
+            "garmin": cost_garmin(g, garmin), "personal": cost_personal(g, model), "race": cost_race(g, race)}
 
 
 # ---------- personal model ----------
@@ -203,15 +206,21 @@ def profile(db: Session, activity: Activity, step_m: float = 10, with_distance: 
     return (grid / 1000, grades) if with_distance else grades
 
 
-def split_paces(db: Session, activity: Activity, splits: list[dict]) -> list[float | None]:
-    """Personal flat-equivalent pace (min/km) of each km split (dicts with end_km, distance_km,
-    duration_s, as from analytics/splits.km_splits)."""
-    model = personal_model(db)
+def split_paces(db: Session, activity: Activity, splits: list[dict], method: str = "personal") -> list[float | None]:
+    """Flat-equivalent pace (min/km) of each split (dicts with end_km, distance_km, duration_s, as
+    from analytics/splits.km_splits), with the personal (heart-rate) model or the race model."""
+    if method == "race":
+        from zachy.analytics.gap_race import cost_race, race_model
+        model = race_model(db)
+        cost = lambda g: cost_race(g, model)
+    else:
+        model = personal_model(db)
+        cost = lambda g: cost_personal(g, model)
     prof = profile(db, activity, with_distance=True)
     if not model or prof is None:
         return [None] * len(splits)
     at_km, g = prof
-    factor = cost_personal(g, model)
+    factor = cost(g)
     out = []
     for s in splits:
         start = s["end_km"] - s["distance_km"]
@@ -230,16 +239,18 @@ _cache: dict[tuple, dict | None] = {}
 def adjusted_paces(db: Session, activity: Activity) -> dict | None:
     """Flat-equivalent pace (min/km) of a run with each method, plus the actual pace.
     Kept in memory per (activity, personal model version): FIT records never change."""
+    from zachy.analytics.gap_garmin import garmin_model
     from zachy.analytics.gap_race import race_model
-    model, race = personal_model(db), race_model(db)
-    key = (activity.id, model and model["fitted_at"], race and race["fitted_at"], activity.distance_km,
-           activity.duration_s, activity.elevation_gain)
+    model, race, garmin = personal_model(db), race_model(db), garmin_model(db)
+    key = (activity.id, model and model["fitted_at"], race and race["fitted_at"], garmin and garmin["fitted_at"],
+           activity.distance_km, activity.duration_s, activity.elevation_gain)
     if key not in _cache:
-        _cache[key] = _adjusted_paces(db, activity, model, race)
+        _cache[key] = _adjusted_paces(db, activity, model, race, garmin)
     return _cache[key]
 
 
-def _adjusted_paces(db: Session, activity: Activity, model: dict | None, race: dict | None = None) -> dict | None:
+def _adjusted_paces(db: Session, activity: Activity, model: dict | None, race: dict | None = None,
+                    garmin: dict | None = None) -> dict | None:
     if not activity.distance_km or not activity.duration_s:
         return None
     g = profile(db, activity)
@@ -251,7 +262,7 @@ def _adjusted_paces(db: Session, activity: Activity, model: dict | None, race: d
     # scaled to the activity's official distance.
     out["km_effort"] = round(minutes / (activity.distance_km + (activity.elevation_gain or 0) / 100), 3)
     scale = activity.distance_km / (len(g) * 0.01)
-    for m, c in costs(g, model, race).items():
+    for m, c in costs(g, model, race, garmin).items():
         if m == "km_effort" or np.isnan(c).all():
             continue
         equivalent_km = float(np.sum(c) * 0.01 * scale)
@@ -261,15 +272,97 @@ def _adjusted_paces(db: Session, activity: Activity, model: dict | None, race: d
 
 def curves(db: Session) -> dict:
     """All cost curves from −40% to +40%, plus the personal and race models' data, for the chart."""
+    from zachy.analytics.gap_garmin import garmin_model
     from zachy.analytics.gap_race import race_model
-    model, race = personal_model(db), race_model(db)
+    model, race, garmin = personal_model(db), race_model(db), garmin_model(db)
     grades = np.arange(-40, 41)
-    c = costs(grades / 100, model, race)
+    c = costs(grades / 100, model, race, garmin)
     return {
         "grades": grades.tolist(),
         "curves": {m: [None if np.isnan(v) else round(float(v), 3) for v in c[m]] for m in METHODS},
         "labels": LABELS,
         "personal": model and {k: model.get(k) for k in ("bins", "windows", "runs", "fitted_at", "by_year", "walk_run")},
+        "garmin": garmin and {k: garmin.get(k) for k in ("bins", "runs", "seconds", "fitted_at")},
         "race": race and {k: race.get(k) for k in ("n_races", "segments", "summary", "races", "beta_hr", "gamma_fatigue",
                                                    "fitted_at")},
     }
+
+
+def speed_vs_slope(db: Session, activity_id: int, window_s: int = 10) -> dict | None:
+    """One run seen as speed against slope, every 10 s, with the cadence (walking under 140 spm):
+    the points for the chart, how much time you ran and walked, the slopes where you switch from
+    running to walking (walking from 25% to 75% of the time) and your walking speed on climbs."""
+    rows = (db.query(Record.timer_s, Record.elapsed_s, Record.distance_km, Record.elevation, Record.cadence)
+            .filter(Record.activity_id == activity_id).order_by(Record.id).all())
+    r = pd.DataFrame(rows, columns=["t", "el", "d", "z", "cad"]).astype(float).dropna(subset=["t", "el", "d", "z"])
+    if len(r) < 300 or r.cad.notna().sum() < len(r) / 2:
+        return None
+    r["z"] = moving_elevation(r.z.to_numpy(), r.t.to_numpy(), r.el.to_numpy())
+    r = r.drop_duplicates("t").set_index("t")
+    grid = np.arange(int(r.index.min()), int(r.index.max()) + 1)
+    r = r.reindex(r.index.union(grid)).interpolate(limit=10).reindex(grid)
+    z = r.z.rolling(15, center=True, min_periods=5).mean()
+    w = pd.DataFrame({"d": r.d.diff(window_s) * 1000, "dz": z.diff(window_s),
+                      "cad": r.cad.rolling(window_s, min_periods=5).median(),
+                      "paused": (r.el.diff(window_s) - window_s) > 2}).iloc[window_s::window_s]
+    w = w[~w.paused & (w.d >= 3) & (w.d / window_s < 7) & w.cad.notna() & (w.cad > 40)]
+    if len(w) < 50:
+        return None
+    w = w.assign(g=(w.dz / w.d).clip(-MAX_GRADE, MAX_GRADE) * 100, v=w.d / window_s * 3.6,
+                 walk=w.cad < WALK_CADENCE)
+    # Run → walk switch: walking share per 1% of slope (enough data), smoothed over ±2%.
+    share = (w[w.g.between(-10, 40)].assign(b=lambda x: x.g.round())
+             .groupby("b").walk.agg(["mean", "count"]))
+    share = share[share["count"] >= 4]["mean"].rolling(5, center=True, min_periods=2).mean()
+    climbs = share[share.index >= -5]
+    start = next((float(b) for b, v in climbs.items() if v >= 0.25), None)
+    end = next((float(b) for b, v in climbs.items() if start is not None and b >= start and v >= 0.75), None)
+    walking = w[w.walk & (w.g > 5)]
+    g_all = gait(db, activity_id)   # running / walking / standing: the same definition everywhere
+    step = max(1, len(w) // 3000)                     # at most ~3,000 points on the chart
+    pts = w.iloc[::step]
+    return {
+        "points": [[round(g, 1), round(v, 2), int(c)] for g, v, c in zip(pts.g, pts.v, pts.cad)],
+        "run_s": g_all["seconds"]["run"] if g_all else int((~w.walk).sum() * window_s),
+        "walk_s": g_all["seconds"]["walk"] if g_all else int(w.walk.sum() * window_s),
+        "idle_s": g_all["seconds"]["idle"] if g_all else 0,
+        "transition": [start, end] if start is not None and end is not None else None,
+        "walk_speed": round(float(walking.v.median()), 1) if len(walking) >= 10 else None,
+        "cadence_threshold": WALK_CADENCE, "window_s": window_s,
+    }
+
+
+IDLE_SPEED = 0.5   # m/s: under = standing (the watch still running)
+
+
+def gait(db: Session, activity_id: int) -> dict | None:
+    """Running / walking / standing for every second of moving time, from the recorded cadence
+    (steps/min) and speed: speed under 0.5 m/s = standing, cadence under 140 = walking, else
+    running. The one definition used everywhere (strip, totals, speed vs slope)."""
+    rows = (db.query(Record.timer_s, Record.distance_km, Record.speed_ms, Record.cadence)
+            .filter(Record.activity_id == activity_id).order_by(Record.id).all())
+    r = pd.DataFrame(rows, columns=["t", "d", "v", "cad"]).astype(float).dropna(subset=["t"])
+    if len(r) < 60 or r.cad.notna().sum() < len(r) / 2:
+        return None
+    dt = r.t.diff().shift(-1).clip(lower=0, upper=30).fillna(0)
+    k = np.where(r.v.fillna(0) < IDLE_SPEED, 0, np.where(r.cad.fillna(0) < WALK_CADENCE, 1, 2))
+    seconds = {"run": int(dt[k == 2].sum()), "walk": int(dt[k == 1].sum()), "idle": int(dt[k == 0].sum())}
+    # Along the distance: runs of the same gait, merged when shorter than 30 s so the strip stays readable.
+    d = np.maximum.accumulate(r.d.ffill().fillna(0).to_numpy())
+    segs = []
+    for i in range(len(r)):
+        if segs and segs[-1][2] == k[i]:
+            segs[-1][1], segs[-1][3] = d[i], segs[-1][3] + dt.iloc[i]
+        else:
+            segs.append([d[i - 1] if i else d[0], d[i], int(k[i]), dt.iloc[i]])
+    merged = []
+    for s in segs:
+        if merged and (s[3] < 30 or merged[-1][2] == s[2]):
+            merged[-1][1] = s[1]
+            if merged[-1][2] != s[2] and s[3] > merged[-1][3]:
+                merged[-1][2] = s[2]
+            merged[-1][3] += s[3]
+        else:
+            merged.append(list(s))
+    return {"seconds": seconds, "segments": [[round(a, 3), round(b, 3), c] for a, b, c, _ in merged],
+            "walk_cadence": WALK_CADENCE, "idle_speed": IDLE_SPEED}

@@ -4,7 +4,8 @@
   Base, VO2 max…) and its training load;
 - your own rating at the end on the watch: RPE (Garmin stores 10-100, shown as 1-10) and
   "how did you feel" (0 very weak … 100 very strong);
-- stamina at the start and end, and the body battery change.
+- stamina at the start and end, the body battery change, and Garmin's impact load (only a total
+  per activity: it isn't in the FIT file).
 
 Only in the activity details (not in the activity list), so fetched once per activity and cached.
 """
@@ -26,12 +27,17 @@ def _convert(d: dict) -> dict:
         "rpe": rpe / 10 if rpe is not None else None, "feel": s.get("directWorkoutFeel"),
         "stamina_start": s.get("beginPotentialStamina"), "stamina_end": s.get("endPotentialStamina"),
         "body_battery": s.get("differenceBodyBattery"),
+        "impact_load": s.get("impactLoad"),
     }
 
 
 def activity_effort(db: Session, activity: Activity, client=None) -> dict:
     row = db.get(ActivityEffort, activity.id)
     # The RPE can be added later in the Garmin app: ask again for the last week's activities.
+    if row is not None and "impact_load" not in json.loads(row.data):   # saved before impact load was read
+        db.delete(row)
+        db.commit()
+        row = None
     if row is not None and json.loads(row.data).get("rpe") is None \
             and (datetime.now().date() - activity.date).days <= 7 and (datetime.now() - row.fetched_at).total_seconds() > 600:
         db.delete(row)

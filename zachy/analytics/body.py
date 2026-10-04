@@ -205,10 +205,12 @@ def yearly_max_hr(db: Session) -> dict[int, dict]:
 
 
 def daily_volume(db: Session) -> list[dict]:
-    """Running distance per day (all foot activities, treadmill included)."""
+    """Running distance, moving time and climb per day (all foot activities, treadmill included)."""
     from sqlalchemy import func
     from zachy.analytics.terrain import FOOT_TYPES
-    rows = (db.query(Activity.date, func.sum(Activity.distance_km), func.sum(Activity.duration_s))
+    rows = (db.query(Activity.date, func.sum(Activity.distance_km), func.sum(Activity.duration_s),
+                     func.sum(Activity.elevation_gain))
             .filter(Activity.activity_type.in_(FOOT_TYPES), Activity.distance_km > 0)
             .group_by(Activity.date).order_by(Activity.date))
-    return [{"date": d.isoformat(), "km": round(km, 2), "secs": secs or 0} for d, km, secs in rows]
+    return [{"date": d.isoformat(), "km": round(km, 2), "secs": secs or 0, "gain": round(gain or 0)}
+            for d, km, secs, gain in rows]

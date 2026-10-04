@@ -277,6 +277,30 @@ def get_activity_effort(activity_id: int, db: Session = Depends(get_db)):
         raise HTTPException(status_code=503, detail="Garmin unavailable")
 
 
+@router.get("/{activity_id}/dynamics")
+def get_activity_dynamics(activity_id: int, db: Session = Depends(get_db)):
+    """Running dynamics, stamina, performance condition, Garmin GAP and body battery, per point and
+    per lap, read from the original FIT file (first time only)."""
+    from zachy.analytics.dynamics import dynamics
+    activity = db.query(Activity).filter(Activity.id == activity_id).first()
+    if not activity:
+        raise HTTPException(status_code=404, detail="Activity not found")
+    out = dynamics(activity.garmin_id)
+    if out is None:
+        raise HTTPException(status_code=404, detail="No FIT file for this activity")
+    return out
+
+
+@router.get("/{activity_id}/gait")
+def get_activity_gait(activity_id: int, db: Session = Depends(get_db)):
+    """Running / walking / standing: seconds of each, and where along the distance."""
+    from zachy.analytics.gap import gait
+    out = gait(db, activity_id)
+    if out is None:
+        raise HTTPException(status_code=404, detail="No cadence data for this activity")
+    return out
+
+
 @router.get("/{activity_id}/splits")
 def get_activity_splits(
     activity_id: int,
@@ -292,17 +316,17 @@ def get_activity_splits(
     if track.empty:
         raise HTTPException(status_code=404, detail="No FIT records for this activity")
     splits = km_splits(track, activity, km)
-    for s, gap in zip(splits, split_paces(db, activity, splits)):
-        s["gap_pace"] = gap   # personal flat-equivalent pace of that km
+    for s, gap, gap_race in zip(splits, split_paces(db, activity, splits), split_paces(db, activity, splits, "race")):
+        s["gap_pace"], s["gap_race_pace"] = gap, gap_race   # flat-equivalent pace of that km, both models
     return {"split_km": km, "splits": splits}
 
 
 def laps_with_fit_stats(db: Session, laps: list[Lap], timeseries: list[dict], activity: Activity) -> list[dict]:
-    """Laps with elevation gain/loss, power and cadence recomputed from the FIT track (same
+    """Laps with elevation gain/loss, max HR, power and cadence recomputed from the FIT track (same
     method as the km splits), and their personal grade-adjusted pace. Garmin's own lap cadence
     averages in stopped time, so it's replaced."""
     track = pd.DataFrame(timeseries).reindex(
-        columns=["seconds_elapsed", "elapsed_s", "elevation", "power", "cadence"]).rename(
+        columns=["seconds_elapsed", "elapsed_s", "elevation", "power", "cadence", "hr"]).rename(
         columns={"seconds_elapsed": "timer_s"}).astype(float)
     stats = lap_stats(track, activity, [lap.duration_s for lap in laps])
     out = []
@@ -316,8 +340,8 @@ def laps_with_fit_stats(db: Session, laps: list[Lap], timeseries: list[dict], ac
     ends = np.cumsum([r["distance_km"] or 0 for r in out])
     pseudo = [{"end_km": float(e), "distance_km": r["distance_km"] or 0, "duration_s": r["duration_s"]}
               for e, r in zip(ends, out)]
-    for r, gap in zip(out, split_paces(db, activity, pseudo)):
-        r["gap_pace"] = gap
+    for r, gap, gap_race in zip(out, split_paces(db, activity, pseudo), split_paces(db, activity, pseudo, "race")):
+        r["gap_pace"], r["gap_race_pace"] = gap, gap_race
     return out
 
 
