@@ -5,7 +5,7 @@ from pydantic import BaseModel
 from sqlalchemy.orm import Session
 
 from zachy.analytics.ffa import table as ffa_table
-from zachy.analytics.race_page import race_detail, race_list
+from zachy.analytics.race_page import race_detail, race_list, stage_race
 from zachy.analytics.race_results import as_dict, fetch_betrail_levels, set_manual_rank, fetch_itra_index, performance_table, import_rows, import_utmb, match_all, save_indexes, set_scores
 from zachy.database import get_db
 from zachy.models import Activity, CategoryCache, Profile, RaceResult
@@ -137,4 +137,13 @@ def get_race(activity_id: int, db: Session = Depends(get_db)):
     out = race_detail(db, activity_id)
     if out is None:
         raise HTTPException(status_code=404, detail="Not a race")
+    return out
+
+
+@router.get("/stage-race/{activity_id}")
+def get_stage_race(activity_id: int, db: Session = Depends(get_db)):
+    """The stage race this activity is a stage of, as one race (404 if it isn't one)."""
+    out = stage_race(db, activity_id)
+    if out is None:
+        raise HTTPException(status_code=404, detail="Not a stage of a stage race")
     return out

@@ -214,6 +214,17 @@ def results_by_activity(db: Session) -> dict[int, dict[str, dict]]:
     return out
 
 
+def stage_ids(db: Session, activity_id: int) -> list[int]:
+    """The activities of the stage race this activity belongs to, first stage first ([] if none)."""
+    for r in db.query(RaceResult).filter(RaceResult.activity_ids.isnot(None),
+                                         RaceResult.match.is_(None) | (RaceResult.match != "rejected")):
+        ids = json.loads(r.activity_ids)
+        if len(ids) > 1 and activity_id in ids:
+            acts = [db.get(Activity, i) for i in ids]
+            return [a.id for a in sorted((a for a in acts if a), key=lambda a: (a.date, int(a.garmin_id or 0)))]
+    return []
+
+
 def import_rows(db: Session, source: str, rows: list[dict], url: str | None = None) -> dict:
     """Store results read from a signed-in results page (keys as in RaceResult), then match."""
     for x in rows:
@@ -263,7 +274,9 @@ def official_for(by_site: dict[str, dict] | None) -> dict | None:
     return {"event": clean(lead["event"]), "race": clean(lead["race"]), "rank": lead["rank"], "total": lead["total"],
             "rank_gender": lead["rank_gender"], "dnf": lead["dnf"], "time_s": lead["time_s"],
             "stage": lead.get("stage"), "stages": lead.get("stages"),
-            "scores": {s: r["score"] for s, r in by_site.items() if r["score"] is not None}}
+            "stage_ids": lead.get("activity_ids") if (lead.get("stages") or 0) > 1 else None,
+            "scores": {s: r["score"] for s, r in by_site.items() if r["score"] is not None},
+            "urls": {s: r["url"] for s, r in by_site.items() if r.get("url") and s != "manual"}}
 
 
 def performance_table(db: Session) -> list[dict]:

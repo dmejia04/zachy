@@ -361,6 +361,30 @@
   .rec-unit { font-size: 13px; font-weight: 500; }
   .rec-meta { font-size: 12px; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   table.laps .dyn-col { background: rgba(140,107,177,0.06); }
+  .results-links { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; margin-top: 10px; font-size: 13px; }
+  .results-links .rl-label { color: var(--muted); font-size: 12px; margin-right: 2px; }
+  .results-links .rl { border: 1px solid var(--line); border-radius: 12px; padding: 2px 10px; background: white; color: var(--ink); text-decoration: none; display: inline-flex; gap: 6px; align-items: center; }
+  .results-links .rl a { color: inherit; text-decoration: none; }
+  .results-links .rl.livetrail { border-color: #79b935; }
+  .results-links .rl button { border: none; background: none; color: var(--muted); cursor: pointer; padding: 0; font-size: 14px; line-height: 1; }
+  .results-links .rl-add { font-size: 12px; padding: 2px 10px; }
+  /* Stage races: Overall · Stage 1 · Stage 2 … above the title; stage rows in the tables. */
+  .stage-bar { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; margin-bottom: 12px; font-size: 13px; }
+  .stage-bar .rl-label { color: var(--muted); font-size: 12px; margin-right: 2px; }
+  table.laps tr.lt-stage td { background: #f4f4f2; font-weight: 600; font-size: 12px; color: var(--muted); }
+  table.laps tr.sr-row { cursor: pointer; }
+  table.laps tr.sr-row:hover td { background: #faf9f6; }
+  .race-card .rc-stages { position: absolute; top: 0; left: 0; right: 0; min-height: 64px; background: rgba(255,255,255,0.97);
+                          border-bottom: 1px solid var(--line); padding: 6px 10px; display: none; font-size: 11.5px;
+                          font-variant-numeric: tabular-nums; z-index: 2; }
+  .race-card:hover .rc-stages { display: block; }
+  .race-card .rc-stages div { display: grid; grid-template-columns: 1fr auto auto; gap: 8px; padding: 2px 4px; border-radius: 4px; }
+  .race-card .rc-stages div:hover { background: #f1efe9; }
+  .race-card .rc-stages span { color: var(--muted); }
+  .lt-stops { font-size: 13px; color: var(--muted); margin-bottom: 10px; } .lt-stops b { color: var(--ink); }
+  .lt-charts { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  @media (max-width: 720px) { .lt-charts { grid-template-columns: 1fr; } }
+  table.lt-table td.name { white-space: nowrap; text-align: left; } table.lt-table td.up { color: #2d6b29; font-weight: 600; } table.lt-table td.down { color: #a50f15; font-weight: 600; }
   .gait-head { display: flex; flex-wrap: wrap; gap: 4px 16px; align-items: center; font-size: 12.5px; margin-top: 2px; }
   .gait-head span { display: inline-flex; align-items: center; gap: 5px; color: var(--muted); }
   .gait-head span b { color: var(--ink); }
@@ -416,8 +440,6 @@
   .race-card .rc-rank.podium { background: #f6e7b0; border-color: #d4a017; font-weight: 700; }
   .race-card .rc-rank.dnf { background: #f3d3d3; border-color: #a50f15; color: #a50f15; font-weight: 700; }
   .official { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 12px; }
-  .race-card .rc-ed { position: absolute; top: 8px; right: 8px; background: rgba(255,255,255,0.92); border: 1px solid var(--line);
-                      border-radius: 10px; font-size: 11px; padding: 1px 7px; font-weight: 600; }
   .race-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; flex-wrap: wrap; }
   .race-head h2 { margin: 0; font-size: 26px; }
   table.perf { width: 100%; border-collapse: collapse; font-size: 12.5px; font-variant-numeric: tabular-nums; min-width: 760px; }
@@ -444,11 +466,6 @@
              justify-content: center; padding: 40px 16px; overflow-y: auto; }
   .overlay-box { background: var(--bg, white); border-radius: 10px; padding: 18px 20px; max-width: 760px; width: 100%;
                  box-shadow: 0 10px 40px rgba(0,0,0,0.25); }
-  table.editions { width: 100%; border-collapse: collapse; font-size: 13px; font-variant-numeric: tabular-nums; }
-  table.editions th { text-align: left; font-weight: 500; color: var(--muted); font-size: 11px; padding: 6px 8px; border-bottom: 1px solid var(--line); }
-  table.editions td { padding: 8px; border-bottom: 1px solid var(--line); }
-  table.editions tr.cur td { background: rgba(165,15,21,0.05); font-weight: 600; }
-  table.editions tr { cursor: pointer; }
   .list-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap; }
   .list-head .seg { margin-top: 10px; }
 
@@ -658,10 +675,6 @@
       <div class="races-filters" id="races-filters"></div>
       <div class="card" style="padding:0;margin-top:10px;"><div id="races-map"></div></div>
       <div id="races-cards"><div class="loading">Loading races…</div></div>
-    </div>
-    <div id="race-detail" style="display:none;">
-      <span class="back" onclick="showRacesList()">&larr; back to races</span>
-      <div id="race-detail-content"></div>
     </div>
   </div>
 
@@ -1557,6 +1570,7 @@ async function drawRouteMap(points) {
   dot(pts[0], THEME.moss).bindTooltip("Start").addTo(routeMap);
   dot(pts[pts.length - 1], THEME.ink).bindTooltip("Finish").addTo(routeMap);
   routeMap.fitBounds(line.getBounds(), { padding: [20, 20] });
+  if (detailState.checkpoints) drawCheckpointMarkers();   // the LiveTrail data may have arrived first
 
   document.getElementById("route-note").textContent =
     "Green = start, black = finish, ringed dot = where you're hovering on the profile or any chart. Click the map to zoom with the scroll wheel.";
@@ -2081,6 +2095,7 @@ function applyCategory() {
   if (laps) laps.style.display = detailState.activity?.category?.category === "easy" ? "none" : "";
   showWorkout();
   showSpeedSlope(detailState.activity);   // follows the race / not race choice
+  showResultsLinks(detailState.activity);
 }
 
 // Workouts: what the session was, guessed from the laps (fetched once per activity).
@@ -2350,6 +2365,270 @@ function setXMode(mode) {
   const a = detailState.activity;
   if (a?.laps?.length) renderLapExtras();                      // lap charts: columns by distance or time
   for (const id of ["gait-chart", "gait-chart-dyn"]) if (gaitCharts[id] && a.gait) drawGaitProfile(a.gait, id);
+}
+
+/* ---------- Stage races: one race over several days, each day its own activity ---------- */
+let srCharts = [];
+const STAGE_COLORS = ["#a50f15", "#3d7ebf", "#3f8f3a", "#e0a43a", "#7b4fb3", "#1f1d18"];
+
+function stageBar(ids, current) {
+  return `<div class="stage-bar"><span class="rl-label">Stage race</span>
+    <button class="pick ${current ? "" : "on"}" onclick="showStageRace(${ids[0]})">Overall</button>
+    ${ids.map((id, i) => `<button class="pick ${current === i + 1 ? "on" : ""}" onclick="showDetail(${id})">Stage ${i + 1}</button>`).join("")}</div>`;
+}
+
+// Overall: totals and official result, the stages, the profile end to end (stage starts marked),
+// the LiveTrail checkpoints across the days, every stage's track on one map.
+async function showStageRace(id) {
+  document.getElementById("list-view").classList.add("hidden");
+  document.getElementById("detail").classList.add("active");
+  const content = document.getElementById("detail-content");
+  content.innerHTML = `<div class="loading">Loading…</div>`;
+  let sr;
+  try {
+    const res = await fetch(`${API}/races/stage-race/${id}`);
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    sr = await res.json();
+  } catch (e) { content.innerHTML = `<div class="error">Could not load this stage race (${e.message}).</div>`; return; }
+  srCharts.forEach(c => c.destroy()); srCharts = [];
+  const o = sr.official || {}, st = sr.stages;
+  const dayOf = (d, opt) => new Date(d + "T00:00:00").toLocaleDateString(undefined, opt);
+  const dates = `${dayOf(st[0].date, { weekday: "short", day: "numeric", month: "short" })} – ${dayOf(st.at(-1).date, { weekday: "short", day: "numeric", month: "short", year: "numeric" })}`;
+  const scores = scoresText(Object.fromEntries(Object.entries(o.scores || {}).map(([k, v]) => [k, { score: v }])));
+  const box = (label, value, sub = "") => `<div class="stat"><div class="stat-label">${label}</div><div class="stat-value">${value}</div><div class="stat-sub">${sub}</div></div>`;
+  content.innerHTML = `
+    ${stageBar(sr.ids, 0)}
+    <h2 class="detail-title"><b class="t-race">${o.race || "Stage race"}</b></h2>
+    <div class="detail-place">${[o.event, `${st.length} stages`].filter(Boolean).join(" · ")}</div>
+    <div class="detail-date">${dates}</div>
+    <div class="results-links" id="results-links"></div>
+    <div class="stat-grid">
+      ${box("distance", `${sr.distance_km.toFixed(1)} km`, st.map(x => `${x.distance_km.toFixed(1)}`).join(" + "))}
+      ${box("elevation", `+${Math.round(sr.elevation_gain).toLocaleString()} m`, `−${Math.round(sr.elevation_loss).toLocaleString()} m`)}
+      ${box("time", fmtRaceTime(sr.duration_s), `${fmtPace(sr.duration_s / 60 / sr.distance_km)}/km · ${st.map(x => fmtRaceTime(x.duration_s)).join(" + ")}`)}
+      ${o.time_s ? box("official result", o.dnf ? "DNF" : o.rank ? `${o.rank}${o.total ? ` / ${o.total}` : ""}` : "—",
+        [o.total && !o.dnf ? `top ${Math.max(1, Math.round(o.rank / o.total * 100))}%` : "", fmtRaceTime(o.time_s), scores].filter(Boolean).join(" · ")) : ""}
+      ${sr.avg_hr ? box("avg heart rate", `${Math.round(sr.avg_hr)} bpm`, st.map(x => x.avg_hr ? Math.round(x.avg_hr) : "—").join(" · ")) : ""}
+      ${sr.relative_effort ? box("relative effort", Math.round(sr.relative_effort), st.map(x => Math.round(x.relative_effort || 0)).join(" + ")) : ""}
+      ${sr.calories ? box("calories", sr.calories.toLocaleString(), "") : ""}
+    </div>
+    <div class="section-title">Stages</div>
+    <div class="card" style="padding:0;overflow-x:auto"><table class="laps">
+      <thead><tr><th>stage</th><th>date</th><th>distance</th><th>climb</th><th>time</th><th>pace</th><th>avg HR</th><th>max HR</th><th>effort</th><th title="overall rank at the end of the stage (LiveTrail)">rank</th></tr></thead>
+      <tbody>${st.map(x => `<tr class="sr-row" onclick="showDetail(${x.id})" title="Open this stage">
+        <td class="name"><span style="color:${STAGE_COLORS[(x.stage - 1) % STAGE_COLORS.length]}">●</span> Stage ${x.stage}</td>
+        <td>${dayOf(x.date, { weekday: "short", day: "numeric", month: "short" })}</td><td>${x.distance_km.toFixed(1)} km</td>
+        <td>+${Math.round(x.elevation_gain || 0).toLocaleString()} m</td><td>${fmtRaceTime(x.duration_s)}</td><td>${x.pace ? fmtPace(x.pace) : "—"}</td>
+        <td>${x.avg_hr ? Math.round(x.avg_hr) : "—"}</td><td>${x.max_hr ? Math.round(x.max_hr) : "—"}</td><td>${x.relative_effort ? Math.round(x.relative_effort) : "—"}</td>
+        <td id="sr-rank-${x.stage}">—</td></tr>`).join("")}</tbody></table></div>
+    <div id="lt-section"></div>
+    <div class="section-title">Route</div>
+    <div class="card" style="padding:0;"><div id="route-map"></div></div>
+    <div class="muted-note">One colour per stage. Click the map to zoom with the scroll wheel.</div>
+    <div id="sr-charts"><div class="loading">Loading the stages' records…</div></div>`;
+  detailState.checkpoints = null;
+  detailState.stageStarts = st.map(x => ({ stage: x.stage, km: x.km_start, s: 0 }));
+  const pseudo = { id: sr.ids[0], overall: true, category: { category: "race" }, official: o, date: st[0].date };
+  detailState.activity = pseudo;
+  detailState.points = [];
+  drawStageMap(sr);
+  showResultsLinks(pseudo);
+  // Every stage's records end to end: distance and time continue from the previous stage's finish
+  // (the night between stages isn't counted).
+  let details;
+  try { details = await Promise.all(sr.ids.map(i => fetch(`${API}/activities/${i}/detail?max_points=1500`).then(r => r.json()))); }
+  catch (e) { document.getElementById("sr-charts").innerHTML = ""; return; }
+  if (detailState.activity !== pseudo) return;
+  const points = [];
+  let km0 = 0, t0 = 0;
+  details.forEach((d, k) => {
+    detailState.stageStarts[k].s = t0;
+    for (const p of d.timeseries) points.push({ ...p, distance_km: p.distance_km != null ? p.distance_km + km0 : null, seconds_elapsed: p.seconds_elapsed + t0 });
+    km0 += st[k].distance_km || d.timeseries.at(-1)?.distance_km || 0;
+    t0 += d.timeseries.at(-1)?.seconds_elapsed || 0;
+  });
+  // Whole race grade-adjusted pace: total time over the stages' total flat-equivalent distance.
+  const flat = key => details.every(d => d.gap?.[key]) ? sr.duration_s / 60 / details.reduce((t, d) => t + d.duration_s / 60 / d.gap[key], 0) : null;
+  Object.assign(pseudo, { terrain: details[0].terrain, elevation_gain: sr.elevation_gain, elevation_loss: sr.elevation_loss,
+    gap: { personal: flat("personal"), actual: sr.duration_s / 60 / sr.distance_km }, peaks: null, timeseries_source: "fit",
+    timeseries_points: details.reduce((t, d) => t + (d.timeseries_points || 0), 0) });
+  try { const zr = await fetch(`${API}/zones/on/${st[0].date}`); detailState.zones = zr.ok ? await zr.json() : null; } catch (e) { detailState.zones = null; }
+  if (!gapState.data) { try { gapState.data = await (await fetch(`${API}/gap/models`)).json(); } catch (e) {} }
+  if (detailState.activity !== pseudo) return;
+  document.getElementById("sr-charts").innerHTML = chartsMarkup(true, false);
+  detailState.points = points;
+  drawTimeseriesCharts();
+  document.getElementById("ts-source").textContent = `All ${st.length} stages end to end (the nights between stages aren't counted) · solid lines: stage starts.`;
+}
+
+async function drawStageMap(sr) {
+  if (routeMap) { routeMap.remove(); routeMap = null; hoverMarker = null; }
+  const el = document.getElementById("route-map");
+  const all = sr.tracks.flat();
+  if (all.length < 2) { el.parentElement.style.display = "none"; return; }
+  const mid = all[Math.floor(all.length / 2)];
+  const inFrance = mid[0] > FRANCE.minLat && mid[0] < FRANCE.maxLat && mid[1] > FRANCE.minLon && mid[1] < FRANCE.maxLon;
+  const token = await getMapboxToken();
+  if (!document.body.contains(el)) return;
+  const { layers, choice } = mapLayers(token, inFrance);
+  routeMap = L.map(el, { scrollWheelZoom: false, layers: [layers[choice]] });
+  L.control.layers(layers, null, { position: "topright" }).addTo(routeMap);
+  L.control.scale({ imperial: false }).addTo(routeMap);
+  routeMap.on("click", () => routeMap.scrollWheelZoom.enable());
+  const lines = sr.tracks.filter(t => t.length > 1).map((t, i) => {
+    L.polyline(t, { color: "white", weight: 6, opacity: 0.9 }).addTo(routeMap);
+    return L.polyline(t, { color: STAGE_COLORS[i % STAGE_COLORS.length], weight: 3.5 }).bindTooltip(`Stage ${i + 1}`, { sticky: true }).addTo(routeMap);
+  });
+  routeMap.fitBounds(L.featureGroup(lines).getBounds(), { padding: [20, 20] });
+  if (detailState.checkpoints) drawCheckpointMarkers();
+}
+
+/* ---------- Race results links and LiveTrail checkpoints ---------- */
+// Results row (races): the official sites matched automatically, plus links you add. A LiveTrail
+// runner link brings the checkpoints: rank and gap to the winners at each, stops, sections.
+async function showResultsLinks(a) {
+  const el = document.getElementById("results-links");
+  if (!el) return;
+  if (a.category?.category !== "race") { el.innerHTML = ""; renderLiveTrail(a, null); return; }
+  let links = [];
+  try { links = await (await fetch(`${API}/activities/${a.id}/links`)).json(); } catch (e) {}
+  if (detailState.activity !== a) return;
+  const sites = Object.entries(a.official?.urls || {}).map(([k, u]) =>
+    `<a class="rl" href="${u}" target="_blank" rel="noopener">${{ utmb: "UTMB", itra: "ITRA", betrail: "Betrail" }[k] || k}</a>`);
+  el.innerHTML = `<span class="rl-label">Results</span>${sites.join("")}
+    ${links.map(l => `<span class="rl ${l.kind}"><a href="${l.url}" target="_blank" rel="noopener">${l.label}</a>
+      <button title="Remove this link" onclick="removeResultsLink(${a.id}, ${l.id})">×</button></span>`).join("")}
+    <button class="pick rl-add" onclick="addResultsLink(${a.id})">+ add link</button>
+    <span class="muted-note" id="rl-status" style="margin:0"></span>`;
+  let lt = null;
+  if (links.some(l => l.kind === "livetrail")) {
+    try { lt = await (await fetch(`${API}/activities/${a.id}/livetrail${a.overall ? "?overall=true" : ""}`)).json(); } catch (e) {}
+  }
+  if (detailState.activity === a) renderLiveTrail(a, lt);
+}
+
+async function addResultsLink(id) {
+  const url = prompt("Paste a results link for this race — a LiveTrail runner page (…/runners/<bib>?raceId=…) brings the checkpoints:");
+  if (!url) return;
+  const status = document.getElementById("rl-status");
+  status.textContent = "Reading…";
+  const res = await fetch(`${API}/activities/${id}/links`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ url }) });
+  const d = await res.json().catch(() => ({}));
+  if (!res.ok) { status.textContent = d.detail || "Could not add this link."; return; }
+  if (d.warning) alert(d.warning);
+  showResultsLinks(detailState.activity);
+}
+
+async function removeResultsLink(id, linkId) {
+  if (!confirm("Remove this link?")) return;
+  await fetch(`${API}/activities/${id}/links/${linkId}`, { method: "DELETE" });
+  showResultsLinks(detailState.activity);
+}
+
+let ltCharts = [];
+function renderLiveTrail(a, lt) {
+  ltCharts.forEach(c => c.destroy()); ltCharts = [];
+  const box = document.getElementById("lt-section");
+  detailState.checkpoints = lt?.sections?.length ? lt.sections : null;
+  drawCheckpointMarkers();
+  if (!box) return;
+  if (!lt?.sections?.length) { box.innerHTML = ""; return; }
+  const S = lt.sections, L = lt.leaders || {};
+  const stops = S.filter(x => x.rest_s > 0).sort((p, q) => q.rest_s - p.rest_s);
+  const hm = sec => sec == null ? "—" : fmtDuration(Math.abs(sec));
+  const overall = lt.stages && !lt.stage, dayOf = d => new Date(d + "T00:00:00").toLocaleDateString(undefined, { weekday: "short", day: "numeric", month: "short" });
+  (lt.stages || []).forEach(x => { const c = document.getElementById(`sr-rank-${x.stage}`); if (c) c.textContent = x.rank ?? "—"; });
+  const cols = 12 + (L.male ? 1 : 0) + (L.female ? 1 : 0);
+  const stageRow = (x, i) => overall && (i === 0 || S[i - 1].stage !== x.stage)
+    ? `<tr class="lt-stage"><td colspan="${cols}">Stage ${x.stage} · ${dayOf(lt.stages[x.stage - 1].date)}</td></tr>` : "";
+  box.innerHTML = `<div class="section-title">Race at the checkpoints<span class="section-sub">from <a href="${lt.url}" target="_blank" rel="noopener">LiveTrail</a> · ${S.length} checkpoints${lt.stage ? ` · stage ${lt.stage} of ${lt.stages.length}` : ""}</span></div>
+    ${lt.total_rest_s ? "" : "<!--"}<div class="lt-stops">Stopped at aid stations <b>${fmtDurationPretty(lt.total_rest_s)}</b>${stops.length ? ` · longest: ${stops.slice(0, 3).map(x => `${x.short || x.name} ${fmtDurationPretty(x.rest_s)}`).join(" · ")}` : ""}</div>${lt.total_rest_s ? "" : "-->"}
+    <div class="lt-charts">
+      <div class="card"><div class="stat-label">rank at each checkpoint</div><canvas id="lt-rank" height="120"></canvas></div>
+      <div class="card"><div class="stat-label">behind the winners${L.male ? ` · ${L.male.name}` : ""}${L.female ? ` · ${L.female.name}` : ""}</div><canvas id="lt-gap" height="120"></canvas></div>
+    </div>
+    <div class="card" style="padding:0;overflow-x:auto;margin-top:12px"><table class="laps lt-table">
+      <thead><tr><th>checkpoint</th><th>km</th><th>section</th><th>climb</th><th>time</th><th>pace</th><th title="race model">GAP</th>
+        <th>arrival</th><th>stop</th><th>rank</th><th>±</th><th>cutoff margin</th>${L.male ? "<th>vs 1st man</th>" : ""}${L.female ? "<th>vs 1st woman</th>" : ""}</tr></thead>
+      <tbody>${S.map((x, i) => `${stageRow(x, i)}<tr>
+        <td class="name">${x.name}</td><td>${x.km.toFixed(1)}</td><td>${x.section_km != null ? x.section_km.toFixed(1) : "—"}</td>
+        <td>${x.section_gain != null ? `+${Math.round(x.section_gain)}` : "—"}</td><td>${x.moving_s != null ? fmtDuration(x.moving_s) : "—"}</td>
+        <td>${x.pace ? fmtPace(x.pace) : "—"}</td><td class="gap-col">${x.gap_race ? fmtPace(x.gap_race) : "—"}</td>
+        <td>${x.arrival ? x.arrival.slice(11, 16) : "—"}</td><td>${x.rest_s ? fmtDuration(x.rest_s) : ""}</td>
+        <td>${x.rank ?? "—"}</td><td class="${x.rank_change > 0 ? "up" : x.rank_change < 0 ? "down" : ""}">${x.rank_change ? (x.rank_change > 0 ? "+" : "") + x.rank_change : ""}</td>
+        <td>${x.cutoff_margin_s != null ? hm(x.cutoff_margin_s) : ""}</td>
+        ${L.male ? `<td>${x.gap_male_s ? "+" + hm(x.gap_male_s) : ""}</td>` : ""}${L.female ? `<td>${x.gap_female_s ? (x.gap_female_s >= 0 ? "+" : "−") + hm(x.gap_female_s) : ""}</td>` : ""}
+      </tr>`).join("")}</tbody></table></div>
+    <div class="muted-note">Time and pace: moving between checkpoints (the stop at the previous one taken out). GAP: race model, on your watch track.
+      ± = places gained (+) or lost (−) since the previous checkpoint. Gaps: to the race winners (first man, first woman)${lt.stage
+        ? ", won or lost on this stage (0 at its start; ranks are overall)" : overall ? ", overall (the night between stages isn't counted)" : ""}.</div>`;
+  const ranked = S.filter(x => x.rank);
+  const kmX = { type: "linear", min: 0, max: S.at(-1).km, grid: { display: false }, ticks: { callback: v => `${Math.round(v)} km`, maxTicksLimit: 6 } };
+  const tip = items => { const x = ranked[items[0].dataIndex] || S[items[0].dataIndex]; return `${x.name} · ${x.km.toFixed(1)} km`; };
+  ltCharts.push(new Chart(document.getElementById("lt-rank"), {
+    type: "line", data: { datasets: [{ data: ranked.map(x => ({ x: x.km, y: x.rank })), borderColor: "#a50f15", backgroundColor: "#a50f15",
+      borderWidth: 2, pointRadius: 3, tension: 0.15 }] },
+    options: { responsive: true, animation: false, interaction: { mode: "nearest", axis: "x", intersect: false },
+      plugins: { legend: { display: false }, tooltip: { callbacks: { title: tip, label: ctx => `rank ${ctx.parsed.y}` } } },
+      scales: { x: kmX, y: { reverse: true, ticks: { maxTicksLimit: 5, precision: 0 } } } },
+  }));
+  const gapSet = (k, color, label) => ({ label, data: S.filter(x => x[`gap_${k}_s`] != null).map(x => ({ x: x.km, y: x[`gap_${k}_s`] / 3600, name: x.name })),
+    borderColor: color, backgroundColor: color, borderWidth: 2, pointRadius: 3, tension: 0.15 });
+  ltCharts.push(new Chart(document.getElementById("lt-gap"), {
+    type: "line", data: { datasets: [...(L.male ? [gapSet("male", "#3d7ebf", "1st man")] : []), ...(L.female ? [gapSet("female", "#c43fd0", "1st woman")] : [])] },
+    options: { responsive: true, animation: false, interaction: { mode: "nearest", axis: "x", intersect: false },
+      plugins: { tooltip: { callbacks: { title: items => `${items[0].raw.name} · ${items[0].parsed.x.toFixed(1)} km`,
+        label: ctx => `${ctx.dataset.label}: ${ctx.parsed.y >= 0 ? "+" : "−"}${fmtDuration(Math.round(Math.abs(ctx.parsed.y) * 3600))}` } } },
+      scales: { x: kmX, y: { ticks: { callback: v => `${v} h`, maxTicksLimit: 5 } } } },
+  }));
+}
+
+// Checkpoints as thin vertical lines on the activity's charts (named on the elevation profile)
+// and as markers on the map. Positions: official km scaled to the watch's distance.
+const checkpointPlugin = {
+  id: "checkpoints",
+  afterDatasetsDraw(chart) {
+    const cps = detailState.checkpoints || [], starts = detailState.stageStarts || [], id = chart.canvas.id;
+    if ((!cps.length && !starts.length) || !/^ts-/.test(id) || !chart.scales.x) return;
+    const pts = detailState.points, byTime = detailState.xMode === "time";
+    const xOf = km => { if (!byTime) return km;
+      for (let i = 1; i < pts.length; i++) if ((pts[i].distance_km ?? 0) >= km) return pts[i].seconds_elapsed; return pts.at(-1).seconds_elapsed; };
+    const { ctx, chartArea: a, scales: { x } } = chart;
+    ctx.save();
+    ctx.strokeStyle = "rgba(31,29,24,0.28)"; ctx.setLineDash([3, 3]); ctx.lineWidth = 1;
+    ctx.font = `10px ${THEME.font}`; ctx.fillStyle = "rgba(31,29,24,0.7)"; ctx.textAlign = "left";
+    let lastLabel = -1e9;
+    cps.forEach(c => {
+      const px = x.getPixelForValue(xOf(c.watch_km));
+      if (px < a.left - 1 || px > a.right + 1) return;
+      ctx.beginPath(); ctx.moveTo(px, a.top); ctx.lineTo(px, a.bottom); ctx.stroke();
+      if (id === "ts-elev" && px - lastLabel > 46) {   // names on the profile, skipping ones too close
+        ctx.save(); ctx.translate(px + 3, a.top + 4); ctx.rotate(Math.PI / 2); ctx.fillText(c.short || c.name, 0, 0); ctx.restore();
+        lastLabel = px;
+      }
+    });
+    // A stage race's overall view: solid lines where each stage starts.
+    ctx.setLineDash([]); ctx.strokeStyle = "rgba(31,29,24,0.65)"; ctx.lineWidth = 1.5; ctx.font = `600 11px ${THEME.font}`;
+    starts.forEach(st => {
+      const px = x.getPixelForValue(byTime ? st.s : st.km);
+      if (st.stage > 1) { ctx.beginPath(); ctx.moveTo(px, a.top); ctx.lineTo(px, a.bottom); ctx.stroke(); }
+      if (id === "ts-elev") ctx.fillText(`Stage ${st.stage}`, px + 4, a.bottom - 6);
+    });
+    ctx.restore();
+  },
+};
+Chart.register(checkpointPlugin);
+
+let checkpointLayer = null;
+function drawCheckpointMarkers() {
+  for (const c of Chart.instances ? Object.values(Chart.instances) : []) if (/^ts-/.test(c.canvas?.id)) c.draw();
+  if (checkpointLayer) { checkpointLayer.remove(); checkpointLayer = null; }
+  const cps = detailState.checkpoints;
+  if (!cps || !routeMap) return;
+  checkpointLayer = L.layerGroup(cps.filter(c => c.lat && c.lon).map(c => L.circleMarker([c.lat, c.lon], {
+      radius: c.rest_s > 0 ? 6 : 4.5, color: "white", weight: 1.5, fillColor: c.rest_s > 0 ? "#e0a43a" : "#1f1d18", fillOpacity: 0.9 })
+    .bindTooltip(`<b>${c.name}</b> · ${c.km.toFixed(1)} km${c.arrival ? `<br>${c.arrival.slice(11, 16)}` : ""}${c.rank ? ` · rank ${c.rank}` : ""}${c.rest_s ? `<br>stop ${fmtDuration(c.rest_s)}` : ""}`)))
+    .addTo(routeMap);
 }
 
 /* ---------- On demand: running dynamics and Garmin's extra metrics (from the FIT file) ---------- */
@@ -2776,61 +3055,10 @@ function drawTimeseriesCharts() {
       : "From Garmin's chart data (about 2,000 points) — the original FIT file hasn't been downloaded for this activity yet.";
 }
 
-async function showDetail(id) {
-  document.getElementById("list-view").classList.add("hidden");
-  document.getElementById("detail").classList.add("active");
-  const content = document.getElementById("detail-content");
-  content.innerHTML = `<div class="loading">Loading…</div>`;
-
-  try {
-    const res = await fetch(`${API}/activities/${id}/detail?max_points=2000`);
-    if (!res.ok) throw new Error(`HTTP ${res.status}`);
-    const a = await res.json();
-    // Zones that applied on the activity's date (none saved yet -> 404 -> plain charts).
-    detailState.zones = null;
-    try {
-      const zr = await fetch(`${API}/zones/on/${a.date}`);
-      if (zr.ok) detailState.zones = await zr.json();
-    } catch (e) {}
-
-    // Km splits come from the FIT records, so only offer them when those exist with distance.
-    const hasSplits = a.timeseries_source === "fit" && (a.timeseries.at(-1)?.distance_km || 0) >= 0.5;
-    const hilly = !!(a.terrain && a.terrain.terrain !== "flat");
-    splitCharts.forEach(c => c.destroy());
-    splitCharts = [];
-
-    content.innerHTML = `
-      <h2 class="detail-title" id="detail-title">${a.name || "Activity"}</h2>
-      <div class="detail-wsub" id="detail-wsub" style="display:none;"></div>
-      <div class="detail-place" id="detail-place"></div>
-      <div class="detail-date"><span id="detail-tags">${a.date}</span>${a.terrain ? ` &middot; ${renderSurfacePicker(a)}` : ""}</div>
-      ${a.category ? `<div class="race-row" id="race-row">${renderCategoryToggle(a)}</div>
-      <div class="workout-box" id="workout-box" style="display:none;"></div>` : ""}
-      <div class="stat-grid">
-        ${summaryBoxes(a)}
-        ${a.terrain && a.terrain.terrain !== "flat" ? `
-        <div class="stat">
-          <div class="stat-label">km-effort</div>
-          <div class="stat-value">${a.terrain.km_effort.toFixed(1)}</div>
-          <div class="stat-sub">${Math.round(a.terrain.gain_per_km)} m/km · ${a.terrain.terrain === "mountain" ? "Mountain" : "Rolling"}</div>
-        </div>` : ""}
-      </div>
-
-      ${a.gap ? `<div id="gap-all" style="display:none">${renderGapBlock(a.gap)}</div>` : ""}
-
-      ${hasSplits ? `
-      <div style="margin-top:20px;">
-        <button class="sync-btn" id="splits-btn" onclick="toggleKmSplits(${a.id})">Show km splits</button>
-      </div>
-      <div id="km-splits" style="display:none;">
-        <div class="section-title">Km splits</div>
-        <div class="card" id="km-splits-body"></div>
-      </div>` : ""}
-
-      <div class="section-title">Route</div>
-      <div class="card" style="padding:0;"><div id="route-map"></div></div>
-      <div class="muted-note" id="route-note"></div>
-
+// The activity charts (elevation, slopes, vertical speed, heart rate, pace, GAP, power, cadence),
+// shared by an activity and a stage race's overall view (extras: power and cadence).
+function chartsMarkup(hilly, extras = true) {
+  return `
       <div class="chart-bar">
         <div class="section-title chart-title t-elev">Elevation profile<span class="section-sub" id="elev-sub"></span></div>
         <div class="chart-tools">
@@ -2883,6 +3111,7 @@ async function showDetail(id) {
         <div id="gap-zones"></div>
       </div>
 
+      <div ${extras ? "" : 'style="display:none"'}>
       <div id="power-section">
         <div class="section-title mm-row chart-title t-power">Power (W)<span class="minmax" id="pk-power"></span></div>
         <div class="card"><canvas id="ts-power" height="80"></canvas></div>
@@ -2894,7 +3123,71 @@ async function showDetail(id) {
         <div class="card"><canvas id="ts-cadence" height="80"></canvas></div>
         <div id="cadence-zones"></div>
       </div>
+      </div>
       <div class="muted-note" id="ts-source"></div>
+`;
+}
+
+async function showDetail(id) {
+  document.getElementById("list-view").classList.add("hidden");
+  document.getElementById("detail").classList.add("active");
+  const content = document.getElementById("detail-content");
+  content.innerHTML = `<div class="loading">Loading…</div>`;
+
+  try {
+    const res = await fetch(`${API}/activities/${id}/detail?max_points=2000`);
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const a = await res.json();
+    // Zones that applied on the activity's date (none saved yet -> 404 -> plain charts).
+    detailState.zones = null;
+    try {
+      const zr = await fetch(`${API}/zones/on/${a.date}`);
+      if (zr.ok) detailState.zones = await zr.json();
+    } catch (e) {}
+
+    // Km splits come from the FIT records, so only offer them when those exist with distance.
+    const hasSplits = a.timeseries_source === "fit" && (a.timeseries.at(-1)?.distance_km || 0) >= 0.5;
+    const hilly = !!(a.terrain && a.terrain.terrain !== "flat");
+    splitCharts.forEach(c => c.destroy());
+    splitCharts = [];
+
+    srCharts.forEach(c => c.destroy()); srCharts = [];
+    content.innerHTML = `
+      ${a.official?.stage_ids?.length > 1 ? stageBar(a.official.stage_ids, a.official.stage) : ""}
+      <h2 class="detail-title" id="detail-title">${a.name || "Activity"}</h2>
+      <div class="detail-wsub" id="detail-wsub" style="display:none;"></div>
+      <div class="detail-place" id="detail-place"></div>
+      <div class="detail-date"><span id="detail-tags">${a.date}</span>${a.terrain ? ` &middot; ${renderSurfacePicker(a)}` : ""}</div>
+      ${a.category ? `<div class="race-row" id="race-row">${renderCategoryToggle(a)}</div>
+      <div class="workout-box" id="workout-box" style="display:none;"></div>
+      <div class="results-links" id="results-links"></div>` : ""}
+      <div class="stat-grid">
+        ${summaryBoxes(a)}
+        ${a.terrain && a.terrain.terrain !== "flat" ? `
+        <div class="stat">
+          <div class="stat-label">km-effort</div>
+          <div class="stat-value">${a.terrain.km_effort.toFixed(1)}</div>
+          <div class="stat-sub">${Math.round(a.terrain.gain_per_km)} m/km · ${a.terrain.terrain === "mountain" ? "Mountain" : "Rolling"}</div>
+        </div>` : ""}
+      </div>
+
+      ${a.gap ? `<div id="gap-all" style="display:none">${renderGapBlock(a.gap)}</div>` : ""}
+      <div id="lt-section"></div>
+
+      ${hasSplits ? `
+      <div style="margin-top:20px;">
+        <button class="sync-btn" id="splits-btn" onclick="toggleKmSplits(${a.id})">Show km splits</button>
+      </div>
+      <div id="km-splits" style="display:none;">
+        <div class="section-title">Km splits</div>
+        <div class="card" id="km-splits-body"></div>
+      </div>` : ""}
+
+      <div class="section-title">Route</div>
+      <div class="card" style="padding:0;"><div id="route-map"></div></div>
+      <div class="muted-note" id="route-note"></div>
+
+      ${chartsMarkup(hilly)}
       <button class="pick" id="dyn-btn" style="margin-top:14px;" onclick="toggleDynamics()">Show running dynamics &amp; Garmin metrics</button>
       <div id="dyn-section"></div>
 
@@ -2919,6 +3212,8 @@ async function showDetail(id) {
     detailState.activity = a;
     detailState.showDyn = detailState.showLapDyn = false;   // extra metrics: on demand, off for each new activity
     detailState.kmSplits = null;
+    detailState.checkpoints = null;
+    detailState.stageStarts = null;
     dynCharts.forEach(c => c.destroy()); dynCharts = [];
     detailState.points = a.timeseries;
     if (hilly && !gapState.data) {   // the GAP chart needs your personal grade model
@@ -2938,6 +3233,7 @@ async function showDetail(id) {
 }
 
 function showList() {
+  srCharts.forEach(c => c.destroy()); srCharts = [];
   detailCharts.forEach(c => c.destroy());
   detailCharts = [];
   splitCharts.forEach(c => c.destroy());
@@ -3071,7 +3367,7 @@ async function refreshProfileFromGarmin() {
   status.textContent = "Updated from Garmin.";
 }
 
-/* ---------- Races: map + cards, then one race with its other editions ---------- */
+/* ---------- Races: map + cards; a card opens the race's activity ---------- */
 const racesState = { data: null, filters: { surface: "all", dist: "all" }, map: null, charts: [] };
 const RACE_DISTANCES = [
   ["all", "All distances", () => true], ["short", "≤ 21 km", k => k < 22], ["marathon", "Marathon", k => k >= 22 && k < 45],
@@ -3116,29 +3412,46 @@ function renderIndexes(ix, elId = "race-indexes") {
 
 function setRaceFilter(key, value) { racesState.filters[key] = value; renderRaces(); }
 
+// A stage race is one card: its stages' totals, silhouettes end to end, the stages on hover.
+function groupStageRaces(list) {
+  const byId = Object.fromEntries(list.map(r => [r.id, r]));
+  const seen = new Set(), out = [];
+  for (const r of list) {
+    const ids = r.result?.stages > 1 ? (r.result.activity_ids || []).filter(i => byId[i]) : [];
+    if (ids.length < 2) { out.push(r); continue; }
+    if (seen.has(ids[0])) continue;
+    seen.add(ids[0]);
+    const st = ids.map(i => byId[i]).sort((a, b) => a.date < b.date ? -1 : 1);
+    const sum = k => st.reduce((t, x) => t + (x[k] || 0), 0);
+    out.push({ ...st[0], date_end: st.at(-1).date, stages: st, distance_km: sum("distance_km"), elevation_gain: sum("elevation_gain"),
+               duration_s: sum("duration_s"), pace: sum("duration_s") / 60 / sum("distance_km"), adjusted_pace: null, ffa: null,
+               profile: st.every(x => x.profile) ? st.flatMap(x => x.profile) : null });
+  }
+  return out;
+}
+
 function filteredRaces() {
   const { surface, dist } = racesState.filters;
   const inDist = RACE_DISTANCES.find(d => d[0] === dist)[2];
-  return racesState.data.filter(r => (surface === "all" || (surface === "road" ? !["trail", "cross"].includes(r.surface) : r.surface === surface))
+  return groupStageRaces(racesState.data).filter(r => (surface === "all" || (surface === "road" ? !["trail", "cross"].includes(r.surface) : r.surface === surface))
                                      && inDist(r.distance_km));
 }
 
 // Elevation silhouette for a card (SVG area), coloured by terrain.
-function profileSvg(profile, color) {
+function profileSvg(profile, color, parts = 1) {
   if (!profile || profile.length < 2) return `<svg viewBox="0 0 100 32" preserveAspectRatio="none"><rect width="100" height="32" fill="#f4f4f2"/></svg>`;
+  const cuts = Array.from({ length: parts - 1 }, (_, i) => ((i + 1) / parts * 100).toFixed(1));   // stage boundaries
   const lo = Math.min(...profile), hi = Math.max(...profile), span = Math.max(hi - lo, 60);   // flat races stay flat
   const pts = profile.map((v, i) => `${(i / (profile.length - 1) * 100).toFixed(1)},${(30 - (v - lo) / span * 26).toFixed(1)}`);
   return `<svg viewBox="0 0 100 32" preserveAspectRatio="none">
     <rect width="100" height="32" fill="${hexToRgba(color, 0.06)}"/>
     <polygon points="0,32 ${pts.join(" ")} 100,32" fill="${hexToRgba(color, 0.35)}"/>
-    <polyline points="${pts.join(" ")}" fill="none" stroke="${color}" stroke-width="0.8" vector-effect="non-scaling-stroke"/></svg>`;
+    <polyline points="${pts.join(" ")}" fill="none" stroke="${color}" stroke-width="0.8" vector-effect="non-scaling-stroke"/>
+    ${cuts.map(x => `<line x1="${x}" x2="${x}" y1="0" y2="32" stroke="white" stroke-width="2" vector-effect="non-scaling-stroke"/>`).join("")}</svg>`;
 }
 
 function renderRaces() {
-  if (!racesState.detail) {   // a race opened meanwhile (from Performance) stays open
-    document.getElementById("races-list").style.display = "";
-    document.getElementById("race-detail").style.display = "none";
-  }
+  document.getElementById("races-list").style.display = "";
   const f = racesState.filters;
   const chip = (key, value, label) => `<button class="pick ${f[key] === value ? "on" : ""}" onclick="setRaceFilter('${key}','${value}')">${label}</button>`;
   document.getElementById("races-filters").innerHTML =
@@ -3155,14 +3468,16 @@ function renderRaces() {
       return `<div class="race-year">${y}<span>${list.length} race${list.length > 1 ? "s" : ""} · ${Math.round(km).toLocaleString()} km · +${Math.round(gain).toLocaleString()} m</span></div>
       <div class="race-cards">${list.map(r => {
         const color = TERRAIN_COLORS[r.terrain] || "#9aa5b1";
-        const day = new Date(r.date + "T00:00:00").toLocaleDateString(undefined, { day: "numeric", month: "short" });
-        return `<div class="race-card" onclick="openRace(${r.id})">
-          ${r.editions > 1 ? `<span class="rc-ed" title="You ran this race ${r.editions} times">×${r.editions}</span>` : ""}
+        const dayOf = d => new Date(d + "T00:00:00").toLocaleDateString(undefined, { day: "numeric", month: "short" });
+        const day = r.stages ? `${dayOf(r.date)} – ${dayOf(r.date_end)}` : dayOf(r.date);
+        return `<div class="race-card" onclick="${r.stages ? `openStageRace(${r.id})` : `openRace(${r.id})`}">
+          ${r.stages ? `<div class="rc-stages">${r.stages.map((x, i) => `<div onclick="event.stopPropagation(); openRace(${x.id})" title="Open this stage">
+            <span>Stage ${i + 1} · ${dayOf(x.date)}</span><b>${x.distance_km.toFixed(0)} km · +${x.elevation_gain.toLocaleString()} m</b><b>${fmtRaceTime(x.duration_s)}</b></div>`).join("")}</div>` : ""}
           ${r.result ? `<span class="rc-rank${r.result.dnf ? " dnf" : r.result.rank <= 3 ? " podium" : ""}" title="${r.result.event} – ${r.result.race} (official result)">${resultBadge(r.result)}</span>` : ""}
-          ${profileSvg(r.profile, color)}
+          ${profileSvg(r.profile, color, r.stages?.length || 1)}
           <div class="rc-body">
             <div class="rc-name">${r.result?.race || raceName(r)}</div>
-            ${r.result?.event ? `<div class="rc-meta">${r.result.event}${r.result.stages > 1 ? ` · stage ${r.result.stage}/${r.result.stages}` : ""}${scoresText(r.results) ? ` · <b class="rc-score">${scoresText(r.results)}</b>` : ""}</div>` : ""}
+            ${r.result?.event ? `<div class="rc-meta">${r.result.event}${r.stages ? ` · ${r.stages.length} stages` : r.result.stages > 1 ? ` · stage ${r.result.stage}/${r.result.stages}` : ""}${scoresText(r.results) ? ` · <b class="rc-score">${scoresText(r.results)}</b>` : ""}</div>` : ""}
             <div class="rc-meta">${day}${r.place && raceName(r) !== r.place ? ` · ${r.place}` : ""} · ${r.surface || ""} ${r.terrain || ""}${r.ffa?.level ? ` <span class="rc-ffa" title="FFA level on ${r.ffa.label} (${r.ffa.time_source} time)">FFA ${r.ffa.level}</span>` : ""}</div>
             <div class="rc-nums">
               <div><b>${r.distance_km.toFixed(r.distance_km < 30 ? 1 : 0)} km</b><small>+${r.elevation_gain.toLocaleString()} m</small></div>
@@ -3190,140 +3505,21 @@ async function drawRacesMap(races) {
       radius: 5 + 11 * Math.sqrt(r.distance_km / maxKm), color: "white", weight: 1.5,
       fillColor: TERRAIN_COLORS[r.terrain] || "#9aa5b1", fillOpacity: 0.85 })
     .bindTooltip(`<b>${raceName(r)}</b><br>${r.date} · ${r.distance_km.toFixed(0)} km · +${r.elevation_gain.toLocaleString()} m · ${fmtRaceTime(r.duration_s)}`)
-    .on("click", () => openRace(r.id))
+    .on("click", () => r.stages ? openStageRace(r.id) : openRace(r.id))
     .addTo(map));
   map.fitBounds(L.featureGroup(markers).getBounds(), { padding: [30, 30], maxZoom: 10 });
 }
 
-function showRacesList() {
-  racesState.detail = null;
-  racesState.charts.forEach(c => c.destroy()); racesState.charts = [];
-  document.getElementById("races-list").style.display = "";
-  document.getElementById("race-detail").style.display = "none";
-  racesState.map?.invalidateSize();
-}
-
-// FFA level of a road race, and how far the next one is.
-function ffaBlock(f) {
-  const box = (label, value, sub = "") => `<div class="stat"><div class="stat-label">${label}</div><div class="stat-value">${value}</div>${sub ? `<div class="stat-sub">${sub}</div>` : ""}</div>`;
-  return `<div class="section-title">FFA level<span class="section-sub">French athletics road grid (men) · ${f.label} · ${f.time_source === "official" ? "official time" : "watch time (start to finish)"}</span></div>
-    <div class="official">
-      ${box("level", f.level || "below D7", f.level ? `${f.points} points · limit ${fmtRaceTime(f.limit_s)}` : "")}
-      ${f.next ? box(`next: ${f.next.level}`, fmtRaceTime(f.next.limit_s), `${fmtRaceTime(f.next.gap_s)} faster needed`) : ""}
-    </div>`;
-}
-
-// Official results: time, ranks and score from each site (UTMB, Betrail), with links.
-function officialBlock(r) {
-  const x = r.result, all = r.results || {};
-  const box = (label, value, sub = "") => `<div class="stat"><div class="stat-label">${label}</div><div class="stat-value">${value}</div>${sub ? `<div class="stat-sub">${sub}</div>` : ""}</div>`;
-  const stage = x.stages > 1 ? `stage ${x.stage} of ${x.stages}; the result is for the whole race` : "";
-  const links = Object.values(all).map(o => `<a href="${o.url}" target="_blank" rel="noopener">${{ utmb: "UTMB", betrail: "Betrail", itra: "ITRA" }[o.source] || o.source}</a>`).join(" · ");
-  const rankBox = (o, label) => o.rank && o.total ? box(label, `${o.rank} / ${o.total.toLocaleString()}`, `top ${topPct(o.rank, o.total)}%`)
-                                                  : o.rank ? box(label, resultBadge(o)) : "";
-  return `<div class="section-title">Official result<span class="section-sub">${links}${stage ? ` · ${stage}` : ""}</span></div>
-    <div class="official">
-      ${box("official time", x.dnf ? "DNF" : fmtRaceTime(x.time_s), x.dnf ? "did not finish" : x.stages > 1 ? "all stages" : `watch ${fmtRaceTime(r.duration_s)}`)}
-      ${rankBox(x, "overall")}
-      ${x.rank_gender ? box("men", x.total_gender ? `${x.rank_gender} / ${x.total_gender.toLocaleString()}` : resultBadge({ rank: x.rank_gender }),
-                          x.total_gender ? `top ${topPct(x.rank_gender, x.total_gender)}%` : "") : ""}
-      ${all.utmb?.score ? box("UTMB score", all.utmb.score, "performance on this race") : ""}
-      ${all.itra?.score ? box("ITRA score", all.itra.score, "race score (subscriber)") : ""}
-      ${all.betrail?.score ? box("Betrail score", all.betrail.score.toFixed(1), "performance level on this race") : ""}
-      ${box("official course", `${x.distance_km} km`, `+${(x.elevation_gain || 0).toLocaleString()} m`)}
-    </div>`;
-}
-
-// A race you ran several times opens the comparison page; a single one goes straight to its activity.
+// A race opens its activity (no comparison of editions for now: courses change between years);
+// a stage race opens on its overall view.
 function openRace(id) {
-  const r = racesState.data?.find(x => x.id === id);
-  if (r && r.editions <= 1) { switchTab("activities"); showDetail(id); return; }
-  showRace(id);
+  switchTab("activities");
+  showDetail(id);
 }
 
-// One race: header, its editions side by side, and where along the course time was won or lost.
-async function showRace(id) {
-  racesState.detail = id;
-  if (document.getElementById("panel-races").classList.contains("active") === false) switchTab("races");
-  document.getElementById("races-list").style.display = "none";
-  const box = document.getElementById("race-detail-content");
-  document.getElementById("race-detail").style.display = "";
-  box.innerHTML = `<div class="loading">Loading…</div>`;
-  scrollTo(0, 0);
-  let d;
-  try { d = await (await fetch(`${API}/races/${id}`)).json(); } catch (e) { box.innerHTML = `<div class="error">Could not load this race.</div>`; return; }
-  racesState.charts.forEach(c => c.destroy()); racesState.charts = [];
-  const eds = d.editions, r = { ...d.race, ...eds.find(e => e.id === d.race.id) };   // with its course data
-  const best = eds.reduce((a, b) => b.duration_s < a.duration_s ? b : a);
-  const multi = eds.length > 1;
-  const stat = (label, value, sub = "") => `<div class="stat"><div class="stat-label">${label}</div><div class="stat-value">${value}</div>${sub ? `<div class="stat-sub">${sub}</div>` : ""}</div>`;
-  box.innerHTML = `
-    <div class="race-head">
-      <div><h2>${r.result?.race || raceName(r)}</h2><div class="detail-date">${r.result?.event ? `${r.result.event} · ` : ""}${r.date}${r.place ? ` · ${r.place}` : ""} · ${r.surface || ""} ${r.terrain || ""}</div></div>
-      <button class="sync-btn" onclick="switchTab('activities'); showDetail(${r.id})">Open activity</button>
-    </div>
-    <div class="stat-grid">
-      ${stat("distance", `${r.distance_km.toFixed(1)} km`, `+${r.elevation_gain.toLocaleString()} m · ${r.km_effort ?? ""} km-effort`)}
-      ${stat("time", fmtRaceTime(r.duration_s), `${fmtPace(r.pace)}/km`)}
-      ${stat("flat-equivalent pace", r.adjusted_pace ? `${fmtPace(r.adjusted_pace)}/km` : "—", "race model (Grade tab)")}
-      ${stat("heart rate", r.avg_hr ? `${Math.round(r.avg_hr)} bpm` : "—", r.relative_effort ? `relative effort ${Math.round(r.relative_effort)}` : "")}
-    </div>
-    ${r.result && r.result.source !== "manual" ? officialBlock(r) : ""}
-    ${r.ffa ? ffaBlock(r.ffa) : ""}
-    <div class="section-title">${multi ? `Your ${eds.length} editions` : "Only edition so far"}</div>
-    <div class="card"><table class="editions">
-      <thead><tr><th>year</th><th>distance</th><th>climb</th><th>time</th><th>vs best</th><th>rank</th><th>UTMB</th><th>ITRA</th><th>Betrail</th><th>pace</th><th>flat-eq.</th><th>avg HR</th><th>effort</th></tr></thead>
-      <tbody>${eds.map(e => `<tr class="${e.id === r.id ? "cur" : ""}" onclick="showRace(${e.id})" title="Show this edition">
-        <td>${e.date.slice(0, 4)}</td><td>${e.distance_km.toFixed(1)} km</td><td>+${e.elevation_gain.toLocaleString()} m</td>
-        <td>${fmtRaceTime(e.duration_s)}${e.id === best.id && multi ? " 🏆" : ""}</td>
-        <td>${e.id === best.id ? "—" : `+${fmtRaceTime(e.duration_s - best.duration_s)}`}</td>
-        <td>${e.result ? resultBadge(e.result) : "—"}</td><td>${e.results?.utmb?.score ?? "—"}</td><td>${e.results?.itra?.score ?? "—"}</td><td>${e.results?.betrail?.score?.toFixed(1) ?? "—"}</td>
-        <td>${fmtPace(e.pace)}</td><td>${e.adjusted_pace ? fmtPace(e.adjusted_pace) : "—"}</td>
-        <td>${e.avg_hr ? Math.round(e.avg_hr) : "—"}</td><td>${e.relative_effort ? Math.round(e.relative_effort) : "—"}</td></tr>`).join("")}</tbody>
-    </table></div>
-    ${multi ? `<div class="section-title">Ahead or behind along the course<span class="section-sub">time difference to ${r.date.slice(0, 4)} at each point (by share of the distance) · grey: altitude</span></div>
-      <div class="card"><canvas id="race-gap" height="90"></canvas></div>
-      <div class="section-title">Heart rate along the course</div>
-      <div class="card"><canvas id="race-hr" height="70"></canvas></div>` :
-      `<div class="section-title">Profile</div><div class="card"><canvas id="race-gap" height="70"></canvas></div>`}`;
-
-  const labels = [...Array(101).keys()];
-  const COLORS = ["#a50f15", "#3d7ebf", "#3f8f3a", "#e0a43a", "#6b5b95", "#7d7d7d"];
-  const color = (e, i) => e.id === r.id ? THEME.ink : COLORS[i % COLORS.length];
-  const alt = (r.elevation_pct || eds.find(e => e.elevation_pct)?.elevation_pct);
-  const altSet = alt ? [{ label: "Altitude", data: alt, yAxisID: "y1", borderWidth: 0, pointRadius: 0, fill: "origin",
-                          backgroundColor: "rgba(150,150,150,0.18)", order: 9 }] : [];
-  const x = { grid: { display: false }, ticks: { maxTicksLimit: 6, callback: v => `${v}%` }, title: { display: true, text: "share of the distance" } };
-  const y1 = { position: "right", grid: { display: false }, ticks: { callback: v => `${v} m` } };
-  if (multi && r.progress) {
-    racesState.charts.push(new Chart(document.getElementById("race-gap"), {
-      type: "line",
-      data: { labels, datasets: [...eds.filter(e => e.progress).map((e, i) => ({
-          label: e.date.slice(0, 4), data: e.progress.map((t, k) => (t - r.progress[k]) / 60), borderColor: color(e, i),
-          backgroundColor: color(e, i), borderWidth: e.id === r.id ? 1 : 2, pointRadius: 0, borderDash: e.id === r.id ? [4, 4] : [] })),
-        ...altSet] },
-      options: { responsive: true, animation: false, interaction: { mode: "index", intersect: false },
-        plugins: { tooltip: { filter: i => i.dataset.label !== "Altitude", callbacks: {
-          title: items => `${items[0].label}% · km ${(items[0].dataIndex / 100 * r.distance_km).toFixed(1)}`,
-          label: ctx => { const m = ctx.parsed.y; return `${ctx.dataset.label}: ${m === 0 ? "reference" : `${m > 0 ? "+" : "−"}${fmtDuration(Math.round(Math.abs(m) * 60))} ${m > 0 ? "behind" : "ahead"}`}`; } } } },
-        scales: { x, y: { reverse: true, ticks: { callback: v => `${v > 0 ? "+" : ""}${Math.round(v)} min` }, title: { display: true, text: "▲ ahead · behind ▼" } }, y1 } },
-    }));
-    racesState.charts.push(new Chart(document.getElementById("race-hr"), {
-      type: "line",
-      data: { labels, datasets: eds.filter(e => e.hr_pct).map((e, i) => ({ label: e.date.slice(0, 4), data: e.hr_pct,
-        borderColor: color(e, i), borderWidth: 1.5, pointRadius: 0, tension: 0.3 })) },
-      options: { responsive: true, animation: false, interaction: { mode: "index", intersect: false },
-        plugins: { tooltip: { callbacks: { label: ctx => `${ctx.dataset.label}: ${ctx.parsed.y} bpm` } } },
-        scales: { x, y: { ticks: { callback: v => `${v} bpm` } } } },
-    }));
-  } else if (alt) {
-    racesState.charts.push(new Chart(document.getElementById("race-gap"), {
-      type: "line", data: { labels, datasets: [{ ...altSet[0], yAxisID: "y", backgroundColor: hexToRgba(TERRAIN_COLORS[r.terrain] || "#9aa5b1", 0.3),
-        borderColor: TERRAIN_COLORS[r.terrain] || "#9aa5b1", borderWidth: 1.5 }] },
-      options: { responsive: true, animation: false, plugins: { legend: { display: false } },
-        scales: { x, y: { ticks: { callback: v => `${v} m` } } } },
-    }));
-  }
+function openStageRace(id) {
+  switchTab("activities");
+  showStageRace(id);
 }
 
 /* ---------- Performance: every official result of every site, with scores ---------- */
@@ -4520,6 +4716,25 @@ function drawSpeedSlope(canvas, d) {
       ctx.restore();
     },
   };
+  // Average GAP curve: the speed at each slope worth your average grade-adjusted pace (thin, grey).
+  const gc = d.gap_curve?.points || [];
+  const gapAt = g => { const i = gc.findIndex(p => p[0] >= g); if (i <= 0) return gc[Math.max(i, 0)]?.[1];
+    const [g0, v0] = gc[i - 1], [g1, v1] = gc[i]; return v0 + (v1 - v0) * (g - g0) / (g1 - g0); };
+  const gapLine = {
+    id: "gapLine", afterDatasetsDraw(chart) {
+      if (gc.length < 2) return;
+      const { ctx, chartArea: a, scales: { x, y } } = chart;
+      ctx.save(); ctx.beginPath(); ctx.rect(a.left, a.top, a.right - a.left, a.bottom - a.top); ctx.clip();
+      ctx.strokeStyle = "rgba(110,110,110,0.85)"; ctx.lineWidth = 1.3; ctx.beginPath();
+      gc.forEach(([g, v], i) => { const px = x.getPixelForValue(g), py = y.getPixelForValue(v); i ? ctx.lineTo(px, py) : ctx.moveTo(px, py); });
+      ctx.stroke();
+      // Its legend in the (empty) top-left corner.
+      ctx.beginPath(); ctx.moveTo(a.left + 8, a.top + 10); ctx.lineTo(a.left + 26, a.top + 10); ctx.stroke();
+      ctx.fillStyle = "rgba(90,90,90,0.95)"; ctx.font = `11px ${THEME.font}`; ctx.textAlign = "left"; ctx.textBaseline = "middle";
+      ctx.fillText(`average GAP ${fmtPace(60 / d.gap_curve.flat_speed)}/km (${d.gap_curve.method.toLowerCase()})`, a.left + 31, a.top + 10);
+      ctx.restore();
+    },
+  };
   return new Chart(canvas, {
     type: "line",
     data: { datasets: [{ label: "average speed", data: curve, borderColor: "#1f1d18", borderWidth: 2.5, pointRadius: 0,
@@ -4527,11 +4742,13 @@ function drawSpeedSlope(canvas, d) {
     options: { responsive: true, animation: false, interaction: { mode: "nearest", axis: "x", intersect: false },
       plugins: { legend: { display: false }, tooltip: { displayColors: false, callbacks: {
         title: items => `${items[0].parsed.x > 0 ? "+" : ""}${items[0].parsed.x}% slope`,
-        label: ctx => [`average ${ctx.parsed.y.toFixed(1)} km/h (${fmtPace(60 / ctx.parsed.y)}/km)`, `average cadence ${Math.round(ctx.raw.cad)} spm`] } } },
+        label: ctx => { const g = gapAt(ctx.parsed.x);
+          return [`average ${ctx.parsed.y.toFixed(1)} km/h (${fmtPace(60 / ctx.parsed.y)}/km)`, `average cadence ${Math.round(ctx.raw.cad)} spm`,
+                  ...(g ? [`average GAP curve ${g.toFixed(1)} km/h (${fmtPace(60 / g)}/km) · you ${ctx.parsed.y >= g ? "+" : "−"}${Math.abs(Math.round((ctx.parsed.y / g - 1) * 100))}%`] : [])]; } } } },
       scales: { x: { type: "linear", min: -40, max: 40, ticks: { stepSize: 10, callback: v => `${v > 0 ? "+" : ""}${v}%` }, title: { display: true, text: "slope" } },
-                y: { min: 0, max: Math.max(12, Math.ceil(d.points.map(p => p[1]).sort((a, b) => a - b)[Math.floor(d.points.length * 0.995)] + 1)),
+                y: { min: 0, max: Math.max(12, Math.ceil(d.points.map(p => p[1]).sort((a, b) => a - b)[Math.floor(d.points.length * 0.995)] + 4)),   // headroom for the legend
                      title: { display: true, text: "speed (km/h)" } } } },
-    plugins: [band, dots],
+    plugins: [band, dots, gapLine],
   });
 }
 

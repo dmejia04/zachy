@@ -15,5 +15,6 @@ from zachy.models.activity_weather import ActivityWeather
 from zachy.models.profile import Profile
 from zachy.models.activity_effort import ActivityEffort
 from zachy.models.race_result import RaceResult
+from zachy.models.activity_link import ActivityLink, LiveTrailData
 
-__all__ = ["Activity", "Lap", "Timeseries", "BodyMetric", "SyncRun", "FitFile", "Record", "ZoneSettings", "Wellness", "ActivityOverride", "WorkoutSummary", "BestEffort", "GapModel", "CategoryCache", "ActivityWeather", "Profile", "ActivityEffort", "RaceResult"]
+__all__ = ["Activity", "Lap", "Timeseries", "BodyMetric", "SyncRun", "FitFile", "Record", "ZoneSettings", "Wellness", "ActivityOverride", "WorkoutSummary", "BestEffort", "GapModel", "CategoryCache", "ActivityWeather", "Profile", "ActivityEffort", "RaceResult", "ActivityLink", "LiveTrailData"]

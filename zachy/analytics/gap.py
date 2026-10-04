@@ -318,6 +318,16 @@ def speed_vs_slope(db: Session, activity_id: int, window_s: int = 10) -> dict | 
     start = next((float(b) for b, v in climbs.items() if v >= 0.25), None)
     end = next((float(b) for b, v in climbs.items() if start is not None and b >= start and v >= 0.75), None)
     walking = w[w.walk & (w.g > 5)]
+    # Average GAP curve: the speed at each slope that's worth your average grade-adjusted pace
+    # (race model, else the personal one): flat-equivalent distance over time, ÷ each slope's cost.
+    from zachy.analytics.gap_race import race_model
+    race, personal = race_model(db), personal_model(db)
+    method = "race" if race else "personal" if personal else "strava"
+    cost = lambda g: costs(np.asarray(g, float) / 100, personal, race)[method]
+    flat_speed = float((w.v * cost(w.g)).mean())   # km/h on the flat (every window lasts window_s)
+    grades = np.arange(-MAX_GRADE * 100, MAX_GRADE * 100 + 1, 1)
+    gap_curve = {"method": LABELS.get(method, method), "flat_speed": round(flat_speed, 2),
+                 "points": [[int(g), round(flat_speed / float(c), 2)] for g, c in zip(grades, cost(grades)) if np.isfinite(c) and c > 0]}
     g_all = gait(db, activity_id)   # running / walking / standing: the same definition everywhere
     step = max(1, len(w) // 3000)                     # at most ~3,000 points on the chart
     pts = w.iloc[::step]
@@ -328,7 +338,7 @@ def speed_vs_slope(db: Session, activity_id: int, window_s: int = 10) -> dict | 
         "idle_s": g_all["seconds"]["idle"] if g_all else 0,
         "transition": [start, end] if start is not None and end is not None else None,
         "walk_speed": round(float(walking.v.median()), 1) if len(walking) >= 10 else None,
-        "cadence_threshold": WALK_CADENCE, "window_s": window_s,
+        "cadence_threshold": WALK_CADENCE, "window_s": window_s, "gap_curve": gap_curve,
     }
 
 

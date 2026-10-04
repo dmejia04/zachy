@@ -301,6 +301,53 @@ def get_activity_gait(activity_id: int, db: Session = Depends(get_db)):
     return out
 
 
+class LinkIn(BaseModel):
+    url: str
+
+
+@router.get("/{activity_id}/links")
+def get_links(activity_id: int, db: Session = Depends(get_db)):
+    """Results pages linked to this activity."""
+    from zachy.analytics.livetrail import links
+    return links(db, activity_id)
+
+
+@router.post("/{activity_id}/links")
+def add_link(activity_id: int, body: LinkIn, db: Session = Depends(get_db)):
+    """Link a results page; a LiveTrail runner link also gets its race data read and saved."""
+    from zachy.analytics.livetrail import save_link
+    activity = db.query(Activity).filter(Activity.id == activity_id).first()
+    if not activity:
+        raise HTTPException(status_code=404, detail="Activity not found")
+    try:
+        return save_link(db, activity, body.url.strip())
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+    except Exception as e:
+        raise HTTPException(status_code=502, detail=f"Could not read the page ({e.__class__.__name__})")
+
+
+@router.delete("/{activity_id}/links/{link_id}")
+def delete_link(activity_id: int, link_id: int, db: Session = Depends(get_db)):
+    from zachy.analytics.livetrail import _group, links
+    from zachy.models import ActivityLink, LiveTrailData
+    link = db.get(ActivityLink, link_id)
+    if link and link.activity_id in _group(db, activity_id):   # a stage race's link is on one of its stages
+        if link.kind == "livetrail":
+            db.query(LiveTrailData).filter_by(activity_id=link.activity_id).delete()
+        db.delete(link)
+        db.commit()
+    return links(db, activity_id)
+
+
+@router.get("/{activity_id}/livetrail")
+def get_livetrail(activity_id: int, overall: bool = False, db: Session = Depends(get_db)):
+    """Checkpoint sections from the linked LiveTrail page (null when none). A stage race: this
+    activity's stage, or overall=true for every stage."""
+    from zachy.analytics.livetrail import livetrail
+    return livetrail(db, activity_id, overall)
+
+
 @router.get("/{activity_id}/splits")
 def get_activity_splits(
     activity_id: int,
