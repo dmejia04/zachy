@@ -211,6 +211,25 @@ def activity_terrain(db: Session, activity: Activity) -> dict | None:
                     detected_cross=looks_like_cross(db, activity, category and category["category"]))
 
 
+class WorkoutTitleIn(BaseModel):
+    type: str | None = None      # your title ("Fartlek"); both empty = back to the guess
+    summary: str | None = None   # and the description ("6 × 3 min hills")
+
+
+@router.put("/{activity_id}/workout")
+def set_workout_title(activity_id: int, body: WorkoutTitleIn, db: Session = Depends(get_db)):
+    """Write a workout's title and description yourself (both empty = the guess again)."""
+    activity = db.query(Activity).filter(Activity.id == activity_id).first()
+    if not activity:
+        raise HTTPException(status_code=404, detail="Activity not found")
+    override = db.get(ActivityOverride, activity_id) or ActivityOverride(activity_id=activity_id)
+    override.workout_type = (body.type or "").strip()[:60] or None
+    override.workout_summary = (body.summary or "").strip()[:200] or None
+    db.merge(override)
+    db.commit()
+    return cached_workout(db, activity)
+
+
 class SurfaceIn(BaseModel):
     surface: str | None   # "road", "trail", "track", "treadmill", "cross", or null to go back to automatic
 
@@ -401,9 +420,11 @@ def fit_timeseries(db: Session, activity_id: int) -> list[dict]:
         .order_by(Record.id)
         .all()
     )
-    # Altimeter recalibration jumps removed on the full-resolution track (moves during a pause kept).
+    # Altimeter recalibration jumps and the barometer's catch-up during pauses removed on the
+    # full-resolution track (real moves during a pause kept).
     elevation = remove_jumps([r.elevation for r in rows],
-                             display_clock([r.elapsed_s for r in rows], [r.timer_s for r in rows]))
+                             display_clock([r.elapsed_s for r in rows], [r.timer_s for r in rows]),
+                             [r.timer_s for r in rows])
     return [
         {
             "seconds_elapsed": r.timer_s, "elapsed_s": r.elapsed_s, "distance_km": r.distance_km,

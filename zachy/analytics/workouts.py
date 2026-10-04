@@ -21,7 +21,7 @@ import numpy as np
 
 from sqlalchemy.orm import Session
 
-from zachy.models import Activity, FitFile, Record, WorkoutSummary
+from zachy.models import Activity, ActivityOverride, FitFile, Record, WorkoutSummary
 from zachy.services.fit import fit_bytes_from_zip, zip_path
 
 WORK, REST, WARMUP, COOLDOWN = "work", "rest", "warmup", "cooldown"
@@ -291,7 +291,18 @@ def describe_activity(db: Session, activity: Activity) -> dict | None:
 
 
 def cached_workout(db: Session, activity: Activity) -> dict | None:
-    """describe_activity(), computed once per activity and kept in workout_summaries."""
+    """describe_activity(), computed once per activity and kept in workout_summaries; with your own
+    title / description instead when you've written one (activity_overrides)."""
+    auto = _guessed_workout(db, activity)
+    o = db.get(ActivityOverride, activity.id)
+    if not o or not (o.workout_type or o.workout_summary):
+        return auto
+    base = auto or {"warmup": None, "cooldown": None, "source": None, "watch_name": None, "on_track": False}
+    return {**base, "type": o.workout_type or (auto or {}).get("type") or "Workout", "summary": o.workout_summary or "",
+            "manual": True, "auto": {"type": auto["type"], "summary": auto["summary"]} if auto else None}
+
+
+def _guessed_workout(db: Session, activity: Activity) -> dict | None:
     row = db.get(WorkoutSummary, activity.id)
     if row is None or (row.structured and row.on_track is None):   # missing, or from before track detection
         fit = db.get(FitFile, activity.id)

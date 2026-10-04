@@ -16,18 +16,61 @@ else (a ski lift, a shuttle back up the hill) — and is kept in the altitude it
 highest / lowest point). For climbing done while moving (gain / loss, slopes, vertical speed),
 moving_elevation() then also takes out what changed during pauses, so a lift ride isn't counted
 as a climb. A clean track comes back unchanged.
+
+Except the barometer catching up during a pause: the altimeter is smoothed, so on a fast descent
+(or climb) the recorded altitude lags the real one, and when you stop the watch it catches up —
+the whole lag shows as one step at the restart, at the same place. Told from a real move by being
+small, in the direction you were already going, and the size of a plausible lag (step ÷ vertical
+speed before the pause = a few seconds to a minute); spread back over the stretch before the
+pause, where it built up (fix_pause_lag).
 """
 
 import numpy as np
 
 ALTITUDE_JUMP_MS = 5.0   # altitude changing faster than 5 m/s = altimeter artefact
 STUCK_M = 0.5            # consecutive samples within this are "the altimeter didn't move"
+PAUSE_S = 20             # a stop of the watch this long or more
+LAG_MAX_M = 30           # a catch-up step is at most this…
+LAG_S = (2, 60)          # …and the lag it means (step ÷ vertical speed before) within this
+VZ_WINDOW_S = 20         # vertical speed before the pause, over this much moving time
 
 
-def remove_jumps(elevation, time_s) -> np.ndarray:
-    """`elevation` with altimeter jumps (faster than ALTITUDE_JUMP_MS per `time_s`) repaired.
-    Missing values stay missing."""
+def fix_pause_lag(elevation, timer_s, elapsed_s) -> np.ndarray:
+    """`elevation` with the barometer's catch-up during pauses spread back over the stretch before
+    each pause (3 × the lag, 15 s to 150 s of moving time), so the step at the restart goes away.
+    Needs both clocks (pauses are where elapsed time runs and moving time doesn't)."""
     z = np.array(elevation, dtype=float)
+    if elapsed_s is None or timer_s is None:
+        return z
+    t, el = np.asarray(timer_s, dtype=float), np.asarray(elapsed_s, dtype=float)
+    if len(t) != len(z) or not (np.isfinite(t).all() and np.isfinite(el).all()):
+        return z
+    ok = np.nonzero(np.isfinite(z))[0]
+    for k in range(1, len(ok)):
+        p, i = ok[k - 1], ok[k]
+        if (el[i] - el[p]) - (t[i] - t[p]) < PAUSE_S:
+            continue
+        step = z[i] - z[p]
+        if abs(step) < 1 or abs(step) > LAG_MAX_M:
+            continue
+        before = ok[(ok <= p) & (t[ok] >= t[p] - VZ_WINDOW_S)]
+        span = t[p] - t[before[0]] if len(before) else 0
+        if span < VZ_WINDOW_S / 2:
+            continue
+        vz = (z[p] - z[before[0]]) / span
+        if vz == 0 or np.sign(vz) != np.sign(step) or not LAG_S[0] <= step / vz <= LAG_S[1]:
+            continue                                   # not a lag: a real move, kept as it is
+        w = min(max(3 * step / vz, 15), 150)
+        j = ok[(ok <= p) & (t[ok] > t[p] - w)]
+        z[j] += step * (t[j] - (t[p] - w)) / w         # 0 at the start of the stretch, the whole step at the pause
+    return z
+
+
+def remove_jumps(elevation, time_s, timer_s=None) -> np.ndarray:
+    """`elevation` with altimeter jumps (faster than ALTITUDE_JUMP_MS per `time_s`) repaired, and,
+    given the moving time too (time_s then elapsed), the barometer's catch-up during pauses.
+    Missing values stay missing."""
+    z = fix_pause_lag(elevation, timer_s, time_s) if timer_s is not None else np.array(elevation, dtype=float)
     ok = np.isfinite(z)
     if ok.sum() < 2:
         return z
@@ -70,7 +113,7 @@ def moving_elevation(elevation, timer_s, elapsed_s=None) -> np.ndarray:
     """Altitude for climbing done while moving: altimeter jumps repaired, then any change still
     faster than ALTITUDE_JUMP_MS of moving time — a move during a pause — taken out, and the
     profile rebuilt from the remaining changes."""
-    z = remove_jumps(elevation, display_clock(elapsed_s, timer_s))
+    z = remove_jumps(elevation, display_clock(elapsed_s, timer_s), timer_s)
     ok = np.isfinite(z)
     if ok.sum() < 2:
         return z

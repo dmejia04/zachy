@@ -53,7 +53,7 @@ def _track(db: Session, activity_id: int) -> dict:
                     m = np.isfinite(h)
                     out["hr_pct"] = [round(float(v)) for v in np.interp(pct, dd[m], h[m])]
                 if np.isfinite(z[ok]).sum() > 10:
-                    zz = remove_jumps(z[ok], display_clock(el[ok], t[ok]))
+                    zz = remove_jumps(z[ok], display_clock(el[ok], t[ok]), t[ok])
                     m = np.isfinite(zz)
                     if m.sum() > 10:
                         prof = np.interp(pct, dd[m], zz[m])
@@ -156,7 +156,7 @@ def stage_race(db: Session, activity_id: int) -> dict | None:
         ok = np.isfinite(d) & np.isfinite(t) & np.isfinite(z)
         if ok.sum() > 10:
             dd = np.maximum.accumulate(d[ok])
-            zz = remove_jumps(z[ok], display_clock(el[ok], t[ok]))
+            zz = remove_jumps(z[ok], display_clock(el[ok], t[ok]), t[ok])
             m = np.isfinite(zz)
             share = max(int(STAGE_PROFILE_POINTS * (a.distance_km or 1) / 100), 40)
             grid = np.linspace(0, dd[m][-1], share)

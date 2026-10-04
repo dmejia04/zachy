@@ -42,21 +42,24 @@
   .sync-info { text-align: right; font-size: 12px; color: var(--muted); line-height: 1.4; }
   .sync-info strong { color: var(--ink); font-weight: 500; }
   .sync-info .err { color: var(--clay); }
-  .sync-btn {
+  /* Buttons, one size for all: actions are black (.btn), choices outlined, black when on
+     (.pick, .chip, .seg toggles). */
+  .btn, .sync-btn {
     font: inherit;
     font-size: 13px;
+    line-height: 1.3;
     display: inline-flex;
     align-items: center;
     gap: 6px;
-    padding: 6px 14px;
+    padding: 5px 14px;
     border: 1px solid var(--ink);
     border-radius: 999px;
     background: var(--ink);
     color: white;
     cursor: pointer;
   }
-  .sync-btn:hover:not(:disabled) { background: #3a372f; }
-  .sync-btn:disabled { opacity: 0.6; cursor: default; }
+  .btn:hover:not(:disabled), .sync-btn:hover:not(:disabled) { background: #3a372f; }
+  .btn:disabled, .sync-btn:disabled { opacity: 0.6; cursor: default; }
   .sync-btn svg { width: 14px; height: 14px; }
   .sync-btn.busy svg { animation: spin 0.9s linear infinite; }
   @keyframes spin { to { transform: rotate(360deg); } }
@@ -136,12 +139,15 @@
   .detail-wsub { font-size: 19px; font-weight: 400; margin: 0 0 6px; font-variant-numeric: tabular-nums; white-space: pre-line; line-height: 1.35; }
   .detail-date { color: var(--muted); font-size: 13px; }
   .loading, .error { color: var(--muted); padding: 40px 0; text-align: center; }
-  .section-title {
-    font-size: 14px;
-    font-weight: 500;
-    color: var(--muted);
-    margin: 28px 0 10px;
+  /* Every title (sections, charts, groups, pages): one font, size and weight; only the colour
+     changes with what the title is about (chart-title t-*). The activity's own title is apart. */
+  .section-title, .race-year, .perf-head, .zc-title, .rec-title {
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--ink);
+    line-height: 1.3;
   }
+  .section-title { margin: 28px 0 10px; }
   .card {
     background: white;
     border: 1px solid var(--line);
@@ -219,7 +225,8 @@
   .pick {
     font: inherit;
     font-size: 13px;
-    padding: 4px 9px;
+    line-height: 1.3;
+    padding: 5px 12px;
     flex: 0 0 auto;
     border: 1px solid var(--line);
     border-radius: 999px;
@@ -233,13 +240,15 @@
   .pick:disabled { color: #c8c8c8; border-color: var(--line-soft); cursor: default; }
   .chart-bar { display: flex; justify-content: space-between; align-items: center; margin: 28px 0 0; }
   .chart-bar .section-title { margin: 0; }
-  .seg { display: inline-flex; border: 1px solid var(--line); border-radius: 999px; padding: 2px; }
+  .seg { display: inline-flex; flex: none; border: 1px solid var(--line); border-radius: 999px; padding: 1px; }
+  .seg button, .pick, .btn, .sync-btn, .chip { white-space: nowrap; }
+  .chart-bar { flex-wrap: wrap; gap: 6px 12px; }
   .seg button {
-    font: inherit; font-size: 12px; border: none; background: none; color: var(--muted);
-    padding: 3px 12px; border-radius: 999px; cursor: pointer;
+    font: inherit; font-size: 13px; line-height: 1.3; border: none; background: none; color: var(--muted);
+    padding: 4px 12px; border-radius: 999px; cursor: pointer;
   }
+  .seg button:hover:not(:disabled):not(.on) { color: var(--ink); }
   .seg button.on { background: var(--ink); color: white; }
-  .seg.seg-sm button { font-size: 11px; padding: 2px 9px; }
   .seg button:disabled { color: #c8c8c8; cursor: default; }
   .section-sub { font-weight: 400; color: var(--muted); margin-left: 8px; font-size: 12px; }
   .half-split { font-size: 13px; margin: 10px 0 2px; font-variant-numeric: tabular-nums; }
@@ -247,8 +256,7 @@
   .half-split .neg { color: #2e7d32; }
   .half-split .pos { color: #a50f15; }
   .half-split .muted { color: var(--muted); font-size: 12px; }
-  /* Chart titles: a bit bigger, colored by what they show (matching each chart's color scale). */
-  .section-title.chart-title { font-size: 16px; font-weight: 600; }
+  /* Chart titles: colored by what they show (matching each chart's color scale). */
   .chart-title.t-pace    { color: #08306b; }
   .chart-title.t-elev    { color: #555555; }
   .chart-title.t-hr      { color: #a50f15; }
@@ -261,8 +269,57 @@
   .workout-box .wk-sum { font-weight: 600; font-variant-numeric: tabular-nums; }
   .workout-box .muted, .workout-box .wk-src { color: var(--muted); font-size: 12px; }
   .workout-box .wk-extra { font-size: 13px; }
+  .workout-box .wk-src a { color: inherit; }
+  /* Paces (VDOT calculator). */
+  .pc-form { display: flex; flex-wrap: wrap; gap: 10px 14px; align-items: flex-end; }
+  .pc-form label { display: flex; flex-direction: column; gap: 4px; font-size: 12px; color: var(--muted); }
+  .pc-form input, .pc-form select { font: inherit; font-size: 15px; padding: 6px 12px; border: 1px solid var(--line); border-radius: 8px;
+    background: white; color: var(--ink); width: 130px; font-variant-numeric: tabular-nums; }
+  .pc-form select { width: 170px; }
+  .pc-form input:focus, .pc-form select:focus { outline: none; border-color: var(--ink); }
+  .pc-add { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; margin-top: 10px; font-size: 13px; }
+  .pc-add .rl-label { color: var(--muted); font-size: 12px; margin-right: 2px; }
+  .pc-add { flex-direction: column; align-items: stretch; gap: 8px; }
+  .pc-list { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+  .pc-reset { font-size: 12px; color: var(--muted); margin-left: 4px; }
+  .pc-list .rl.pc-nocs { color: var(--muted); text-decoration: line-through; text-decoration-color: rgba(0,0,0,0.3); }
+  .pc-cs { font-size: 13px; line-height: 1.5; }
+  .pc-vdots { margin-top: 10px; }
+  .pc-vrow { display: grid; grid-template-columns: 110px 1fr 70px 44px; gap: 10px; align-items: center; font-size: 13px; padding: 3px 0; font-variant-numeric: tabular-nums; }
+  .pc-vrow small { color: var(--muted); }
+  .pc-vrow i { display: block; height: 10px; background: #f1efe9; border-radius: 5px; overflow: hidden; }
+  .pc-vrow i b { display: block; height: 100%; border-radius: 5px; }
+  .pc-vrow > span:nth-child(3), .pc-vrow > b { text-align: right; }
+  .pc-cs b { color: #3d7ebf; }
+  .pc-cs .muted { color: var(--muted); font-size: 12px; }
+  .pc-add select { max-width: 100%; }
+  .pc-add input, .pc-add select { font: inherit; font-size: 13px; line-height: 1.3; padding: 5px 10px; border: 1px solid var(--line);
+    border-radius: 999px; background: white; color: var(--ink); }
+  .pc-add input:focus, .pc-add select:focus { outline: none; border-color: var(--ink); }
+  .pc-add .rl { border: 1px solid var(--line); border-radius: 999px; padding: 5px 12px; line-height: 1.3; background: white; display: inline-flex; gap: 6px; }
+  .pc-add .rl button { border: none; background: none; color: var(--muted); cursor: pointer; padding: 0; font-size: 14px; line-height: 1; }
+  table.pc-table td.name, table.pc-table th:first-child, table.pc-table th.reps { text-align: left; }
+  table.pc-table td { white-space: nowrap; }
+  table.pc-table td.name, table.pc-table td.reps { white-space: normal; min-width: 150px; }
+  table.pc-table td.name small { display: block; color: var(--muted); font-size: 11px; font-weight: 400; margin-left: 16px; }
+  table.pc-table td.reps { text-align: left; white-space: normal; }
+  table.pc-table td.reps span { display: inline-block; margin-right: 14px; white-space: nowrap; }
+  table.pc-table tr.pc-on td { background: #f4f1e8; }
+  .pc-cols { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 0 16px; }
+  .pc-chart { padding: 10px; }
+  .pc-chart-box { position: relative; height: 380px; }
+  /* A workout's title and description: click to rewrite in place. */
+  .editable { cursor: text; border-radius: 4px; outline: 1px dashed transparent; outline-offset: 2px; }
+  .editable:hover { outline-color: var(--line); }
+  .editable:focus { outline: 1px solid var(--ink); }
+  .editable:empty::before { content: attr(data-placeholder); color: var(--muted); font-weight: 400; }
   .detail-title b { font-weight: 700; }
   .detail-title .t-race { color: #a50f15; }
+  /* The bold part of an activity's title (page and list cards) in its category tag's colour. */
+  .cat-race > b { color: #a50f15; }
+  .cat-workout > b { color: #2d6b29; }
+  .cat-easy > b { color: #2f6aa6; }
+  .cat-long > b { color: #1f4e8c; }
   .detail-place { font-size: 14px; color: var(--ink); opacity: 0.75; margin: 2px 0 4px; }
   .chart-tools { display: flex; gap: 8px; flex-wrap: wrap; justify-content: flex-end; flex-shrink: 0; }
   .chart-tools button { white-space: nowrap; }
@@ -311,7 +368,7 @@
   .zones-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 18px; }
   @media (max-width: 720px) { .zones-grid { grid-template-columns: 1fr; } }
   .zc-head { display: flex; justify-content: space-between; align-items: center; gap: 8px; margin-bottom: 10px; }
-  .zc-title { font-weight: 500; font-size: 15px; }
+
   .zc-thr { font-size: 12px; color: var(--muted); display: flex; align-items: center; gap: 6px; }
   .zc-thr input { width: 72px; text-align: right; }
   table.zone-table { width: 100%; border-collapse: collapse; font-size: 13px; font-variant-numeric: tabular-nums; }
@@ -343,10 +400,10 @@
   .records-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 10px; }
   .rec-group { margin-top: 22px; padding-top: 14px; border-top: 1px solid var(--line); }
   .rec-group:first-child { margin-top: 8px; padding-top: 0; border-top: none; }
-  .rec-group > .section-title { font-size: 19px; font-weight: 700; color: var(--ink); margin: 0; }
+  .rec-group > .section-title { margin: 0; }
   @media (max-width: 720px) { .records-grid { grid-template-columns: 1fr; } }
   .rec-head { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 8px; }
-  .rec-title { font-size: 17px; font-weight: 700; }
+
   .rec-count { font-size: 12px; color: var(--muted); }
   .rec-row { display: flex; align-items: center; gap: 12px; padding: 8px 6px; border-radius: 6px; cursor: pointer;
              border-top: 1px solid var(--line-soft); }
@@ -363,11 +420,10 @@
   table.laps .dyn-col { background: rgba(140,107,177,0.06); }
   .results-links { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; margin-top: 10px; font-size: 13px; }
   .results-links .rl-label { color: var(--muted); font-size: 12px; margin-right: 2px; }
-  .results-links .rl { border: 1px solid var(--line); border-radius: 12px; padding: 2px 10px; background: white; color: var(--ink); text-decoration: none; display: inline-flex; gap: 6px; align-items: center; }
+  .results-links .rl { border: 1px solid var(--line); border-radius: 999px; padding: 5px 12px; line-height: 1.3; background: white; color: var(--ink); text-decoration: none; display: inline-flex; gap: 6px; align-items: center; }
   .results-links .rl a { color: inherit; text-decoration: none; }
   .results-links .rl.livetrail { border-color: #79b935; }
   .results-links .rl button { border: none; background: none; color: var(--muted); cursor: pointer; padding: 0; font-size: 14px; line-height: 1; }
-  .results-links .rl-add { font-size: 12px; padding: 2px 10px; }
   /* Stage races: Overall · Stage 1 · Stage 2 … above the title; stage rows in the tables. */
   .stage-bar { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; margin-bottom: 12px; font-size: 13px; }
   .stage-bar .rl-label { color: var(--muted); font-size: 12px; margin-right: 2px; }
@@ -419,7 +475,7 @@
   .races-filters { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
   .races-filters .sep { width: 1px; height: 20px; background: var(--line); margin: 0 6px; }
   #races-map { height: 300px; border-radius: 6px; }
-  .race-year { font-size: 18px; font-weight: 600; margin: 28px 0 10px; display: flex; align-items: baseline; gap: 10px; }
+  .race-year { margin: 28px 0 10px; display: flex; align-items: baseline; gap: 10px; }
   .race-year span { font-size: 12px; font-weight: 400; color: var(--muted); }
   .race-cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 14px; }
   .race-card { background: white; border: 1px solid var(--line); border-radius: 8px; overflow: hidden; cursor: pointer;
@@ -434,9 +490,17 @@
   .race-card .rc-nums small { display: block; font-size: 11px; color: var(--muted); }
   .race-card .rc-rank { position: absolute; top: 8px; left: 8px; background: rgba(255,255,255,0.92); border: 1px solid var(--line);
                         border-radius: 10px; font-size: 11px; padding: 1px 7px; font-variant-numeric: tabular-nums; }
-  .race-card .rc-score { color: var(--ink); font-weight: 600; }
-  .race-card .rc-ffa { background: #1f4e8c; color: white; border-radius: 10px; font-size: 10.5px; font-weight: 700;
-                       padding: 1px 7px; margin-left: 4px; white-space: nowrap; }
+  /* Race level tags: FFA / VDOT for road races, UTMB / ITRA / Betrail scores for trail races. */
+  .rtags { display: flex; flex-wrap: wrap; gap: 4px; margin: 4px 0 2px; }
+  .rtag { color: white; border-radius: 10px; font-size: 10.5px; font-weight: 700; padding: 1px 7px; white-space: nowrap;
+          font-variant-numeric: tabular-nums; line-height: 1.5; }
+  .rtag-ffa { background: #1f4e8c; }
+  .rtag-vdot { background: #3d7ebf; }
+  .rtag-utmb { background: #1c2f5e; }
+  .rtag-itra { background: #2d6b29; }
+  .rtag-betrail { background: #8b1a1a; }
+  .detail-rtags .rtags { margin: 2px 0 8px; }
+  .detail-rtags .rtag { font-size: 12px; padding: 2px 9px; }
   .race-card .rc-rank.podium { background: #f6e7b0; border-color: #d4a017; font-weight: 700; }
   .race-card .rc-rank.dnf { background: #f3d3d3; border-color: #a50f15; color: #a50f15; font-weight: 700; }
   .official { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 12px; }
@@ -453,12 +517,16 @@
   table.perf td.sc { text-align: right; font-weight: 600; }
   table.perf td.best { color: #2d6b29; } table.perf td.worst { color: #a50f15; }
   table.perf td.na { color: #c9c9c9; font-weight: 400; }
-  .perf-head { font-size: 24px; font-weight: 700; color: var(--ink); margin: 0 0 14px; display: flex; flex-wrap: wrap;
+  .perf-head { margin: 0 0 14px; display: flex; flex-wrap: wrap;
                align-items: baseline; gap: 4px 12px; }
-  .perf-head .section-sub { font-size: 13px; font-weight: 400; }
+  .perf-head .section-sub { font-size: 12px; font-weight: 400; }
   .perf-sep { margin-top: 44px; padding-top: 22px; border-top: 1px solid var(--line); }
   .speed-head { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; justify-content: space-between; margin-top: 12px; }
-  .speed-head select { font: inherit; font-size: 14px; padding: 5px 8px; border: 1px solid var(--line); border-radius: 6px; background: white; max-width: 100%; }
+  /* Drop-down choices: same height and text as the buttons. */
+  .speed-head select, select.surface-pick { font: inherit; font-size: 13px; line-height: 1.3; padding: 5px 28px 5px 12px; border: 1px solid var(--line);
+    border-radius: 999px; background: white url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M1 1l4 4 4-4' fill='none' stroke='%237a7263' stroke-width='1.5'/%3E%3C/svg%3E") no-repeat right 11px center;
+    appearance: none; -webkit-appearance: none; color: var(--ink); cursor: pointer; max-width: 100%; }
+  .speed-head select:hover, select.surface-pick:hover { border-color: var(--muted); }
   .cad-scale { display: flex; align-items: center; gap: 8px; font-size: 11px; color: var(--muted); }
   .cad-scale i { display: block; width: 180px; height: 6px; border-radius: 3px;
                  background: linear-gradient(90deg, rgb(64,196,99) 0%, rgb(64,196,99) 42%, rgb(61,126,255) 58%, rgb(92,61,255) 83%, rgb(255,64,129) 100%); }
@@ -524,8 +592,9 @@
   .compare-label { font-size: 12px; color: var(--muted); margin-right: 4px; }
   .chip {
     font: inherit;
-    font-size: 12px;
-    padding: 3px 10px;
+    font-size: 13px;
+    line-height: 1.3;
+    padding: 5px 12px;
     border: 1px solid var(--line);
     border-radius: 999px;
     background: white;
@@ -571,6 +640,7 @@
     <button class="tab" data-tab="yearly" onclick="switchTab('yearly')">Yearly</button>
     <button class="tab" data-tab="races" onclick="switchTab('races')">Races</button>
     <button class="tab" data-tab="performance" onclick="switchTab('performance')">Performance</button>
+    <button class="tab" data-tab="paces" onclick="switchTab('paces')">Paces</button>
     <button class="tab" data-tab="records" onclick="switchTab('records')">Records</button>
     <button class="tab" data-tab="grade" onclick="switchTab('grade')">Grade</button>
     <button class="tab" data-tab="progress" onclick="switchTab('progress')">Progress</button>
@@ -691,6 +761,17 @@
     <div class="card" style="padding:0;overflow-x:auto;margin-top:10px;"><table class="perf" id="perf-table"></table></div>
   </div>
 
+  <div id="panel-paces" class="panel">
+    <div class="section-title" style="margin-top:0;">Pace calculator<span class="section-sub">Jack Daniels' VDOT · from a race time, or the time you're aiming for</span></div>
+    <div class="pc-form">
+      <label>Distance<select id="pc-dist" onchange="paceCalc('dist')"></select></label>
+      <label id="pc-custom-wrap" style="display:none">km<input id="pc-custom" type="number" min="0.8" max="50" step="0.1" value="12" oninput="paceCalc('dist')"></label>
+      <label>Time<input id="pc-time" placeholder="h:mm:ss" oninput="paceCalc('time')"></label>
+      <label>Pace /km<input id="pc-pace" placeholder="m:ss" oninput="paceCalc('pace')"></label>
+    </div>
+    <div id="pc-out"></div>
+  </div>
+
   <div id="panel-records" class="panel">
     <div class="chart-bar" style="margin-top:0;">
       <div class="section-title">Personal records<span class="section-sub">fastest activities at each distance</span></div>
@@ -781,7 +862,7 @@
 
     <div class="section-title mm-row">Weight<span class="section-sub">kg</span><span class="minmax" id="mm-weight"></span></div>
     <div class="card"><canvas id="bc-weight" height="70"></canvas></div>
-    <button class="pick" id="body-comp-btn" style="margin-top:10px;" onclick="toggleBodyComp()">Show body composition</button>
+    <button class="btn" id="body-comp-btn" style="margin-top:10px;" onclick="toggleBodyComp()">Show body composition</button>
     <div id="body-comp"></div>
     <div class="section-title mm-row">HRV<span class="section-sub">overnight average (ms) · shaded: your balanced range</span><span class="minmax" id="mm-hrv"></span></div>
     <div class="card"><canvas id="bc-hrv" height="70"></canvas></div>
@@ -803,18 +884,18 @@
   </div>
 
   <div id="panel-profile" class="panel">
-    <div class="section-title" style="margin-top:0;font-size:16px;">Profile</div>
+    <div class="section-title" style="margin-top:0;">Profile</div>
     <div class="muted-note" style="margin:0 0 14px;">Read from your Garmin profile (refreshed at each sync).
       Type a value to override it; empty a field to go back to Garmin's. Weight follows your latest scale reading unless you set it.</div>
     <div class="profile-grid" id="profile-grid"><div class="loading">Loading…</div></div>
     <div class="zones-bar" style="margin-top:16px;">
       <button class="sync-btn" onclick="saveProfile()">Save</button>
-      <button class="pick" onclick="refreshProfileFromGarmin()">Refresh from Garmin</button>
+      <button class="btn" onclick="refreshProfileFromGarmin()">Refresh from Garmin</button>
       <span class="muted-note" id="profile-status" style="margin:0;"></span>
     </div>
 
     <!-- Training zones: same page as the profile (both are your settings). -->
-    <div class="section-title" style="margin-top:40px;padding-top:24px;border-top:1px solid var(--line);font-size:16px;">Training zones</div>
+    <div class="section-title" style="margin-top:40px;padding-top:24px;border-top:1px solid var(--line);">Training zones</div>
     <div class="muted-note" style="margin:0 0 14px;">
       Enter where each zone ends; the next zone starts there. Leave a metric empty if you don't use it.
       A set applies from its date until the next one, so older runs are analysed with the zones you
@@ -1074,9 +1155,12 @@ async function monthActivities(year, month) {
   return monthActivityCache[key];
 }
 
+// Text you typed, safe to put in HTML.
+const esc = v => String(v ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+
 // Short label under a bubble: what the session was.
 function calendarLabel(a) {
-  if (a.category === "workout") return a.workout ? `${a.workout.type}` : surfaceFartlek(a.surface);
+  if (a.category === "workout") return a.workout ? esc(a.workout.type) : surfaceFartlek(a.surface);
   if (a.category === "race") return a.official?.race || customName(a) || (a.surface === "cross" ? "Cross country" : a.place) || "Race";
   if (a.category === "long") return "Long run";
   if (a.category === "easy") return "Easy run";
@@ -1251,7 +1335,7 @@ async function loadMonthActivities() {
       return `
       <div class="list-item" onclick="showDetail(${a.id})">
         <div class="li-left">
-          <span class="li-name">${cardTitle(a)}</span>
+          <span class="li-name${a.category ? ` cat-${a.category}` : ""}">${cardTitle(a)}</span>
           ${place}
           <span class="li-date">${a.date}${tags ? " &middot; " + tags : ""}</span>
         </div>
@@ -1292,14 +1376,14 @@ function customName(a) {
 function cardTitle(a) {
   const own = customName(a);
   if (a.category === "workout") {
-    if (a.workout) return `<b>${a.workout.type}</b> · ${a.workout.summary}`;
+    if (a.workout) return `<b>${esc(a.workout.type)}</b>${a.workout.summary ? ` · ${esc(a.workout.summary)}` : ""}`;
     return `<b>${surfaceFartlek(a.surface)}</b>${own ? ` · ${own}` : ""}`;   // no clear structure
   }
   if (a.category === "race" && a.official?.race) return `<b class="t-race">${a.official.race}</b> · ${a.official.event}`;   // official result
   const raceWord = a.surface === "cross" ? "Cross Country Race" : "Race";
   if (a.category === "race") return own ? `<b class="t-race">${raceWord}</b> · ${own}` : `<b class="t-race">${raceWord}</b>`;
-  if (a.category === "easy") return "Easy run";
-  if (a.category === "long") return "Long run";
+  if (a.category === "easy") return "<b>Easy run</b>";
+  if (a.category === "long") return "<b>Long run</b>";
   const sport = SPORT_LABELS[a.activity_type] || (a.activity_type || "Activity").replace(/_/g, " ").replace(/^./, c => c.toUpperCase());
   return own && own !== sport ? `${sport} · ${own}` : sport;
 }
@@ -1307,15 +1391,14 @@ function cardTitle(a) {
 // Activity page: a bigger title with its main part in bold; a workout's description goes on its
 // own line below it.
 function detailTitle(a) {
-  if (a.category === "workout" && a.workout) return { title: `<b>${a.workout.type}</b>`, sub: a.workout.summary };
+  if (a.category === "workout" && a.workout) return { title: `<b>${esc(a.workout.type)}</b>`, sub: a.workout.summary || "" };
   if (a.category === "race" && a.official?.race) {   // the official race name, event and result underneath
     const o = a.official;
     const rank = o.dnf ? "DNF" : o.rank ? resultBadge(o) : "";
-    const scores = scoresText(Object.fromEntries(Object.entries(o.scores || {}).map(([k, v]) => [k, { score: v }])));
     return { title: `<b class="t-race">${o.race}</b>`,
-             // Line 1: the event; line 2: the result (rank and scores).
+             // Line 1: the event; line 2: the result (rank). Scores: the tags line under it.
              sub: [[a.surface === "cross" ? "Cross country" : "", o.event, o.stages > 1 ? `stage ${o.stage}/${o.stages}` : ""],
-                   [rank, scores]].map(line => line.filter(Boolean).join(" · ")).filter(Boolean).join("\n") };
+                   [rank]].map(line => line.filter(Boolean).join(" · ")).filter(Boolean).join("\n") };
   }
   let t = cardTitle(a);
   if (!t.startsWith("<b")) t = t.replace(/^([^·]+)/, m => `<b>${m.trim()}</b> `).replace(/ $/, "");
@@ -2116,15 +2199,53 @@ async function showWorkout() {
   const w = a.workout;
   // The title already says what it was; the box adds the details around it.
   box.style.display = "block";
+  const edit = "click the title or description to change them";
   if (!w) {
-    box.innerHTML = `<div class="wk-src">No clear rep structure in the laps, so it's titled by surface.</div>`;
+    box.innerHTML = `<div class="wk-src">No clear rep structure in the laps, so it's titled by surface · ${edit}</div>`;
     return;
   }
   const extras = [w.warmup && `warm-up <b>${w.warmup}</b>`, w.cooldown && `cool-down <b>${w.cooldown}</b>`].filter(Boolean).join(" · ");
-  const src = w.source === "watch workout"
-    ? `from your watch workout${w.watch_name ? ` “${w.watch_name}”` : ""}`
-    : `guessed from the laps${w.on_track ? " · reps on a track (GPS)" : ""}`;
+  const src = w.manual
+    ? `title written by you${w.auto ? ` (guess: ${esc(w.auto.type)} · ${esc(w.auto.summary)})` : ""} · ${edit} · <a href="#" onclick="saveWorkoutTitle(true); return false;">back to the guess</a>`
+    : `${w.source === "watch workout"
+        ? `from your watch workout${w.watch_name ? ` “${esc(w.watch_name)}”` : ""}`
+        : `guessed from the laps${w.on_track ? " · reps on a track (GPS)" : ""}`} · ${edit}`;
   box.innerHTML = `${extras ? `<div class="wk-extra">${extras}</div>` : ""}<div class="wk-src">${src}</div>`;
+}
+
+// Your own workout title and description, when the guess doesn't fit (unstructured sessions):
+// click the title or the line under it, rewrite, Enter (Escape cancels). Both emptied = the guess.
+function makeWorkoutEditable(el, placeholder) {
+  el.contentEditable = "true";
+  el.spellcheck = false;
+  el.classList.add("editable");
+  el.dataset.placeholder = placeholder;
+  el.title = "Click to rewrite";
+  el.dataset.before = el.textContent;
+  el.onkeydown = e => {
+    if (e.key === "Enter") { e.preventDefault(); el.blur(); }
+    else if (e.key === "Escape") { el.textContent = el.dataset.before; el.blur(); }
+  };
+  // Saved once you leave both (moving from the title to the description doesn't save yet).
+  el.onblur = () => setTimeout(() => {
+    if (document.activeElement?.classList.contains("editable")) return;
+    const edited = [...document.querySelectorAll("#detail .editable")].some(x => x.textContent.trim() !== (x.dataset.before || "").trim());
+    if (edited) saveWorkoutTitle();
+  }, 0);
+}
+
+async function saveWorkoutTitle(reset = false) {
+  const a = detailState.activity;
+  const body = reset ? { type: null, summary: null }
+                     : { type: document.querySelector("#detail-title > b")?.textContent.trim() || null,
+                         summary: document.getElementById("detail-wsub").textContent.trim() || null };
+  const res = await fetch(`${API}/activities/${a.id}/workout`, { method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) });
+  if (!res.ok) return;
+  a.workout = await res.json(); a.workoutChecked = true;
+  // The list and calendar show it too: update the cached row so they don't need a reload.
+  for (const rows of Object.values(monthActivityCache)) for (const r of rows) if (r.id === a.id) r.workout = a.workout;
+  renderDetailHeader();
+  showWorkout();
 }
 
 // Trail / road picker next to the date. "Auto" follows the watch mode, promoted to trail on
@@ -2171,13 +2292,40 @@ function renderDetailHeader() {
     workout: a.workout ?? null, official: a.official ?? null,
   };
   const { title, sub } = detailTitle(card);
-  document.getElementById("detail-title").innerHTML = title;
+  const titleEl = document.getElementById("detail-title");
+  titleEl.innerHTML = title;
+  titleEl.className = `detail-title${card.category ? ` cat-${card.category}` : ""}`;
   const subEl = document.getElementById("detail-wsub");
   subEl.textContent = sub;
   subEl.style.display = sub ? "" : "none";
+  subEl.contentEditable = "false"; subEl.classList.remove("editable");
+  if (card.category === "workout") {
+    const b = titleEl.querySelector("b");
+    if (b) makeWorkoutEditable(b, "Title");
+    subEl.style.display = "";
+    makeWorkoutEditable(subEl, "Add a description");
+  }
   document.getElementById("detail-place").textContent = a.place || "";
+  renderDetailRaceTags(a, card);
   const tags = cardTags(card).map(t => `<span class="tag tag-${t}">${CATEGORY_TAGS[t] || t}</span>`).join("");
   document.getElementById("detail-tags").innerHTML = `${a.date}${tags ? " &middot; " + tags : ""}`;
+}
+
+// A race's page: the same level tags as its card (FFA / VDOT, UTMB / ITRA / Betrail), from the races
+// list (it has the FFA level); before that list is loaded, from the scores the page already has.
+async function renderDetailRaceTags(a, card) {
+  const el = document.getElementById("detail-rtags");
+  if (!el) return;
+  if (card.category !== "race") { el.innerHTML = ""; return; }
+  const fromPage = () => ({ surface: card.surface, terrain: card.terrain, distance_km: a.distance_km, duration_s: a.duration_s,
+    result: a.official ? { time_s: a.official.time_s, dnf: a.official.dnf } : null,
+    results: Object.fromEntries(Object.entries(a.official?.scores || {}).map(([k, v]) => [k, { score: v }])) });
+  const found = () => racesState.data?.find(r => r.id === a.id);
+  el.innerHTML = raceTags(found() ? { ...found(), surface: card.surface, terrain: card.terrain } : fromPage());
+  if (!racesState.data) {
+    try { racesState.data = await (await fetch(`${API}/races/`)).json(); } catch (e) { return; }
+    if (detailState.activity === a && found()) el.innerHTML = raceTags({ ...found(), surface: card.surface, terrain: card.terrain });
+  }
 }
 
 // A workout without a clear rep structure: "<Surface> fartlek".
@@ -2273,17 +2421,34 @@ function drawLapCharts(laps, hilly = false, extra = null) {
       if (shown[i] == null) return;
       data.push({ x: starts[i], y: shown[i], lap: i }, { x: starts[i] + widths[i], y: shown[i], lap: i });
     });
-    const lapOfCtx = ctx => ctx.p1.raw.lap;
+    // Each lap is its own column, filled with its zone colour and outlined in black, so lap edges
+    // stay visible even between laps of the same shade. The line underneath is invisible: it's
+    // only there for the tooltip.
+    const columns = {
+      id: "lapColumns",
+      beforeDatasetsDraw(chart) {
+        const { ctx, chartArea: c, scales: { x, y: ys } } = chart;
+        const base = d.metric === "vam" ? Math.round(ys.getPixelForValue(0)) : c.bottom;
+        const px = v => Math.round(x.getPixelForValue(v)) + 0.5;
+        ctx.save();
+        ctx.beginPath(); ctx.rect(c.left, c.top, c.right - c.left, c.bottom - c.top); ctx.clip();
+        laps.forEach((l, i) => {
+          if (shown[i] == null) return;
+          const x0 = px(starts[i]), x1 = px(starts[i] + widths[i]), top = Math.round(ys.getPixelForValue(shown[i])) + 0.5;
+          ctx.fillStyle = hexToRgba(colorOf(values[i]), 0.55);
+          ctx.fillRect(x0, Math.min(top, base), x1 - x0, Math.abs(base - top));
+          ctx.strokeStyle = "rgba(31,29,24,0.85)"; ctx.lineWidth = 1;
+          ctx.strokeRect(x0, Math.min(top, base), x1 - x0, Math.abs(base - top));
+        });
+        ctx.restore();
+      },
+    };
 
     splitCharts.push(new Chart(document.getElementById(`sc-${d.metric}`), {
       type: "line",
+      plugins: [columns],
       data: { datasets: [{
-        data, fill: d.metric === "vam" ? "origin" : "start", tension: 0, pointRadius: 0, pointHoverRadius: 0, borderWidth: 1.5,
-        borderColor: d.color, backgroundColor: d.color,
-        segment: {
-          borderColor: ctx => colorOf(values[lapOfCtx(ctx)]),
-          backgroundColor: ctx => hexToRgba(colorOf(values[lapOfCtx(ctx)]), 0.55),
-        },
+        data, fill: false, tension: 0, pointRadius: 0, pointHoverRadius: 0, borderWidth: 0, borderColor: "transparent",
       }] },
       options: {
         responsive: true, animation: false,
@@ -2498,7 +2663,7 @@ async function showResultsLinks(a) {
   el.innerHTML = `<span class="rl-label">Results</span>${sites.join("")}
     ${links.map(l => `<span class="rl ${l.kind}"><a href="${l.url}" target="_blank" rel="noopener">${l.label}</a>
       <button title="Remove this link" onclick="removeResultsLink(${a.id}, ${l.id})">×</button></span>`).join("")}
-    <button class="pick rl-add" onclick="addResultsLink(${a.id})">+ add link</button>
+    <button class="btn rl-add" onclick="addResultsLink(${a.id})">+ add link</button>
     <span class="muted-note" id="rl-status" style="margin:0"></span>`;
   let lt = null;
   if (links.some(l => l.kind === "livetrail")) {
@@ -2618,6 +2783,43 @@ const checkpointPlugin = {
   },
 };
 Chart.register(checkpointPlugin);
+
+// Rolling and mountain runs: the elevation profile behind every activity chart (time series,
+// laps, running dynamics), light grey, no scale. Behind the lines; as a thin outline over the
+// lap columns, which would hide it.
+const profilePlugin = {
+  id: "profileBackdrop",
+  draw(chart, over) {
+    const id = chart.canvas.id, a = detailState.activity, pts = detailState.points;
+    if (!/^(ts-(?!elev)|sc-|dyn-)/.test(id) || !a?.terrain || a.terrain.terrain === "flat" || !pts?.length || !chart.scales.x) return;
+    if (over !== id.startsWith("sc-")) return;
+    const byTime = detailState.xMode === "time" || !(pts.at(-1).distance_km > 0.05);
+    const xs = [], zs = [];
+    for (const p of pts) {
+      const x = byTime ? p.seconds_elapsed : p.distance_km;
+      if (x != null && p.elevation != null) { xs.push(x); zs.push(p.elevation); }
+    }
+    if (xs.length < 2) return;
+    let lo = Infinity, hi = -Infinity;
+    for (const z of zs) { if (z < lo) lo = z; if (z > hi) hi = z; }
+    const { ctx, chartArea: c, scales: { x } } = chart;
+    const yOf = z => c.bottom - (z - lo) / Math.max(hi - lo, 1) * (c.bottom - c.top) * 0.85;
+    ctx.save();
+    ctx.beginPath(); ctx.rect(c.left, c.top, c.right - c.left, c.bottom - c.top); ctx.clip();
+    ctx.beginPath();
+    xs.forEach((v, i) => { const px = x.getPixelForValue(v), py = yOf(zs[i]); i ? ctx.lineTo(px, py) : ctx.moveTo(px, py); });
+    if (over) {
+      ctx.strokeStyle = "rgba(60,60,60,0.35)"; ctx.lineWidth = 1.2; ctx.stroke();
+    } else {
+      ctx.lineTo(x.getPixelForValue(xs.at(-1)), c.bottom); ctx.lineTo(x.getPixelForValue(xs[0]), c.bottom); ctx.closePath();
+      ctx.fillStyle = "rgba(0,0,0,0.07)"; ctx.fill();
+    }
+    ctx.restore();
+  },
+  beforeDatasetsDraw(chart) { profilePlugin.draw(chart, false); },
+  afterDatasetsDraw(chart) { profilePlugin.draw(chart, true); },
+};
+Chart.register(profilePlugin);
 
 let checkpointLayer = null;
 function drawCheckpointMarkers() {
@@ -3156,6 +3358,7 @@ async function showDetail(id) {
       ${a.official?.stage_ids?.length > 1 ? stageBar(a.official.stage_ids, a.official.stage) : ""}
       <h2 class="detail-title" id="detail-title">${a.name || "Activity"}</h2>
       <div class="detail-wsub" id="detail-wsub" style="display:none;"></div>
+      <div class="detail-rtags" id="detail-rtags"></div>
       <div class="detail-place" id="detail-place"></div>
       <div class="detail-date"><span id="detail-tags">${a.date}</span>${a.terrain ? ` &middot; ${renderSurfacePicker(a)}` : ""}</div>
       ${a.category ? `<div class="race-row" id="race-row">${renderCategoryToggle(a)}</div>
@@ -3188,7 +3391,7 @@ async function showDetail(id) {
       <div class="muted-note" id="route-note"></div>
 
       ${chartsMarkup(hilly)}
-      <button class="pick" id="dyn-btn" style="margin-top:14px;" onclick="toggleDynamics()">Show running dynamics &amp; Garmin metrics</button>
+      <button class="btn" id="dyn-btn" style="margin-top:14px;" onclick="toggleDynamics()">Show running dynamics &amp; Garmin metrics</button>
       <div id="dyn-section"></div>
 
 
@@ -3263,9 +3466,341 @@ function switchTab(name) {
     if (!bodyState.loaded) loadBody(); else setBodyRange(bodyState.ranges[name]);
   }
   if (name === "records" && !recordsState.data) loadRecords();
+  if (name === "paces") loadPaceCalc();
   if (name === "performance") loadPerformance();
   if (name === "races") { if (racesState.data) renderRaces(); else loadRaces(); }
   if (name === "grade") { if (gapState.data) renderGap(); else loadGap(); }
+}
+
+/* ---------- Paces: Jack Daniels' VDOT calculator ---------- */
+// Daniels & Gilbert (1979). The oxygen cost of running at v m/min, and the share of VO2max you can
+// hold for t minutes; VDOT = cost ÷ share for a race. The same equation gives the time at any
+// other distance (equivalent races), and training paces are the speeds costing a set share of
+// VDOT: easy 62–70%, threshold 88%, interval 97.5%, repetition 105% (marathon = its predicted
+// pace). Checked against Daniels' tables (VDOT 50: 5K 19:57, threshold 4:15/km, interval 3:55/km).
+const vo2Cost = v => -4.60 + 0.182258 * v + 0.000104 * v * v;
+const vo2Share = t => 0.8 + 0.1894393 * Math.exp(-0.012778 * t) + 0.2989558 * Math.exp(-0.1932605 * t);
+const vdotOf = (m, sec) => vo2Cost(m / (sec / 60)) / vo2Share(sec / 60);
+const speedAt = vo2 => (-0.182258 + Math.sqrt(0.182258 ** 2 + 4 * 0.000104 * (vo2 + 4.60))) / (2 * 0.000104);   // m/min
+function raceSeconds(vdot, m) {   // time at distance m for this VDOT (bisection: VDOT falls as time grows)
+  let lo = m / 1000 * 90, hi = m / 1000 * 1200;
+  for (let i = 0; i < 80; i++) { const mid = (lo + hi) / 2; if (vdotOf(m, mid) > vdot) lo = mid; else hi = mid; }
+  return (lo + hi) / 2;
+}
+const PC_DISTANCES = [["800 m", 800], ["1500 m", 1500], ["Mile", 1609.34], ["3000 m", 3000], ["2 miles", 3218.69], ["5K", 5000],
+  ["8K", 8000], ["10K", 10000], ["15K", 15000], ["10 miles", 16093.4], ["20K", 20000], ["Half marathon", 21097.5],
+  ["25K", 25000], ["30K", 30000], ["Marathon", 42195]];
+const PC_ZONES = [
+  { key: "E", name: "Easy", color: "#2f6aa6", lo: 0.62, hi: 0.70, reps: [], note: "easy days, long runs, warm-ups" },
+  { key: "M", name: "Marathon", color: "#1f4e8c", marathon: true, reps: [], note: "your predicted marathon pace" },
+  { key: "T", name: "Threshold", color: "#e0a43a", f: 0.88, reps: [400, 1000, 2000], note: "comfortably hard, ~1 h race effort · tempo runs, cruise intervals" },
+  { key: "I", name: "Interval", color: "#a50f15", f: 0.975, reps: [400, 800, 1000, 1200], note: "VO2max · reps of 3–5 min, equal or shorter recoveries" },
+  { key: "R", name: "Repetition", color: "#c43fd0", f: 1.05, reps: [200, 400, 600, 800], note: "speed and economy · short reps, full recoveries" },
+];
+const pcState = { loaded: false };
+
+function parseClock(t) {   // "1:20:00", "20:00", "45" (minutes) -> seconds
+  const parts = String(t || "").trim().split(":").map(Number);
+  if (!parts.length || parts.some(x => !isFinite(x) || x < 0)) return null;
+  if (parts.length === 1) return parts[0] * 60;
+  return parts.reduce((s, x) => s * 60 + x, 0);
+}
+const fmtRep = sec => sec < 60 ? `${Math.round(sec)} s` : fmtRaceTime(Math.round(sec));
+const distLabel = m => m >= 1000 ? `${+(m / 1000).toFixed(m % 1000 ? 1 : 0)} km` : `${m} m`;
+const repLabel = m => Math.abs(m - 1609.34) < 1 ? "mile" : `${m} m`;
+
+async function loadPaceCalc() {
+  if (!pcState.loaded) {
+    document.getElementById("pc-dist").innerHTML = PC_DISTANCES.map(([l, m]) => `<option value="${m}" ${m === 10000 ? "selected" : ""}>${l}</option>`).join("")
+      + `<option value="custom">Other…</option>`;
+    pcState.loaded = true;
+  }
+  // Your road races (the chart's dots) and the ones you added to it.
+  const [races, sel] = await Promise.all([
+    racesState.data || fetch(`${API}/races/`).then(r => r.json()).catch(() => null),
+    fetch(`${API}/profile/pace-races`).then(r => r.json()).catch(() => ({ added: [], hidden: [] })),
+  ]);
+  racesState.data ||= races;
+  pcState.sel = sel;
+  const timeEl = document.getElementById("pc-time");
+  if (!timeEl.value) {
+    // Start from your best recent road race: the highest VDOT of the last 12 months on a flat
+    // course (else of all time).
+    const cands = roadRaces().filter(x => x.flat && PC_DISTANCES.some(([, d]) => d === x.d));
+    const yearAgo = new Date(Date.now() - 365 * 864e5).toISOString().slice(0, 10);
+    const pool = cands.some(x => x.date >= yearAgo) ? cands.filter(x => x.date >= yearAgo) : cands;
+    const last = pool.sort((a, b) => vdotOf(b.d, b.t) - vdotOf(a.d, a.t))[0];
+    if (last) {
+      document.getElementById("pc-dist").value = last.d;
+      timeEl.value = fmtRaceTime(Math.round(last.t));
+    }
+    paceCalc("time");
+  } else { renderPinnedRaces(); drawPaceChart(); }
+}
+
+// Your road races at the standard distances (official time when matched, else the watch's).
+const PC_STANDARD = [[1500, "1500 m"], [1609.34, "Mile"], [3000, "3000 m"], [5000, "5K"], [10000, "10K"], [15000, "15K"],
+  [16093.4, "10 miles"], [20000, "20K"], [21097.5, "Half"], [25000, "25K"], [30000, "30K"], [42195, "Marathon"]];
+function roadRaces() {
+  const KEY_M = { "5k": 5000, "10k": 10000, "15k": 15000, "20k": 20000, half: 21097.5, marathon: 42195 };
+  const snap = d => (PC_STANDARD.find(([s]) => Math.abs(d / s - 1) <= 0.03) || [])[0];
+  const out = [];
+  for (const r of racesState.data || []) {
+    if (["trail", "cross"].includes(r.surface)) continue;
+    const d = KEY_M[r.ffa?.distance] || snap(r.distance_km * 1000);
+    const t = r.result?.time_s || r.ffa?.time_s || r.duration_s;
+    if (d && t) out.push({ d, t, name: raceName(r), date: r.date, id: r.id, flat: !r.terrain || r.terrain === "flat" });
+  }
+  return out;
+}
+
+// The chart's races: by default your best flat road race at each distance (the model is for flat
+// courses); you can take any off, and add any other road race. They also give the critical speed.
+function chartRaces() {
+  const sel = pcState.sel || { added: [], hidden: [] };
+  const all = roadRaces(), best = new Map();
+  for (const x of all.filter(x => x.flat)) if (!best.has(x.d) || x.t < best.get(x.d).t) best.set(x.d, x);
+  const bestIds = new Set([...best.values()].map(x => x.id));
+  const shown = [...best.values()].filter(x => !sel.hidden.includes(x.id));
+  const added = all.filter(x => sel.added.includes(x.id) && !bestIds.has(x.id)).map(x => ({ ...x, added: true }));
+  return [...shown, ...added].sort((a, b) => a.d - b.d || a.t - b.t);
+}
+
+// Critical speed (distance–time model): distance = CS × time + D′, a straight line through your
+// races. CS is the slope, the fastest speed held without the fatigue building up (between threshold
+// and VO2max, ~30–40 min race effort); D′ the intercept, the distance you can run above it (reserve).
+// Only races of 2–90 min: the straight line holds there; a marathon falls below it (fuel, fatigue)
+// and would drag CS down.
+const CS_MIN_S = 120, CS_MAX_S = 90 * 60;
+const inCsFit = r => r.t >= CS_MIN_S && r.t <= CS_MAX_S;
+function criticalSpeed(all) {
+  const races = all.filter(inCsFit);
+  if (races.length < 2 || new Set(races.map(r => r.d)).size < 2) return null;
+  const n = races.length, mt = races.reduce((s, r) => s + r.t, 0) / n, md = races.reduce((s, r) => s + r.d, 0) / n;
+  const sxy = races.reduce((s, r) => s + (r.t - mt) * (r.d - md), 0), sxx = races.reduce((s, r) => s + (r.t - mt) ** 2, 0);
+  const cs = sxy / sxx, dprime = md - cs * mt;   // m/s, m
+  const ss = races.reduce((s, r) => s + (r.d - md) ** 2, 0), res = races.reduce((s, r) => s + (r.d - (cs * r.t + dprime)) ** 2, 0);
+  return { cs, dprime, r2: ss ? 1 - res / ss : 1, n, shortest: Math.min(...races.map(r => r.t)), longest: Math.max(...races.map(r => r.t)) };
+}
+
+// Under the chart: the races it uses (× takes one off), a picker to add another, and the critical speed.
+function renderPinnedRaces() {
+  const box = document.getElementById("pc-add");
+  if (!box) return;
+  const races = chartRaces(), shown = new Set(races.map(x => x.id));
+  const label = x => `${(PC_STANDARD.find(([d]) => d === x.d) || [0, distLabel(x.d)])[1]} ${fmtRaceTime(Math.round(x.t))}`;
+  const options = roadRaces().filter(x => !shown.has(x.id)).sort((a, b) => a.date < b.date ? 1 : -1);
+  const cs = criticalSpeed(races);
+  pcState.cs = cs;
+  box.innerHTML = `
+    <div class="pc-list"><span class="rl-label">In the chart</span>
+      ${races.map(x => `<span class="rl${inCsFit(x) ? "" : " pc-nocs"}" title="${esc(x.name)} · ${x.date}${inCsFit(x) ? "" : " · not used for the critical speed (over 90 min)"}">${x.added ? "○" : "●"} ${label(x)} · ${x.date.slice(0, 4)}
+        <button title="Take it off the chart" onclick="removeChartRace(${x.id})">×</button></span>`).join("") || `<span class="muted-note" style="margin:0">none</span>`}
+      ${(pcState.sel?.hidden?.length || pcState.sel?.added?.length) ? `<a href="#" class="pc-reset" onclick="resetChartRaces(); return false;">back to my best races</a>` : ""}
+    </div>
+    <div class="pc-list"><span class="rl-label">Add a race</span>
+      <select id="pc-add-race">${options.map(x => `<option value="${x.id}">${x.date} · ${esc(x.name)} · ${label(x)}${x.flat ? "" : " (hilly)"}</option>`).join("")}</select>
+      <button class="btn" onclick="addChartRace()" ${options.length ? "" : "disabled"}>Add</button>
+    </div>
+    <div class="pc-cs">${cs ? `<b>Critical speed ${(cs.cs * 3.6).toFixed(1)} km/h</b> · ${fmtPace(1000 / cs.cs / 60)}/km ·
+      D′ ${Math.round(cs.dprime)} m · from ${cs.n} races
+      <span class="muted">· distance = CS × time + D′, fitted on the races in the chart lasting 2–90 min (struck through: not used — a marathon falls below the line,
+      fuel and fatigue).${cs.shortest > 30 * 60 ? " A race of 3K–5K would sharpen it." : ""} CS sits between threshold and VO2max (~30–40 min race effort); D′ is the distance you can run above it.</span>`
+      : `<span class="muted">Critical speed: needs two races or more of 2–90 min, at different distances, in the chart.</span>`}</div>
+    ${enduranceProfile(races, cs)}`;
+}
+
+// Endurance profile of the races in the chart: how little they drop off as the distance grows.
+// - VDOT of each race (Daniels): level from 10K to marathon = endurance; most runners lose 2–5
+//   points at the marathon.
+// - Riegel exponent k in T2 = T1 × (D2/D1)^k, fitted on the races: 1.06 standard, ≤ 1.05 endurance-
+//   oriented, ≥ 1.08 speed-oriented; and between each pair of distances, to see where it drops.
+// - The marathon as a share of the critical speed: recreational ~80–88%, good amateurs ~88–93%,
+//   elites up to ~96% (Smyth & Muniz-Pumares 2020).
+function enduranceProfile(races, cs) {
+  if (races.length < 2 || new Set(races.map(r => r.d)).size < 2) return "";
+  const name = x => (PC_STANDARD.find(([d]) => d === x.d) || [0, distLabel(x.d)])[1];
+  const withV = races.map(r => ({ ...r, vdot: vdotOf(r.d, r.t) }));
+  // Riegel: slope of log(time) against log(distance).
+  const xs = races.map(r => Math.log(r.d)), ys = races.map(r => Math.log(r.t));
+  const mx = xs.reduce((a, b) => a + b) / xs.length, my = ys.reduce((a, b) => a + b) / ys.length;
+  const k = xs.reduce((s, x, i) => s + (x - mx) * (ys[i] - my), 0) / xs.reduce((s, x) => s + (x - mx) ** 2, 0);
+  const kVerdict = k <= 1.05 ? ["endurance-oriented", "#2d6b29"] : k < 1.08 ? ["balanced", "#7a7263"] : ["speed-oriented", "#a50f15"];
+  // Per distance: best of each, then the exponent from one distance to the next.
+  const byD = [...new Map(races.slice().sort((a, b) => b.t - a.t).map(r => [r.d, r])).values()].sort((a, b) => a.d - b.d);
+  const steps = byD.slice(1).map((r, i) => ({ from: byD[i], to: r, k: Math.log(r.t / byD[i].t) / Math.log(r.d / byD[i].d) }));
+  const worst = steps.length > 1 ? steps.reduce((a, b) => b.k > a.k ? b : a) : null;
+  const vs = withV.map(r => r.vdot), vMax = Math.max(...vs), vMin = Math.min(...vs);
+  const marathon = withV.filter(r => r.d === 42195).sort((a, b) => a.t - b.t)[0];
+  const shortV = withV.filter(r => r.d <= 10000).sort((a, b) => b.vdot - a.vdot)[0];
+  const pctCs = marathon && cs ? marathon.d / marathon.t / cs.cs * 100 : null;
+  const pctVerdict = pctCs == null ? null : cs.shortest > 30 * 60 ? "not reliable yet" : pctCs >= 96 ? "elite level" : pctCs >= 88 ? "good amateur level" : pctCs >= 80 ? "recreational level" : "below the usual range";
+  const lo = Math.floor(vMin - 1), hi = Math.ceil(vMax + 1);
+  const box = (label, value, sub) => `<div class="stat"><div class="stat-label">${label}</div><div class="stat-value">${value}</div><div class="stat-sub">${sub}</div></div>`;
+  return `<div class="section-title">Endurance profile<span class="section-sub">how little your races drop off as the distance grows · from the races in the chart</span></div>
+    <div class="stat-grid">
+      ${box("Riegel exponent", k.toFixed(3), `<b style="color:${kVerdict[1]}">${kVerdict[0]}</b> · 1.06 standard, ≤ 1.05 endurance, ≥ 1.08 speed${worst ? `<br>biggest drop: ${name(worst.from)} → ${name(worst.to)} (${worst.k.toFixed(3)})` : ""}`)}
+      ${box("VDOT spread", `${(vMax - vMin).toFixed(1)}<span class="rec-unit"> pts</span>`, `${vMin.toFixed(1)}–${vMax.toFixed(1)} across ${races.length} races · ${vMax - vMin <= 2 ? "<b style=\"color:#2d6b29\">level</b>" : vMax - vMin <= 4 ? "usual" : "<b style=\"color:#a50f15\">large</b>"}${marathon && shortV ? `<br>marathon ${marathon.vdot >= shortV.vdot ? "+" : "−"}${Math.abs(marathon.vdot - shortV.vdot).toFixed(1)} vs your best up to 10K (usual: −2 to −5)` : ""}`)}
+      ${pctCs != null ? box("marathon / critical speed", `${pctCs.toFixed(1)}<span class="rec-unit">%</span>`, `${pctVerdict} · recreational 80–88%, good amateurs 88–93%, elites up to ~96%${cs.shortest > 30 * 60 ? `<br><span style="color:#a50f15">reads high: no race under 30 min in the fit, so CS is likely underestimated</span>` : ""}`) : ""}
+    </div>
+    <div class="card pc-vdots">${withV.map(r => `<div class="pc-vrow" title="${esc(r.name)} · ${r.date}">
+        <span>${name(r)} <small>${r.date.slice(0, 4)}</small></span>
+        <i><b style="width:${((r.vdot - lo) / (hi - lo) * 100).toFixed(1)}%;background:${r.added ? "#b9b2a4" : "#3d7ebf"}"></b></i>
+        <span>${fmtRaceTime(Math.round(r.t))}</span><b>${r.vdot.toFixed(1)}</b></div>`).join("")}
+      <div class="muted-note" style="margin:6px 0 0">VDOT of each race (bars from ${lo} to ${hi}): level bars from short to long = good endurance. Races from different seasons
+        compare different fitness; the fairest reading uses races from one season.</div></div>`;
+}
+
+async function saveChartRaces(sel) {
+  const res = await fetch(`${API}/profile/pace-races`, { method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify(sel) });
+  if (!res.ok) return;
+  pcState.sel = await res.json();
+  renderPinnedRaces();
+  drawPaceChart();
+}
+function addChartRace() {
+  const id = +document.getElementById("pc-add-race").value, sel = pcState.sel;
+  if (!id) return;
+  saveChartRaces(sel.hidden.includes(id) ? { ...sel, hidden: sel.hidden.filter(x => x !== id) } : { ...sel, added: [...sel.added, id] });
+}
+function removeChartRace(id) {
+  const sel = pcState.sel;
+  saveChartRaces(sel.added.includes(id) ? { ...sel, added: sel.added.filter(x => x !== id) } : { ...sel, hidden: [...sel.hidden, id] });
+}
+const resetChartRaces = () => saveChartRaces({ added: [], hidden: [] });
+
+function paceCalc(changed) {
+  const sel = document.getElementById("pc-dist");
+  document.getElementById("pc-custom-wrap").style.display = sel.value === "custom" ? "" : "none";
+  const m = sel.value === "custom" ? +document.getElementById("pc-custom").value * 1000 : +sel.value;
+  const timeEl = document.getElementById("pc-time"), paceEl = document.getElementById("pc-pace");
+  let sec = parseClock(timeEl.value);
+  if (changed === "pace") {
+    const p = parseClock(paceEl.value);   // m:ss per km -> seconds per km
+    sec = p && m ? p * m / 1000 : null;
+    if (sec) timeEl.value = fmtRaceTime(Math.round(sec));
+  } else if (sec && m) {
+    paceEl.value = fmtPace(sec / 60 / (m / 1000));
+  }
+  const out = document.getElementById("pc-out");
+  if (!m || !sec || sec / 60 < 3.5 || sec / 60 > 300) {
+    out.innerHTML = `<div class="muted-note">Type a time (h:mm:ss) or a pace: from 3½ minutes to 5 hours, where the model holds.</div>`;
+    return;
+  }
+  const vdot = vdotOf(m, sec);
+  const vmax = speedAt(vdot);   // m/min at VO2max
+  const marathonSec = raceSeconds(vdot, 42195);
+  const paceOf = v => 1000 / v;   // min/km
+  const zones = PC_ZONES.map(z => {
+    if (z.marathon) return { ...z, v: 42195 / (marathonSec / 60) };
+    if (z.lo) return { ...z, vSlow: speedAt(z.lo * vdot), vFast: speedAt(z.hi * vdot) };
+    return { ...z, v: speedAt(z.f * vdot) };
+  });
+  const row = z => `<tr>
+      <td class="name"><span class="zone-dot" style="background:${z.color}"></span><b>${z.name}</b><small>${z.note}</small></td>
+      <td>${z.vSlow ? `${fmtPace(paceOf(z.vSlow))}–${fmtPace(paceOf(z.vFast))}` : fmtPace(paceOf(z.v))}</td>
+      <td class="reps">${z.reps.map(r => `<span>${repLabel(r)} <b>${fmtRep(r / z.v * 60)}</b></span>`).join("")}</td></tr>`;
+  // Equivalent races, and the splits of the race you typed (every km; every 5 km beyond a half).
+  const equiv = PC_DISTANCES.filter(([, d]) => d >= 1500).map(([l, d]) => { const t = raceSeconds(vdot, d); return { l, d, t }; });
+  const stepKm = m > 21100 ? 5 : m > 10000 ? 2 : 1;
+  const marks = [];
+  for (let k = stepKm; k * 1000 < m - 1; k += stepKm) marks.push(k * 1000);
+  if (m >= 42000) marks.push(21097.5);   // a marathon's half way
+  const splits = [...new Set([...marks, m])].sort((a, b) => a - b);
+  out.innerHTML = `
+    <div class="stat-grid" style="margin-top:14px">
+      <div class="stat"><div class="stat-label">VDOT</div><div class="stat-value">${vdot.toFixed(1)}</div><div class="stat-sub">${distLabel(m)} in ${fmtRaceTime(Math.round(sec))}</div></div>
+      <div class="stat"><div class="stat-label">VO2max pace</div><div class="stat-value">${fmtPace(paceOf(vmax))}<span class="rec-unit"> /km</span></div><div class="stat-sub">${(vmax * 0.06).toFixed(1)} km/h · ~11 min all-out</div></div>
+      <div class="stat"><div class="stat-label">marathon prediction</div><div class="stat-value">${fmtRaceTime(Math.round(marathonSec))}</div><div class="stat-sub">${fmtPace(marathonSec / 60 / 42.195)}/km · with the training for it</div></div>
+    </div>
+    <div class="section-title">Equivalent races<span class="section-sub">line: the same level as ${distLabel(m)} in ${fmtRaceTime(Math.round(sec))} ◆ ·
+      dots: your best road race at each distance, <span style="color:#a50f15">this or last year</span> · <span style="color:#e0763a">2–3 years ago</span> ·
+      <span style="color:#9a927f">older</span> · rings: races you added · <span style="color:#3d7ebf">dashed: critical speed from these races</span></span></div>
+    <div class="card pc-chart"><div class="pc-chart-box"><canvas id="pc-chart"></canvas></div></div>
+    <div class="pc-add" id="pc-add"></div>
+    <div class="section-title">Training paces</div>
+    <div class="card" style="padding:0;overflow-x:auto"><table class="laps pc-table">
+      <thead><tr><th>pace</th><th>/km</th><th class="reps">reps</th></tr></thead>
+      <tbody>${zones.map(row).join("")}</tbody></table></div>
+    <div class="pc-cols">
+      <div><div class="section-title">Time at each distance</div>
+        <div class="card" style="padding:0;overflow-x:auto"><table class="laps pc-table">
+          <thead><tr><th>race</th><th>time</th><th>/km</th></tr></thead>
+          <tbody>${equiv.map(e => `<tr class="${Math.abs(e.d - m) < 1 ? "pc-on" : ""}"><td class="name">${e.l}</td><td><b>${fmtRaceTime(Math.round(e.t))}</b></td><td>${fmtPace(e.t / 60 / (e.d / 1000))}</td></tr>`).join("")}</tbody></table></div></div>
+      <div><div class="section-title">Race splits<span class="section-sub">even pace · ${distLabel(m)} in ${fmtRaceTime(Math.round(sec))}</span></div>
+        <div class="card" style="padding:0;overflow-x:auto"><table class="laps pc-table">
+          <thead><tr><th>at</th><th>time</th></tr></thead>
+          <tbody>${splits.map(d => `<tr><td class="name">${Math.abs(d - 21097.5) < 1 && m > 21100 ? "half way" : distLabel(d)}</td><td><b>${fmtRaceTime(Math.round(sec * d / m))}</b></td></tr>`).join("")}</tbody></table></div></div>
+    </div>
+    <div class="muted-note">Jack Daniels' VDOT (Daniels &amp; Gilbert, 1979): the oxygen cost of your race speed over the share of VO2max you can hold for
+      that long. Equivalent races assume the training for each distance (a marathon time from a 5K is optimistic without the long runs).
+      Training paces: easy 62–70% of VDOT, threshold 88%, interval 97.5%, repetition 105%; the model holds from about 1500 m to the marathon, on the flat, in good conditions.</div>`;
+  pcState.level = { vdot, m, sec };
+  renderPinnedRaces();
+  drawPaceChart();
+}
+
+// The equivalence curve (speed at every distance for this VDOT) and your best road race at each
+// distance, each with its own VDOT: above the line = better than the level typed, below = slower.
+let pcChart = null;
+function drawPaceChart() {
+  if (pcChart) { pcChart.destroy(); pcChart = null; }
+  const canvas = document.getElementById("pc-chart");
+  if (!canvas || !pcState.level) return;
+  const { vdot, m, sec } = pcState.level;
+  const kmh = (d, t) => d / t * 3.6;
+  const curve = [];
+  for (let d = 1500; d <= 42195; d += d < 5000 ? 250 : 1000) curve.push({ x: d / 1000, y: kmh(d, raceSeconds(vdot, d)) });
+  curve.push({ x: 42.195, y: kmh(42195, raceSeconds(vdot, 42195)) });
+  const thisYear = new Date().getFullYear();
+  const color = r => { const age = r.date ? thisYear - +r.date.slice(0, 4) : 0;
+    return age <= 1 ? "#a50f15" : age <= 3 ? "#e0763a" : "#9a927f"; };
+  const dots = chartRaces().map(r => ({ x: r.d / 1000, y: kmh(r.d, r.t), r, vdot: vdotOf(r.d, r.t) }));
+  // Critical speed: its level (dashed) and the speed it predicts at each distance, CS·d / (d − D′).
+  const cs = pcState.cs;
+  const csCurve = cs ? curve.filter(p => p.x * 1000 > cs.dprime * 4).map(p => ({ x: p.x, y: cs.cs * (p.x * 1000) / (p.x * 1000 - cs.dprime) * 3.6 })) : [];
+  const csLine = cs ? [{ x: 0, y: cs.cs * 3.6 }, { x: 43, y: cs.cs * 3.6 }] : [];
+  const ys = [...curve.map(p => p.y), ...dots.map(p => p.y), ...csCurve.map(p => p.y)];
+  // Each dot named with its distance on the chart.
+  const labels = {
+    id: "pcLabels", afterDatasetsDraw(chart) {
+      const { ctx, chartArea: a, scales: { y } } = chart, meta = chart.getDatasetMeta(3);
+      ctx.save(); ctx.font = `11px ${THEME.font}`; ctx.fillStyle = THEME.muted; ctx.textAlign = "center";
+      meta.data.forEach((pt, i) => { const p = dots[i]; ctx.fillText((PC_STANDARD.find(([d]) => d === p.r.d) || [0, distLabel(p.r.d)])[1], pt.x, pt.y - 10); });
+      if (cs) {   // the critical speed, written on its line
+        ctx.fillStyle = "#3d7ebf"; ctx.textAlign = "left";
+        ctx.fillText(`critical speed ${(cs.cs * 3.6).toFixed(1)} km/h`, a.left + 6, y.getPixelForValue(cs.cs * 3.6) + 14);
+      }
+      ctx.restore();
+    },
+  };
+  pcChart = new Chart(canvas, {
+    plugins: [labels],
+    data: { datasets: [
+      { type: "line", label: "equivalent", data: curve, borderColor: "#1f1d18", borderWidth: 2, pointRadius: 0, tension: 0.3, order: 2 },
+      { type: "line", label: "critical speed model", data: csCurve, borderColor: "#3d7ebf", borderWidth: 1.5, borderDash: [6, 4], pointRadius: 0, tension: 0.3, order: 3 },
+      { type: "line", label: "critical speed", data: csLine, borderColor: "rgba(61,126,191,0.6)", borderWidth: 1, borderDash: [2, 3], pointRadius: 0, order: 4 },
+      { type: "scatter", label: "best races", data: dots, order: 1, pointRadius: 6, pointHoverRadius: 8, borderWidth: 2,
+        backgroundColor: dots.map(p => p.r.added ? "white" : hexToRgba(color(p.r), 0.9)),
+        borderColor: dots.map(p => p.r.added ? color(p.r) : "white") },
+      { type: "scatter", label: "typed", data: [{ x: m / 1000, y: kmh(m, sec) }], order: 0, pointRadius: 7,
+        pointStyle: "rectRot", backgroundColor: "#1f1d18", borderColor: "white", borderWidth: 1.5 },
+    ] },
+    options: { responsive: true, maintainAspectRatio: false, animation: false,
+      interaction: { mode: "nearest", intersect: true },
+      plugins: { legend: { display: false }, tooltip: { displayColors: false, callbacks: {
+        title: items => { const p = items[0].raw; return p.r ? `${p.r.name}${p.r.date ? ` · ${p.r.date}` : ""}` : items[0].dataset.label === "typed" ? "what you typed" : `${items[0].dataset.label} · ${p.x.toFixed(1)} km`; },
+        label: ctx => { const p = ctx.raw;
+          if (p.r) return [`${distLabel(Math.round(p.r.d))} in ${fmtRaceTime(Math.round(p.r.t))} · ${fmtPace(60 / p.y)}/km · ${p.y.toFixed(1)} km/h`,
+                           `VDOT ${p.vdot.toFixed(1)} (${p.vdot >= vdot ? "+" : ""}${(p.vdot - vdot).toFixed(1)} vs the line)`];
+          return `${p.y.toFixed(1)} km/h · ${fmtPace(60 / p.y)}/km · ${fmtRaceTime(Math.round(p.x / p.y * 3600))}`; } } } },
+      scales: {
+        x: { type: "linear", min: 0, max: 43, title: { display: true, text: "distance (km)" },
+             afterBuildTicks: axis => { axis.ticks = [0, 5, 10, 15, 21.1, 30, 42.2].map(v => ({ value: v })); },
+             ticks: { callback: v => ({ 21.1: "half", 42.2: "marathon" }[v] ?? `${v}`) }, grid: { color: THEME.grid } },
+        y: { min: Math.floor(Math.min(...ys) - 0.5), max: Math.ceil(Math.max(...ys) + 0.5),
+             title: { display: true, text: "speed (km/h)" }, grid: { color: THEME.grid } } } },
+  });
 }
 
 /* ---------- Profile: birth date, height, weight, sex (Garmin, or yours) ---------- */
@@ -3312,7 +3847,7 @@ function renderProfile() {
       ? `<div class="profile-derived pf-wide" id="profile-derived"></div><div class="pf-group">Analysis settings <span class="muted-note">used by the aerobic efficiency and max heart rate charts</span></div>`
       : f.link && !PROFILE_FIELDS[i - 1].link
       ? `<div class="pf-group">Results pages <span class="muted-note">your official results, matched to your races</span>
-           <button class="pick" style="margin-left:8px;" onclick="importResults()">Import results</button>
+           <button class="btn" style="margin-left:8px;" onclick="importResults()">Import results</button>
            <span class="muted-note" id="results-status"></span></div>` : "";
     return `${head}<div class="profile-field"><label for="pf-${f.key}">${f.label}</label>${input}${srcText(f)}</div>`;
   }).join("");
@@ -3477,8 +4012,9 @@ function renderRaces() {
           ${profileSvg(r.profile, color, r.stages?.length || 1)}
           <div class="rc-body">
             <div class="rc-name">${r.result?.race || raceName(r)}</div>
-            ${r.result?.event ? `<div class="rc-meta">${r.result.event}${r.stages ? ` · ${r.stages.length} stages` : r.result.stages > 1 ? ` · stage ${r.result.stage}/${r.result.stages}` : ""}${scoresText(r.results) ? ` · <b class="rc-score">${scoresText(r.results)}</b>` : ""}</div>` : ""}
-            <div class="rc-meta">${day}${r.place && raceName(r) !== r.place ? ` · ${r.place}` : ""} · ${r.surface || ""} ${r.terrain || ""}${r.ffa?.level ? ` <span class="rc-ffa" title="FFA level on ${r.ffa.label} (${r.ffa.time_source} time)">FFA ${r.ffa.level}</span>` : ""}</div>
+            ${r.result?.event ? `<div class="rc-meta">${r.result.event}${r.stages ? ` · ${r.stages.length} stages` : r.result.stages > 1 ? ` · stage ${r.result.stage}/${r.result.stages}` : ""}</div>` : ""}
+            ${raceTags(r)}
+            <div class="rc-meta">${day}${r.place && raceName(r) !== r.place ? ` · ${r.place}` : ""} · ${r.surface || ""} ${r.terrain || ""}</div>
             <div class="rc-nums">
               <div><b>${r.distance_km.toFixed(r.distance_km < 30 ? 1 : 0)} km</b><small>+${r.elevation_gain.toLocaleString()} m</small></div>
               <div style="text-align:right"><b>${fmtRaceTime(r.duration_s)}</b><small>${r.adjusted_pace ? `${fmtPace(r.adjusted_pace)}/km flat-eq.` : `${fmtPace(r.pace)}/km`}</small></div>
@@ -3508,6 +4044,26 @@ async function drawRacesMap(races) {
     .on("click", () => r.stages ? openStageRace(r.id) : openRace(r.id))
     .addTo(map));
   map.fitBounds(L.featureGroup(markers).getBounds(), { padding: [30, 30], maxZoom: 10 });
+}
+
+// A race's level tags, on a line of their own under its title (race cards and the race's page):
+// road races their FFA level and Daniels' VDOT (official time, else the watch's; standard distance
+// when it is one), trail races their UTMB / ITRA / Betrail scores.
+function raceTags(r) {
+  const tags = [];
+  if (r.ffa?.level) tags.push(`<span class="rtag rtag-ffa" title="FFA level on ${r.ffa.label} (${r.ffa.time_source} time)">FFA ${r.ffa.level}</span>`);
+  if (!r.stages && !["trail", "cross"].includes(r.surface) && !r.result?.dnf) {
+    const KEY_M = { "5k": 5000, "10k": 10000, "15k": 15000, "20k": 20000, half: 21097.5, marathon: 42195 };
+    const d = KEY_M[r.ffa?.distance] || r.distance_km * 1000;
+    const t = r.ffa?.time_s || r.result?.time_s || r.duration_s;
+    if (t && d >= 1500 && d <= 43000)
+      tags.push(`<span class="rtag rtag-vdot" title="Daniels VDOT: ${distLabel(Math.round(d))} in ${fmtRaceTime(Math.round(t))}${r.terrain && r.terrain !== "flat" ? " (hilly course: reads low)" : ""}">VDOT ${vdotOf(d, t).toFixed(1)}</span>`);
+  }
+  for (const [k, label] of [["utmb", "UTMB"], ["itra", "ITRA"], ["betrail", "Betrail"]]) {
+    const v = r.results?.[k]?.score;
+    if (v != null) tags.push(`<span class="rtag rtag-${k}" title="${label} score for this race">${label} ${+v.toFixed(1)}</span>`);
+  }
+  return tags.length ? `<div class="rtags">${tags.join("")}</div>` : "";
 }
 
 // A race opens its activity (no comparison of editions for now: courses change between years);
@@ -3607,7 +4163,7 @@ async function showFfaGrid() {
   over.onclick = e => { if (e.target === over) over.remove(); };
   over.innerHTML = `<div class="overlay-box">
     <div class="race-head"><div class="section-title" style="margin:0">FFA road grid · men, all ages<span class="section-sub">each time is the limit to beat for the level</span></div>
-      <button class="pick" onclick="this.closest('.overlay').remove()">Close</button></div>
+      <button class="btn" onclick="this.closest('.overlay').remove()">Close</button></div>
     <div style="overflow-x:auto;margin-top:10px"><table class="perf" style="min-width:560px">
       <thead><tr><th>level</th><th>pts</th>${keys.map(k => `<th>${grid.labels[k]}</th>`).join("")}</tr></thead>
       <tbody>${grid.levels.map((l, i) => `<tr style="cursor:default"><td><b>${l.level}</b></td><td>${l.points}</td>
@@ -4360,8 +4916,8 @@ function renderZones() {
       return `<button class="pick ${on ? "on" : ""}" onclick="editZoneSet(zonesState.sets.find(x => x.valid_from === '${s.valid_from}'))">
                 since ${s.valid_from} · ${s.zone_model} zones</button>`;
     }).join("") +
-    `<button class="pick" onclick="startNewZoneSet()">+ New set</button>` +
-    (zonesState.savedDate ? `<button class="pick" onclick="deleteZoneSet()" title="Delete this set">Delete</button>` : "");
+    `<button class="btn" onclick="startNewZoneSet()">+ New set</button>` +
+    (zonesState.savedDate ? `<button class="btn" onclick="deleteZoneSet()" title="Delete this set">Delete</button>` : "");
 
   const n = e.zone_model;
   document.getElementById("zones-cards").innerHTML = ZONE_METRICS.map(m => {
@@ -4584,7 +5140,7 @@ function renderRaceModel(d) {
   document.getElementById("gap-methods").innerHTML = "";
   if (!rm) {
     document.getElementById("gap-table").innerHTML = `<div class="muted-note">No race model yet.
-      <button class="pick" onclick="refitRace(this)">Fit it now</button></div>`;
+      <button class="btn" onclick="refitRace(this)">Fit it now</button></div>`;
     return;
   }
   const order = ["race", "personal", "garmin", "strava", "km_effort", "minetti"].filter(k => rm.summary[k]);
@@ -4604,7 +5160,7 @@ function renderRaceModel(d) {
         previous 12 months, vs your real time — bias is how much slower the trail was than predicted, spread how consistent.
         ${rm.n_races} races, ${rm.segments.toLocaleString()} segments of 200 m · heart rate: +1% HR ≈ ${(rm.beta_hr).toFixed(2)}% faster ·
         fatigue: ${(rm.gamma_fatigue * 100).toFixed(0)}% by the finish · fitted ${rm.fitted_at.slice(0, 10)}
-        <button class="pick" style="margin-left:6px" onclick="refitRace(this)">Refit</button></div>
+        <button class="btn" style="margin-left:6px" onclick="refitRace(this)">Refit</button></div>
     </div>
     <div class="section-title">Your races<span class="section-sub">spread per model · bold = flattest · click a race to see its profile above</span></div>
     <div class="card" style="padding:0;overflow-x:auto"><table class="perf" style="min-width:640px">
@@ -4697,14 +5253,17 @@ function drawSpeedSlope(canvas, d) {
       ctx.restore();
     },
   };
-  // Average speed per 1% of slope (enough points), smoothed over ±1%: the line you hover.
-  const bins = new Map();
-  for (const [g, v, c] of d.points) { const k = Math.round(g); if (!bins.has(k)) bins.set(k, []); bins.get(k).push([v, c]); }
+  // Average speed at every 1% of slope: the points within ±1.5% of it (±3% where they're sparse),
+  // 8 at least; the line breaks where there's too little data rather than bridging the gap.
   const mean = a => a.reduce((s, v) => s + v, 0) / a.length;
-  const avg = [...bins.entries()].filter(([, vs]) => vs.length >= 8).sort((a, b) => a[0] - b[0])
-    .map(([g, vs]) => ({ x: g, y: mean(vs.map(p => p[0])), cad: mean(vs.map(p => p[1])) }));
-  const curve = avg.map((p, i) => { const w = avg.slice(Math.max(0, i - 1), i + 2);
-    return { x: p.x, y: mean(w.map(q => q.y)), cad: mean(w.map(q => q.cad)) }; });
+  const gs = d.points.map(p => p[0]);
+  const curve = [];
+  for (let g = Math.ceil(Math.min(...gs)); g <= Math.floor(Math.max(...gs)); g++) {
+    let near = d.points.filter(p => Math.abs(p[0] - g) <= 1.5);
+    if (near.length < 8) near = d.points.filter(p => Math.abs(p[0] - g) <= 3);
+    if (near.length < 8) { if (curve.length && curve.at(-1).y != null) curve.push({ x: g, y: null }); continue; }
+    curve.push({ x: g, y: mean(near.map(p => p[1])), cad: mean(near.map(p => p[2])) });
+  }
   // The dots are painted underneath (not a dataset), so hovering only ever reads the curve.
   const dots = {
     id: "speedDots", beforeDatasetsDraw(chart) {
@@ -4937,8 +5496,8 @@ function renderGap() {
   const p = d.personal;
   document.getElementById("gap-note").innerHTML = p
     ? `Personal model: ${p.windows.toLocaleString()} one-minute windows from ${p.runs.toLocaleString()} runs, fitted ${p.fitted_at.slice(0, 10)}.
-       <button class="pick" style="margin-left:8px;" onclick="refitPersonal(this)">Refit with latest runs</button>`
-    : `No personal model yet. <button class="pick" onclick="refitPersonal(this)">Fit it now</button>`;
+       <button class="btn" style="margin-left:8px;" onclick="refitPersonal(this)">Refit with latest runs</button>`
+    : `No personal model yet. <button class="btn" onclick="refitPersonal(this)">Fit it now</button>`;
 }
 
 /* ---------- Records: fastest activities at the classic distances ---------- */

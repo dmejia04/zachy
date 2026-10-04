@@ -19,5 +19,6 @@ class Profile(Base):
     betrail_url = Column(String, nullable=True)
     ffa_licence = Column(String, nullable=True)   # French athletics licence number (reference only)
     indexes_json = Column(Text, nullable=True)    # your overall UTMB / ITRA indexes, from those pages
+    pace_races_json = Column(Text, nullable=True)   # Paces chart: {added: [activity id…], hidden: [best races taken off]}
     garmin_json = Column(Text, nullable=True)     # last profile read from Garmin
     garmin_fetched_at = Column(DateTime, nullable=True)

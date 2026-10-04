@@ -78,7 +78,7 @@ def elevation_extremes(track: pd.DataFrame) -> dict | None:
         return None
     if "timer_s" in t:
         clock = display_clock(t["elapsed_s"] if "elapsed_s" in t else [], t["timer_s"])
-        t["elevation"] = remove_jumps(t["elevation"], clock)
+        t["elevation"] = remove_jumps(t["elevation"], clock, t["timer_s"])
     out = {"alt_min": float(t["elevation"].min()), "alt_max": float(t["elevation"].max()),
            "alt_min_km": round(float(t.loc[t["elevation"].idxmin(), "distance_km"]), 2),
            "alt_max_km": round(float(t.loc[t["elevation"].idxmax(), "distance_km"]), 2)}
