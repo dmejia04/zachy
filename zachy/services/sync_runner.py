@@ -13,6 +13,7 @@ from zachy.analytics.profile import refresh_from_garmin as refresh_profile
 from zachy.analytics.effort import activity_effort
 from zachy.analytics.relative_effort import compute as relative_effort
 from zachy.analytics.weather import activity_weather
+from zachy.analytics.routes import assign_new as assign_route
 from zachy.analytics.workouts import cached_workout
 from zachy.services.fit import process_activity
 from zachy.services.sync import sync_new_activities
@@ -48,6 +49,10 @@ def run_sync(run_id: int) -> None:
                     cached_workout(db, activity)   # describe it now so the list stays fast
                 if activity.activity_type in EFFORT_TYPES:
                     compute_best_efforts(db, activity)   # 5 km / 10 km / half / marathon records
+                try:
+                    assign_route(db, activity)           # on a route you run regularly?
+                except Exception:
+                    db.rollback()
             for extra in (activity_weather,              # temperature, humidity, wind at the start
                           activity_effort,               # training effect, RPE, feel, stamina
                           lambda db, a, client: relative_effort(db, a)):   # TRIMP load

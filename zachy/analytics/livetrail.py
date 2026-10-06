@@ -244,6 +244,8 @@ def sections(data: dict) -> list[dict]:
     gap to the winners at each checkpoint."""
     pts = {p["pointId"]: p for p in data["points"]}
     lead = {k: {p["pointId"]: p for p in v["passings"]} for k, v in data.get("leaders", {}).items()}
+    if data.get("compare"):   # the runner you compare with: gap_compare_s, like the winners'
+        lead["compare"] = {p["pointId"]: p for p in data["compare"]["passings"]}
     mine = [p for p in data["passings"] if p["pointId"] in pts]
     out, prev = [], None
     for p in mine:
@@ -260,6 +262,9 @@ def sections(data: dict) -> list[dict]:
             their = ps.get(p["pointId"])
             if their and their.get("raceTime") is not None and p.get("raceTime") is not None:
                 row[f"gap_{k}_s"] = p["raceTime"] - their["raceTime"]
+            if k == "compare" and their:
+                row["compare_rest_s"] = their.get("restTime") or 0
+                row["compare_rank"] = (their.get("ranking") or {}).get("scratch")
         if prev:
             row.update({"section_km": round(row["km"] - prev["km"], 2),
                         "section_gain": (pt.get("elevationGain") or 0) - (pts[prev["point_id"]].get("elevationGain") or 0),
@@ -271,6 +276,77 @@ def sections(data: dict) -> list[dict]:
 
 
 OVERNIGHT_S = 3 * 3600      # a stop this long ends a stage (stage races are one LiveTrail race)
+
+
+def ranking(data: dict) -> list[dict]:
+    """Every runner of the race, in finishing order: bib, name, rank, sex, category, time, status.
+    New pages: LiveTrail's final ranking (the API the site uses, by pages); archive: classement.php."""
+    info = parse_url(data["url"])
+    out = []
+    if info.get("archive"):
+        rows = _archive_xml(info, "classement.php", course=data["race_id"], cat="scratch").find("classement")
+        for i, c in enumerate(list(rows) if rows is not None else [], 1):
+            if not (c.get("doss") or "").isdigit():
+                continue
+            out.append({"bib": int(c.get("doss")), "name": f"{c.get('prenom', '')} {c.get('nom', '')}".strip(),
+                        "rank": int(c.get("class")) if (c.get("class") or "").isdigit() else i, "sex": c.get("sx"),
+                        "category": c.get("cat"), "race_time": _hms(c.get("tps")), "status": "FINISHER"})
+        return out
+    h = {**HEADERS, "Accept": "application/json", "X-Tenant": data["tenant"]}
+    page, total = 0, None
+    while total is None or len(out) < total:
+        r = httpx.get(f"{API}/ranking/final/{data['race_id']}", params={"limit": 500, "page": page}, headers=h, timeout=30).json()
+        rows, total = r.get("runners") or [], r.get("total") or 0
+        if not rows:
+            break
+        out += [{"bib": x["bib"], "name": f"{x.get('firstName', '')} {x.get('lastName', '')}".strip(),
+                 "rank": (x.get("ranking") or {}).get("scratch"), "sex": "F" if x.get("sex") == "FEMALE" else "H",
+                 "category": x.get("category"), "race_time": x.get("raceTime"), "status": x.get("status")} for x in rows]
+        page += 1
+    return out
+
+
+def race_ranking(db: Session, activity_id: int) -> list[dict] | None:
+    row = _data_row(db, activity_id)
+    return ranking(json.loads(row.data)) if row else None
+
+
+def _fetch_compare(data: dict, bib: int, rows: list[dict] | None = None) -> dict:
+    info = parse_url(data["url"])
+    if info.get("archive"):
+        passings = _archive_runner({**info, "bib": data["bib"]}, bib)[2]
+    else:
+        passings = _runner_page(info, bib)[1]
+    if not passings:
+        raise ValueError(f"No times for bib {bib} on LiveTrail")
+    who = next((r for r in (rows if rows is not None else ranking(data)) if r["bib"] == bib), {})
+    return {"bib": bib, "name": who.get("name") or f"#{bib}", "rank": who.get("rank"),
+            "race_time": who.get("race_time"), "passings": passings}
+
+
+def _default_compare(row: LiveTrailData, data: dict, db: Session) -> None:
+    """By default you're compared with the race winner, or the second when the winner is you."""
+    rows = sorted((r for r in ranking(data) if r.get("rank")), key=lambda r: r["rank"])
+    pick = next((r for r in rows if r["bib"] != data["bib"]), None)
+    if pick:
+        data["compare"] = {**_fetch_compare(data, pick["bib"], rows), "auto": True}
+        row.data = json.dumps(data)
+        db.commit()
+
+
+def set_compare(db: Session, activity_id: int, bib: int | None) -> None:
+    """Compare your race with another runner's (their times at every checkpoint, read once and
+    kept with the race); bib None goes back to the default (the winner, or the second if it's you)."""
+    row = _data_row(db, activity_id)
+    if not row:
+        raise ValueError("No LiveTrail link on this race")
+    data = json.loads(row.data)
+    if bib is None:
+        data.pop("compare", None)
+    else:
+        data["compare"] = _fetch_compare(data, bib)
+    row.data = json.dumps(data)
+    db.commit()
 
 
 def _group(db: Session, activity_id: int) -> list[int]:
@@ -322,6 +398,9 @@ def _stages(secs: list[dict]) -> list[list[dict]]:
             out[-1][-1]["rest_s"] = 0
             out.append([])
             s["rest_s"] = 0   # the next morning's start repeats the night as its stop
+            for r in (out[-2][-1], s):
+                if r.get("compare_rest_s", 0) >= OVERNIGHT_S:
+                    r["compare_rest_s"] = 0
             for k in ("section_km", "section_gain", "section_s", "rank_change"):
                 s.pop(k, None)
         out[-1].append(s)
@@ -357,6 +436,11 @@ def livetrail(db: Session, activity_id: int, overall: bool = False) -> dict | No
     if not row:
         return None
     data = json.loads(row.data)
+    if not data.get("compare"):
+        try:
+            _default_compare(row, data, db)
+        except Exception:
+            pass   # LiveTrail unreachable: no comparison this time
     secs = sections(data)
     if "/histo/" in data["url"]:
         # Aid stations given as two checkpoints (entrance / exit, a few hundred metres apart, in the
@@ -383,7 +467,7 @@ def livetrail(db: Session, activity_id: int, overall: bool = False) -> dict | No
                 s["km"], s["watch_km"] = s["km_total"], round(s["watch_km"] + watch0, 3)
             watch0 += a.distance_km or 0
         else:
-            for k in ("gap_male_s", "gap_female_s"):
+            for k in ("gap_male_s", "gap_female_s", "gap_compare_s"):
                 start = part[0].get(k)
                 for s in part:
                     if s.get(k) is not None and start is not None:
@@ -394,6 +478,8 @@ def livetrail(db: Session, activity_id: int, overall: bool = False) -> dict | No
         out = stages[ids.index(activity_id)] if activity_id in ids else secs
     return {**{k: data[k] for k in ("url", "race", "runner")},
             "leaders": {k: {"name": v["name"], "race_time": v["race_time"]} for k, v in data.get("leaders", {}).items()},
+            "compare": {**{k: data["compare"][k] for k in ("bib", "name", "rank", "race_time")}, "auto": bool(data["compare"].get("auto"))}
+                       if data.get("compare") else None,
             "sections": out, "total_rest_s": sum(s["rest_s"] for s in out),
             "stages": summary if len(stages) > 1 else None,
             "stage": next((x["stage"] for x in summary if x["activity_id"] == activity_id), None) if len(stages) > 1 and not overall else None}

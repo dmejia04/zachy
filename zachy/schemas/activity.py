@@ -98,3 +98,5 @@ class ActivityDetailOut(ActivityOut):
     category: dict | None = None          # race/workout/easy, auto guess, source, reasons (analytics/races.py)
     place: str | None = None              # from the activity name ("Toulouse Running" -> Toulouse)
     gap: dict | None = None               # flat-equivalent pace per method (analytics/gap.py)
+    shoe: dict | None = None              # {"shoe": {...}, "source": "manual" | "default"} (analytics/shoes.py)
+    route: dict | None = None             # the regular route it's on: name, nth time, time rank (analytics/routes.py)

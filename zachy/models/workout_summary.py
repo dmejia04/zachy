@@ -1,4 +1,4 @@
-from sqlalchemy import Column, ForeignKey, Integer, String
+from sqlalchemy import Column, ForeignKey, Integer, String, Text
 from zachy.database import Base
 
 
@@ -16,3 +16,5 @@ class WorkoutSummary(Base):
     source      = Column(String, nullable=True)      # "watch workout" | "laps"
     watch_name  = Column(String, nullable=True)
     on_track    = Column(Integer, nullable=True)     # 1 = reps on an athletics track; NULL = old entry
+    split_json  = Column(Text, nullable=True)        # warm-up / work / cool-down parts (workout_split)
+    split_ver   = Column(Integer, nullable=True)

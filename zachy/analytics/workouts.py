@@ -14,6 +14,7 @@ the reps were run on an athletics track: their GPS points stay inside a ~170 × 
 """
 
 import io
+import json
 import warnings
 
 import fitdecode
@@ -319,3 +320,98 @@ def _guessed_workout(db: Session, activity: Activity) -> dict | None:
         return None
     out = {c: getattr(row, c) for c in ("type", "summary", "warmup", "cooldown", "source", "watch_name")}
     return {**out, "on_track": bool(row.on_track)}
+
+
+# ---------- warm-up / work / cool-down, and how much was run off the track ----------
+
+SPLIT_VERSION = 1
+
+
+def workout_split(db: Session, activity: Activity, on_track: bool = False) -> dict | None:
+    """Warm-up (easy), the work (reps and recoveries) and cool-down (easy), each with its distance,
+    time and pace. The work runs from the first rep to the last (lap roles); on a track session
+    without laps, it's what was run on the track. On a track, also how much of each part was off
+    it (on the way there and back): the track is the spot the run circles most (the point with
+    the most GPS points within ~85 m); on it = within ~100 m for 60 s or more. Warm-up and
+    cool-down times are moving time (drills and standing left out)."""
+    rows = (db.query(Record.timer_s, Record.distance_km, Record.latitude, Record.longitude)
+            .filter(Record.activity_id == activity.id).order_by(Record.id).all())
+    a = np.array([[np.nan if v is None else v for v in r] for r in rows], dtype=float) if rows else np.empty((0, 4))
+    ok = np.isfinite(a[:, :2]).all(axis=1) if len(a) else np.zeros(0, bool)
+    if ok.sum() < 120:
+        return None
+    t, d, lat, lon = a[ok].T
+    d = np.maximum.accumulate(d)
+    on = None
+    gps = np.isfinite(lat) & np.isfinite(lon)
+    if on_track and gps.sum() > 120:
+        x = np.where(gps, lon, np.nan) * np.cos(np.radians(np.nanmean(lat))) * 111_320
+        y = np.where(gps, lat, np.nan) * 111_320
+        cand = np.flatnonzero(gps)[::max(1, int(gps.sum()) // 800)]
+        counts = [int(np.nansum((x - x[i]) ** 2 + (y - y[i]) ** 2 <= TRACK_P90_M ** 2)) for i in cand]
+        c = cand[int(np.argmax(counts))]
+        near = (x - x[c]) ** 2 + (y - y[c]) ** 2 <= TRACK_P90_M ** 2
+        inside = np.hypot(x - np.nanmean(x[near]), y - np.nanmean(y[near])) <= TRACK_MAX_M
+        on = np.zeros(len(t), bool)   # stretches of 60 s+ inside (passing by doesn't count)
+        i = 0
+        while i < len(t):
+            j = i
+            while j + 1 < len(t) and inside[j + 1] == inside[i]:
+                j += 1
+            if inside[i] and t[j] - t[i] >= 60:
+                on[i:j + 1] = True
+            i = j + 1
+        if not on.any():
+            on = None
+    # Where the work starts and ends: from the laps' roles, else the time on the track.
+    w0 = w1 = None
+    source = "laps"
+    try:
+        laps, _ = read_fit_laps(activity.garmin_id)
+        roles = assign_roles(laps) if len(laps) >= 3 else None
+    except Exception:
+        roles = None
+    if roles and WORK in roles:
+        ends = np.cumsum([l["distance"] for l in laps]) / 1000
+        first, last = roles.index(WORK), len(roles) - 1 - roles[::-1].index(WORK)
+        km0, km1 = (ends[first - 1] if first else 0.0), ends[last]
+        w0, w1 = int(np.searchsorted(d, km0 + d[0])), min(len(d) - 1, int(np.searchsorted(d, km1 + d[0])))
+        source = "laps + gps" if on is not None else "laps"
+    if (w0 is None or w1 <= w0) and on is not None:
+        w0, w1 = int(np.argmax(on)), len(on) - 1 - int(np.argmax(on[::-1]))
+        source = "gps"
+    if w0 is None or w1 <= w0 or d[w1] - d[w0] < 0.8:
+        return None
+    dt, dd = np.diff(t, prepend=t[0]), np.diff(d, prepend=d[0]) * 1000
+    moving = (dt > 0) & (dd >= 1.5 * np.maximum(dt, 1e-9))     # not standing or walking
+
+    def part(i0, i1, role, category):
+        km = float(d[i1] - d[i0])
+        s = float(dt[i0 + 1:i1 + 1][moving[i0 + 1:i1 + 1]].sum()) if role != "work" else float(t[i1] - t[i0])
+        out = {"role": role, "category": category, "km": round(km, 2), "time_s": round(s),
+               "pace": s / 60 / km if km > 0.05 else None}
+        if on is not None:
+            seg = slice(i0, i1 + 1)
+            out["off_track_km"] = round(float(np.sum(np.diff(d[seg])[~on[seg][1:]])) if i1 > i0 else 0.0, 2)
+        return out
+    parts = []
+    if d[w0] - d[0] >= 0.3:
+        parts.append(part(0, w0, "warmup", "easy"))
+    parts.append(part(w0, w1, "work", "workout"))
+    if d[-1] - d[w1] >= 0.3:
+        parts.append(part(w1, len(d) - 1, "cooldown", "easy"))
+    return {"parts": parts, "source": source, "on_track": on is not None}
+
+
+def cached_split(db: Session, activity: Activity, workout: dict | None) -> dict | None:
+    """workout_split(), computed once per workout and kept with its summary."""
+    if not workout:
+        return None
+    row = db.get(WorkoutSummary, activity.id)
+    if row is None:
+        return workout_split(db, activity, bool(workout.get("on_track")))
+    if row.split_ver != SPLIT_VERSION:
+        sp = workout_split(db, activity, bool(workout.get("on_track")))
+        row.split_json, row.split_ver = json.dumps(sp) if sp else None, SPLIT_VERSION
+        db.commit()
+    return json.loads(row.split_json) if row.split_json else None

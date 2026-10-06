@@ -132,7 +132,7 @@
     border-radius: 6px;
     padding: 14px;
   }
-  .stat-label { font-size: 11px; color: var(--muted); text-transform: lowercase; }
+  .stat-label { font-size: 11px; color: var(--muted); }
   .stat-value { font-size: 20px; font-weight: 500; margin-top: 2px; }
   .detail-title { font-size: 26px; font-weight: 500; margin: 0 0 2px; line-height: 1.25; }
   .detail-title > b { font-weight: 700; }
@@ -250,7 +250,17 @@
   .seg button:hover:not(:disabled):not(.on) { color: var(--ink); }
   .seg button.on { background: var(--ink); color: white; }
   .seg button:disabled { color: #c8c8c8; cursor: default; }
-  .section-sub { font-weight: 400; color: var(--muted); margin-left: 8px; font-size: 12px; }
+  .section-sub { font-weight: 400; color: var(--muted); margin-left: 8px; font-size: 12px; display: inline-block; }
+  /* Sentence case everywhere: whatever the text, it starts with a capital letter. */
+  .stat-label::first-letter, .stat-sub::first-letter, .muted-note::first-letter, .section-sub::first-letter, .rc-meta::first-letter,
+  th::first-letter, .tag::first-letter, .pick::first-letter, .btn::first-letter, .seg button::first-letter, .chip::first-letter,
+  .rl-label::first-letter, .ps-head span::first-letter, .ps-ends span::first-letter, .ps-note::first-letter, .ps-result span::first-letter,
+  .ps-result small::first-letter, .cal-sub-label::first-letter, .cal-chip::first-letter, .zc-thr::first-letter, .detail-date::first-letter,
+  .fuel-legend span::first-letter, .rc-name::first-letter, .ri span::first-letter, .ri small::first-letter,
+  .surface-src::first-letter, .race-note::first-letter, .te-row > span::first-letter, .temp-band::first-letter, .wk-src::first-letter,
+  .shoe-row .muted-note::first-letter, .cal-chip::first-letter, .li-date::first-letter { text-transform: uppercase; }
+  .rl-label, .ps-ends span, .ps-result span, .ps-result small, .fuel-legend span, .ri span, .ri small,
+  .surface-src, .race-note, .te-row > span, .temp-band { display: inline-block; }
   .half-split { font-size: 13px; margin: 10px 0 2px; font-variant-numeric: tabular-nums; }
   .half-split b { font-weight: 600; }
   .half-split .neg { color: #2e7d32; }
@@ -270,6 +280,129 @@
   .workout-box .muted, .workout-box .wk-src { color: var(--muted); font-size: 12px; }
   .workout-box .wk-extra { font-size: 13px; }
   .workout-box .wk-src a { color: inherit; }
+  .lt-compare { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; margin: 10px 0 4px; font-size: 13px; }
+  .lt-compare .rl-label { color: var(--muted); font-size: 12px; margin-right: 2px; }
+  .lt-compare select { font: inherit; font-size: 13px; line-height: 1.3; padding: 5px 10px; border: 1px solid var(--line); border-radius: 999px;
+    background: white; color: var(--ink); max-width: 100%; }
+  /* Race planner. */
+  .plan-new { display: flex; flex-wrap: wrap; gap: 6px 12px; align-items: center; margin: 14px 0 6px; padding: 14px 16px; font-size: 13px;
+              background: #f6f5f1; border: 1px dashed #bdb8aa; border-radius: 8px; }
+  .plan-new b { font-size: 15px; font-weight: 600; }
+  .plan-new-row { display: inline-flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-left: auto; }
+  .plan-new select { font: inherit; font-size: 13px; padding: 5px 10px; border: 1px solid var(--line); border-radius: 999px; background: white; }
+  .plan-new input[type=number] { font: inherit; font-size: 13px; padding: 5px 10px; border: 1px solid var(--line); border-radius: 999px; }
+  .shoe-wear { min-width: 110px; }
+  .shoe-wear span { display: block; white-space: nowrap; }
+  .shoe-wear i { display: block; height: 4px; border-radius: 2px; background: #ebe8e1; margin-top: 3px; overflow: hidden; }
+  .shoe-wear i b { display: block; height: 100%; border-radius: 2px; }
+  .plan-head-tag { margin-top: 8px; }
+  .shoe-pair { display: inline-flex; flex-wrap: wrap; align-items: center; gap: 6px; margin-right: 10px; }
+  .shoe-part { font-size: 12.5px; color: var(--muted); }
+  .shoe-part b { color: var(--ink); font-weight: 600; }
+  .wk-parts { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 6px; }
+  .wk-part { flex: 1 1 150px; border-left: 3px solid; padding: 2px 0 2px 10px; display: flex; flex-direction: column; }
+  .wk-part span { font-size: 12px; font-weight: 600; }
+  .wk-part b { font-size: 20px; font-weight: 600; font-variant-numeric: tabular-nums; }
+  .wk-part b small { font-size: 12px; font-weight: 400; color: var(--muted); }
+  .wk-part > small { font-size: 12px; color: var(--muted); }
+  .road-fuel-pick { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; margin-top: 10px; }
+  .sec-dot { display: inline-block; width: 9px; height: 9px; border-radius: 2px; margin-right: 6px; }
+  .plan-head-tag + .detail-title { margin-top: 4px; }
+  .plan-kind-tag { display: inline-block; font-size: 10.5px; font-weight: 600; text-transform: uppercase; letter-spacing: .04em; padding: 1px 7px; border-radius: 999px; color: white; margin-right: 6px; vertical-align: 1px; }
+  .plan-new input[type=text], .plan-new input:not([type]) { font: inherit; font-size: 13px; line-height: 1.3; padding: 5px 12px; border: 1px solid var(--line); border-radius: 999px; }
+  .plan-new input[type=file] { font: inherit; font-size: 13px; }
+  #planner-detail .back { cursor: pointer; color: var(--moss); font-size: 14px; display: inline-block; margin-bottom: 12px; }
+  .plan-date input { font: inherit; font-size: 12px; border: 1px solid var(--line); border-radius: 6px; padding: 1px 6px; color: var(--ink); }
+  .plan-sliders { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 12px 24px; margin-top: 14px;
+                  background: white; border: 1px solid var(--line); border-radius: 6px; padding: 12px 16px; }
+  .plan-sliders input[type=range] { width: 100%; accent-color: var(--ink); margin: 6px 0 2px; }
+  .ps-head { display: flex; justify-content: space-between; font-size: 13px; color: var(--muted); }
+  .ps-head b { color: var(--ink); font-variant-numeric: tabular-nums; }
+  .ps-ends { display: flex; justify-content: space-between; font-size: 11px; color: var(--muted); }
+  .ps-note { font-size: 11.5px; color: var(--muted); margin-top: 4px; }
+  .ps-note b { color: var(--ink); font-weight: 600; }
+  .ps-result { grid-column: 1 / -1; display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 8px; border-top: 1px solid var(--line); padding-top: 10px; }
+  .ps-result div { display: flex; flex-direction: column; }
+  .ps-result span { font-size: 11px; color: var(--muted); }
+  .ps-result b { font-size: 20px; font-weight: 600; font-variant-numeric: tabular-nums; line-height: 1.3; }
+  .ps-result em { font-style: normal; font-size: 12px; font-weight: 400; color: var(--muted); margin-left: 2px; }
+  .ps-result small { font-size: 11px; color: var(--muted); }
+  .ps-result .rtags { flex-direction: column; align-items: flex-start; gap: 4px; margin: 4px 0 0; }
+  .ps-result .rtag { font-size: 12px; padding: 2px 9px; color: white; display: inline-block; }
+  .plan-split { display: flex; flex-wrap: wrap; gap: 6px 18px; font-size: 13px; margin-top: 8px; font-variant-numeric: tabular-nums; }
+  .plan-split i { display: inline-block; width: 10px; height: 10px; border-radius: 2px; margin-right: 6px; vertical-align: -1px; }
+  table.plan-table td.name { text-align: left; }
+  table.plan-table th:nth-child(2) { text-align: left; }
+  table.plan-table td { white-space: nowrap; }
+  table.plan-aid-table th:first-child { text-align: left; }
+  table.plan-aid-table input { font: inherit; font-size: 13px; padding: 3px 8px; border: 1px solid var(--line); border-radius: 6px; background: white; }
+  table.plan-aid-table td.name input { width: 150px; }
+  table.plan-aid-table tr.plan-fixed td { color: var(--muted); }
+  table.plan-aid-table button.x { border: none; background: none; color: var(--muted); cursor: pointer; font-size: 15px; }
+  .plan-aid-bar { display: flex; gap: 8px; align-items: center; margin-top: 8px; flex-wrap: wrap; }
+  .aid-pin { display: inline-flex; align-items: center; justify-content: center; width: 16px; height: 16px; border-radius: 50%; background: #e0a43a;
+             border: 2px solid white; box-shadow: 0 0 0 1px rgba(0,0,0,0.08); color: white; font-size: 9px; font-weight: 700; margin-right: 8px; vertical-align: middle; }
+  .aid-pin.aid-start { background: #3f8f3a; } .aid-pin.aid-finish { background: #1f1d18; }
+  .aid-pin.aid-pin-map { width: 20px; height: 20px; font-size: 10px; margin: 0; box-shadow: 0 1px 3px rgba(0,0,0,0.35); }
+  table.plan-table small.clock { display: block; color: var(--muted); font-size: 11px; font-weight: 400; }
+  table.plan-table tr.plan-longest td { background: #faf6ee; }
+  .plan-tag { color: white; border-radius: 10px; font-size: 10px; font-weight: 700; padding: 1px 7px; margin-left: 6px; white-space: nowrap; }
+  table.plan-table tr.plan-total td { font-weight: 600; border-top: 1px solid var(--line); }
+  table.plan-table td small { color: var(--muted); font-size: 11px; }
+  .nu-targets { display: flex; flex-wrap: wrap; gap: 8px 14px; align-items: flex-end; font-size: 13px; }
+  .nu-targets label { display: flex; flex-direction: column; gap: 3px; font-size: 11px; color: var(--muted); }
+  .nu-targets label span { color: var(--ink); font-size: 12px; }
+  .nu-targets input { font: inherit; font-size: 13px; width: 64px; padding: 4px 8px; border: 1px solid var(--line); border-radius: 6px; }
+  .nu-reset { font-size: 12px; color: var(--muted); }
+  .fuel-sq { display: inline-block; width: 9px; height: 9px; border-radius: 2px; margin-right: 6px; vertical-align: 0; }
+  .fuel-under { background: #3d7ebf; } .fuel-ok { background: #2d6b29; } .fuel-over { background: #a50f15; }
+  .fuel-legend { display: flex; flex-wrap: wrap; gap: 4px 16px; font-size: 12px; color: var(--muted); margin-top: 6px; }
+  table.nu-table td.name small { display: block; color: var(--muted); font-size: 11px; }
+  table.nu-table th.fuel-col { max-width: 90px; white-space: normal; line-height: 1.2; font-size: 11px; }
+  table.nu-table td.fuel-col input { width: 54px; font: inherit; font-size: 13px; padding: 3px 6px; border: 1px solid var(--line); border-radius: 6px; text-align: right; }
+  .fuel-lib { margin-top: 12px; font-size: 13px; }
+  .fuel-lib summary { cursor: pointer; font-weight: 600; }
+  .fuel-lib summary small { color: var(--muted); font-weight: 400; margin-left: 6px; }
+  table.fuel-table input, table.fuel-table select { font: inherit; font-size: 13px; padding: 3px 8px; border: 1px solid var(--line); border-radius: 6px; background: white; }
+  table.fuel-table input[type=number] { width: 70px; }
+  table.fuel-table td.name input { width: 190px; }
+  table.fuel-table button.x { border: none; background: none; color: var(--muted); cursor: pointer; font-size: 15px; }
+  /* Routes. */
+  .route-cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 14px; margin-top: 12px; }
+  .route-card { background: white; border: 1px solid var(--line); border-radius: 8px; overflow: hidden; cursor: pointer; transition: box-shadow .15s, transform .15s; }
+  .route-card:hover { box-shadow: 0 4px 14px rgba(0,0,0,0.08); transform: translateY(-1px); }
+  .route-card svg { display: block; width: 100%; height: 96px; background: #f6f5f1; }
+  .plan-card svg { height: 64px; background: none; }   /* the elevation profile, as on the race cards */
+  .route-card .rc-body { padding: 10px 12px 12px; }
+  .route-card .rc-name { font-weight: 600; font-size: 15px; line-height: 1.25; }
+  .route-card .rc-meta { font-size: 12px; color: var(--muted); margin-top: 2px; }
+  .route-card .rc-nums { display: flex; justify-content: space-between; margin-top: 8px; font-variant-numeric: tabular-nums; }
+  .route-card .rc-nums b { font-size: 16px; font-weight: 600; }
+  .route-card .rc-nums small { display: block; font-size: 11px; color: var(--muted); }
+  table.route-table td { cursor: pointer; }
+  table.route-table .rt-rank { color: #b07a1a; font-weight: 700; }
+  #route-detail .stat-value a { color: inherit; text-decoration: none; border-bottom: 1px dashed var(--line); }
+  #route-detail .stat-value a:hover { border-bottom-color: var(--ink); }
+  #route-detail .back { cursor: pointer; color: var(--moss); font-size: 14px; display: inline-block; margin-bottom: 12px; }
+  .rl-route { border: 1px solid var(--line); border-radius: 999px; padding: 5px 12px; line-height: 1.3; background: white; color: var(--ink); text-decoration: none; }
+  .rl-route:hover { border-color: var(--muted); }
+  /* Equipment: shoes. */
+  table.shoes-table td { white-space: nowrap; }
+  table.shoes-table td.name { text-align: left; }
+  table.shoes-table th:first-child, table.shoes-table th:nth-child(2) { text-align: left; }
+  table.shoes-table td small { color: var(--muted); font-size: 11px; }
+  table.shoes-table button { border: none; background: none; cursor: pointer; font-size: 15px; color: var(--muted); padding: 0 4px; }
+  table.shoes-table button:hover { color: var(--ink); }
+  table.shoes-table button.star.on { color: #d4a017; }
+  table.shoes-table td.acts { white-space: nowrap; text-align: right; }
+  table.shoes-table button.txt { font-size: 12px; border: 1px solid var(--line); border-radius: 999px; padding: 2px 9px; margin: 0 4px; color: var(--ink); }
+  table.shoes-table button.txt:hover { border-color: var(--muted); }
+  .shoe-form, .shoe-row { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; margin-top: 10px; font-size: 13px; }
+  .shoe-form .rl-label, .shoe-row .rl-label { color: var(--muted); font-size: 12px; margin-right: 2px; }
+  .shoe-form input, .shoe-form select, .shoe-row select { font: inherit; font-size: 13px; line-height: 1.3; padding: 5px 10px;
+    border: 1px solid var(--line); border-radius: 999px; background: white; color: var(--ink); }
+  .shoe-form input:focus, .shoe-form select:focus { outline: none; border-color: var(--ink); }
+  .shoe-form .sh-date, .shoe-form .sh-check { color: var(--muted); font-size: 12px; display: inline-flex; align-items: center; gap: 4px; }
   /* Paces (VDOT calculator). */
   .pc-form { display: flex; flex-wrap: wrap; gap: 10px 14px; align-items: flex-end; }
   .pc-form label { display: flex; flex-direction: column; gap: 4px; font-size: 12px; color: var(--muted); }
@@ -438,8 +571,7 @@
   .race-card .rc-stages div:hover { background: #f1efe9; }
   .race-card .rc-stages span { color: var(--muted); }
   .lt-stops { font-size: 13px; color: var(--muted); margin-bottom: 10px; } .lt-stops b { color: var(--ink); }
-  .lt-charts { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-  @media (max-width: 720px) { .lt-charts { grid-template-columns: 1fr; } }
+  .lt-charts { display: grid; grid-template-columns: 1fr; gap: 12px; }
   table.lt-table td.name { white-space: nowrap; text-align: left; } table.lt-table td.up { color: #2d6b29; font-weight: 600; } table.lt-table td.down { color: #a50f15; font-weight: 600; }
   .gait-head { display: flex; flex-wrap: wrap; gap: 4px 16px; align-items: center; font-size: 12.5px; margin-top: 2px; }
   .gait-head span { display: inline-flex; align-items: center; gap: 5px; color: var(--muted); }
@@ -562,7 +694,7 @@
   .cal-sub { border-top: 1px solid var(--line); padding: 6px 2px 8px; display: flex; flex-direction: column;
              align-items: center; gap: 4px; min-width: 0; }
   .cal-sub-label { align-items: flex-start; justify-content: center; font-size: 11px; color: var(--muted);
-                   text-transform: lowercase; letter-spacing: 0.02em; }
+                   letter-spacing: 0.02em; }
   .cal-sub .cal-chip { max-width: 100%; white-space: normal; text-align: center; line-height: 1.3; }
   .cal-day .dnum { position: absolute; top: 4px; right: 6px; font-size: 10px; color: var(--muted); }
   .cal-day.today .dnum { color: var(--clay); font-weight: 700; }
@@ -641,6 +773,8 @@
     <button class="tab" data-tab="races" onclick="switchTab('races')">Races</button>
     <button class="tab" data-tab="performance" onclick="switchTab('performance')">Performance</button>
     <button class="tab" data-tab="paces" onclick="switchTab('paces')">Paces</button>
+    <button class="tab" data-tab="planner" onclick="switchTab('planner')">Planner</button>
+    <button class="tab" data-tab="routes" onclick="switchTab('routes')">Routes</button>
     <button class="tab" data-tab="records" onclick="switchTab('records')">Records</button>
     <button class="tab" data-tab="grade" onclick="switchTab('grade')">Grade</button>
     <button class="tab" data-tab="progress" onclick="switchTab('progress')">Progress</button>
@@ -741,7 +875,6 @@
   </div>
   <div id="panel-races" class="panel">
     <div id="races-list">
-      <div class="race-indexes" id="race-indexes"></div>
       <div class="races-filters" id="races-filters"></div>
       <div class="card" style="padding:0;margin-top:10px;"><div id="races-map"></div></div>
       <div id="races-cards"><div class="loading">Loading races…</div></div>
@@ -770,6 +903,41 @@
       <label>Pace /km<input id="pc-pace" placeholder="m:ss" oninput="paceCalc('pace')"></label>
     </div>
     <div id="pc-out"></div>
+  </div>
+
+  <div id="panel-planner" class="panel">
+    <div id="planner-list">
+      <div class="section-title" style="margin-top:0;">Race planner<span class="section-sub">trail: from the race's GPX, climbs, descents and flats, aid stations · road: splits from your critical speed · your predicted time</span></div>
+      <div class="plan-new">
+        <b>New plan</b>
+        <span class="seg" id="plan-kind"><button data-k="trail" class="on" onclick="setPlanKind('trail')">Trail</button><button data-k="road" onclick="setPlanKind('road')">Road</button></span>
+        <span id="plan-new-trail" class="plan-new-row"><span class="muted-note" style="margin:0">From the race's GPX file</span>
+          <input type="file" id="plan-file" accept=".gpx,application/gpx+xml" style="display:none" onchange="createPlan('trail')">
+          <button class="btn" onclick="document.getElementById('plan-file').click()">+ Load a GPX</button></span>
+        <span id="plan-new-road" class="plan-new-row" style="display:none">
+          <select id="plan-road-dist" onchange="document.getElementById('plan-road-km').style.display = this.value === 'other' ? '' : 'none'">
+            <option value="5">5K</option><option value="10" selected>10K</option><option value="21.0975">Half marathon</option><option value="42.195">Marathon</option><option value="other">Other…</option></select>
+          <input id="plan-road-km" type="number" min="0.4" max="120" step="0.1" placeholder="km" style="display:none;width:80px">
+          <input type="file" id="plan-road-file" accept=".gpx,application/gpx+xml" style="display:none" onchange="document.getElementById('plan-road-gpx').textContent = this.files[0] ? this.files[0].name : 'GPX (optional)'">
+          <button class="pick" id="plan-road-gpx" onclick="document.getElementById('plan-road-file').click()">GPX (optional)</button>
+          <button class="btn" onclick="createPlan('road')">+ Create plan</button></span>
+        <span class="muted-note" id="plan-msg" style="margin:0"></span>
+      </div>
+      <div class="section-title">Your plans</div>
+      <div class="route-cards" id="plan-cards"><div class="loading">Loading…</div></div>
+    </div>
+    <div id="planner-detail" style="display:none"></div>
+  </div>
+
+  <div id="panel-routes" class="panel">
+    <div id="routes-list">
+      <div class="chart-bar" style="margin-top:0;">
+        <div class="section-title">Routes you run regularly<span class="section-sub">10 runs or more on the same course · found from your GPS tracks</span></div>
+        <button class="btn" id="routes-detect" onclick="detectRoutes()">Detect again</button>
+      </div>
+      <div class="route-cards" id="route-cards"><div class="loading">Loading…</div></div>
+    </div>
+    <div id="route-detail" style="display:none"></div>
   </div>
 
   <div id="panel-records" class="panel">
@@ -892,6 +1060,18 @@
       <button class="sync-btn" onclick="saveProfile()">Save</button>
       <button class="btn" onclick="refreshProfileFromGarmin()">Refresh from Garmin</button>
       <span class="muted-note" id="profile-status" style="margin:0;"></span>
+    </div>
+
+    <!-- Equipment: shoes, entered by hand; the default pair goes on every run that fits. -->
+    <div class="section-title" style="margin-top:40px;padding-top:24px;border-top:1px solid var(--line);">Equipment</div>
+    <div class="muted-note" style="margin:0 0 4px;">The default pair for each surface and use goes on every run that fits, from its "since"
+      date until you retire it (it keeps the runs of its time); pick another pair on a run's page.</div>
+    <div class="section-title" style="margin-top:14px;">Shoes</div>
+    <div class="card" style="padding:0;overflow-x:auto" id="shoes-table"><div class="loading">Loading…</div></div>
+    <div class="shoe-form" id="shoe-form"></div>
+    <div id="shoes-retired" style="display:none">
+      <div class="section-title">Retired shoes</div>
+      <div class="card" style="padding:0;overflow-x:auto"></div>
     </div>
 
     <!-- Training zones: same page as the profile (both are your settings). -->
@@ -1478,7 +1658,7 @@ function summaryBoxes(a) {
     box("distance", a.distance_km ? a.distance_km.toFixed(2) + " km" : "—"),
     box("duration", fmtDurationPretty(a.duration_s), durSub),
     box("avg pace", `${fmtPace(a.avg_pace)} /km`, paceSub, "", "fastest and slowest held for 30 s (as in the pace chart)"),
-    box("avg hr", a.avg_hr ? Math.round(a.avg_hr) + " bpm" : "—", hrSub, "", "lowest and highest held for 30 s (as in the HR chart)"),
+    box("avg HR", a.avg_hr ? Math.round(a.avg_hr) + " bpm" : "—", hrSub, "", "lowest and highest held for 30 s (as in the HR chart)"),
     box("elevation", a.elevation_gain ? `+${Math.round(a.elevation_gain).toLocaleString()} m` : "—",
         a.elevation_loss ? `loss <b>−${Math.round(a.elevation_loss).toLocaleString()} m</b>` : ""),
     p.alt_mean != null ? box("mean altitude", `${Math.round(p.alt_mean).toLocaleString()} m`,
@@ -1701,8 +1881,8 @@ function renderSplitTable(kind, items, { avgHr = null, hilly = false, extra = nu
     ["pace /km", r => fmtPace(r.pace), true],
     [`GAP /km`, r => r.gap != null ? fmtPace(r.gap) : "—", has(r => r.gap), "gap-col",
      `grade-adjusted pace, ${lapGapKey() === "gap_race_pace" ? "race model" : "personal model"}`],
-    ["avg hr", r => r.hr ? Math.round(r.hr) : "—", true],
-    ["max hr", r => r.maxhr ? Math.round(r.maxhr) : "—", has(r => r.maxhr)],
+    ["avg HR", r => r.hr ? Math.round(r.hr) : "—", true],
+    ["max HR", r => r.maxhr ? Math.round(r.maxhr) : "—", has(r => r.maxhr)],
     ["cadence", r => r.cad ? Math.round(r.cad) : "—", true],
     ["power", r => r.power ? Math.round(r.power) : "—", has(r => r.power)],
     ["elev +m", r => r.gain != null ? Math.round(r.gain) : "—", true],
@@ -2210,7 +2390,14 @@ async function showWorkout() {
     : `${w.source === "watch workout"
         ? `from your watch workout${w.watch_name ? ` “${esc(w.watch_name)}”` : ""}`
         : `guessed from the laps${w.on_track ? " · reps on a track (GPS)" : ""}`} · ${edit}`;
-  box.innerHTML = `${extras ? `<div class="wk-extra">${extras}</div>` : ""}<div class="wk-src">${src}</div>`;
+  // On a track: warm-up and cool-down (easy, much of it on the way there and back) around the work.
+  const sp = w.split?.parts?.length > 1 ? w.split.parts : null;
+  const ROLE = { warmup: "Warm-up", work: "Work", cooldown: "Cool-down" };
+  const parts = sp ? `<div class="wk-parts">${sp.map(p => `<div class="wk-part" style="border-color:${CAT_COLORS[p.category]}">
+      <span style="color:${CAT_COLORS[p.category]}">${ROLE[p.role]} · ${p.category === "easy" ? "Easy" : "Workout"}</span>
+      <b>${p.km.toFixed(1)}<small> km</small></b>
+      <small>${fmtRaceTime(p.time_s)}${p.pace ? ` · ${fmtPace(p.pace)}/km` : ""}${p.role === "work" ? " · reps and recoveries" : p.off_track_km >= 0.2 ? ` · ${p.off_track_km.toFixed(1)} km off the track` : ""}</small></div>`).join("")}</div>` : "";
+  box.innerHTML = `${parts || (extras ? `<div class="wk-extra">${extras}</div>` : "")}<div class="wk-src">${src}${sp ? ` · split from the laps${w.split.on_track ? " and the GPS" : ""} (warm-up and cool-down: moving time)` : ""}</div>`;
 }
 
 // Your own workout title and description, when the guess doesn't fit (unstructured sessions):
@@ -2307,6 +2494,8 @@ function renderDetailHeader() {
   }
   document.getElementById("detail-place").textContent = a.place || "";
   renderDetailRaceTags(a, card);
+  renderShoeRow(a);
+  renderRouteBadge(a);
   const tags = cardTags(card).map(t => `<span class="tag tag-${t}">${CATEGORY_TAGS[t] || t}</span>`).join("");
   document.getElementById("detail-tags").innerHTML = `${a.date}${tags ? " &middot; " + tags : ""}`;
 }
@@ -2623,6 +2812,7 @@ async function showStageRace(id) {
   document.getElementById("sr-charts").innerHTML = chartsMarkup(true, false);
   detailState.points = points;
   drawTimeseriesCharts();
+  ltCharts.forEach(c => c.draw());   // the LiveTrail charts may have been drawn before the records: now with the profile
   document.getElementById("ts-source").textContent = `All ${st.length} stages end to end (the nights between stages aren't counted) · solid lines: stage starts.`;
 }
 
@@ -2698,54 +2888,108 @@ function renderLiveTrail(a, lt) {
   drawCheckpointMarkers();
   if (!box) return;
   if (!lt?.sections?.length) { box.innerHTML = ""; return; }
-  const S = lt.sections, L = lt.leaders || {};
+  const S = lt.sections, L = lt.leaders || {}, C = lt.compare;
+  detailState.ltScale = S.at(-1)?.watch_km ? S.at(-1).km / S.at(-1).watch_km : 1;   // watch km → official km (the profile behind the charts)
+  const cFirst = C ? C.name.split(" ")[0] : "";
+  const signed = sec => sec == null ? "" : `${sec > 0 ? "+" : sec < 0 ? "−" : ""}${fmtDuration(Math.abs(sec))}`;
   const stops = S.filter(x => x.rest_s > 0).sort((p, q) => q.rest_s - p.rest_s);
   const hm = sec => sec == null ? "—" : fmtDuration(Math.abs(sec));
   const overall = lt.stages && !lt.stage, dayOf = d => new Date(d + "T00:00:00").toLocaleDateString(undefined, { weekday: "short", day: "numeric", month: "short" });
   (lt.stages || []).forEach(x => { const c = document.getElementById(`sr-rank-${x.stage}`); if (c) c.textContent = x.rank ?? "—"; });
-  const cols = 12 + (L.male ? 1 : 0) + (L.female ? 1 : 0);
+  const cols = 11 + (C ? 1 : 0);
   const stageRow = (x, i) => overall && (i === 0 || S[i - 1].stage !== x.stage)
     ? `<tr class="lt-stage"><td colspan="${cols}">Stage ${x.stage} · ${dayOf(lt.stages[x.stage - 1].date)}</td></tr>` : "";
   box.innerHTML = `<div class="section-title">Race at the checkpoints<span class="section-sub">from <a href="${lt.url}" target="_blank" rel="noopener">LiveTrail</a> · ${S.length} checkpoints${lt.stage ? ` · stage ${lt.stage} of ${lt.stages.length}` : ""}</span></div>
     ${lt.total_rest_s ? "" : "<!--"}<div class="lt-stops">Stopped at aid stations <b>${fmtDurationPretty(lt.total_rest_s)}</b>${stops.length ? ` · longest: ${stops.slice(0, 3).map(x => `${x.short || x.name} ${fmtDurationPretty(x.rest_s)}`).join(" · ")}` : ""}</div>${lt.total_rest_s ? "" : "-->"}
+    <div class="lt-compare"><span class="rl-label">Compare with</span>
+      <select id="lt-cmp" onchange="compareLiveTrail(this.value)"><option value="">${C ? `${C.rank ? `${C.rank}. ` : ""}${esc(C.name)}` : "Loading the ranking…"}</option></select>
+      ${C ? `<span class="muted-note" style="margin:0">${C.auto ? (C.rank === 1 ? "the winner (default)" : "the runner after you (default: you won)") : `picked by you · <a href="#" onclick="compareLiveTrail(''); return false;">back to the default</a>`}</span>` : ""}
+    </div>
     <div class="lt-charts">
-      <div class="card"><div class="stat-label">rank at each checkpoint</div><canvas id="lt-rank" height="120"></canvas></div>
-      <div class="card"><div class="stat-label">behind the winners${L.male ? ` · ${L.male.name}` : ""}${L.female ? ` · ${L.female.name}` : ""}</div><canvas id="lt-gap" height="120"></canvas></div>
+      <div class="card"><div class="stat-label">rank at each checkpoint${C ? ` · ${esc(cFirst)} dashed` : ""}</div><canvas id="lt-rank" height="55"></canvas></div>
+      <div class="card"><div class="stat-label">${C ? `gap to ${esc(C.name)} · + behind, − ahead` : "gap"}</div><canvas id="lt-gap" height="55"></canvas></div>
     </div>
     <div class="card" style="padding:0;overflow-x:auto;margin-top:12px"><table class="laps lt-table">
       <thead><tr><th>checkpoint</th><th>km</th><th>section</th><th>climb</th><th>time</th><th>pace</th><th title="race model">GAP</th>
-        <th>arrival</th><th>stop</th><th>rank</th><th>±</th><th>cutoff margin</th>${L.male ? "<th>vs 1st man</th>" : ""}${L.female ? "<th>vs 1st woman</th>" : ""}</tr></thead>
+        <th>arrival</th><th>stop</th><th>rank</th><th>±</th>${C ? `<th title="Your time minus ${esc(C.name)}'s: + behind, − ahead">vs ${esc(cFirst)}</th>` : ""}</tr></thead>
       <tbody>${S.map((x, i) => `${stageRow(x, i)}<tr>
         <td class="name">${x.name}</td><td>${x.km.toFixed(1)}</td><td>${x.section_km != null ? x.section_km.toFixed(1) : "—"}</td>
         <td>${x.section_gain != null ? `+${Math.round(x.section_gain)}` : "—"}</td><td>${x.moving_s != null ? fmtDuration(x.moving_s) : "—"}</td>
         <td>${x.pace ? fmtPace(x.pace) : "—"}</td><td class="gap-col">${x.gap_race ? fmtPace(x.gap_race) : "—"}</td>
         <td>${x.arrival ? x.arrival.slice(11, 16) : "—"}</td><td>${x.rest_s ? fmtDuration(x.rest_s) : ""}</td>
         <td>${x.rank ?? "—"}</td><td class="${x.rank_change > 0 ? "up" : x.rank_change < 0 ? "down" : ""}">${x.rank_change ? (x.rank_change > 0 ? "+" : "") + x.rank_change : ""}</td>
-        <td>${x.cutoff_margin_s != null ? hm(x.cutoff_margin_s) : ""}</td>
-        ${L.male ? `<td>${x.gap_male_s ? "+" + hm(x.gap_male_s) : ""}</td>` : ""}${L.female ? `<td>${x.gap_female_s ? (x.gap_female_s >= 0 ? "+" : "−") + hm(x.gap_female_s) : ""}</td>` : ""}
+        ${C ? `<td class="${x.gap_compare_s > 0 ? "down" : x.gap_compare_s < 0 ? "up" : ""}" title="${x.compare_rank ? `${esc(cFirst)} was ${x.compare_rank}${x.compare_rest_s ? `, stopped ${fmtDuration(x.compare_rest_s)}` : ""}` : ""}">${signed(x.gap_compare_s)}</td>` : ""}
       </tr>`).join("")}</tbody></table></div>
     <div class="muted-note">Time and pace: moving between checkpoints (the stop at the previous one taken out). GAP: race model, on your watch track.
-      ± = places gained (+) or lost (−) since the previous checkpoint. Gaps: to the race winners (first man, first woman)${lt.stage
-        ? ", won or lost on this stage (0 at its start; ranks are overall)" : overall ? ", overall (the night between stages isn't counted)" : ""}.</div>`;
+      ± = places gained (+) or lost (−) since the previous checkpoint.${C ? ` vs ${esc(cFirst)}: your time minus theirs (+ behind, − ahead; hover for their rank and stop)${lt.stage
+        ? ", won or lost on this stage (0 at its start; ranks are overall)" : overall ? ", overall (the night between stages isn't counted)" : ""}. By default you're compared with the winner (the second when you won); pick anyone in the list.` : ""}</div>`;
   const ranked = S.filter(x => x.rank);
   const kmX = { type: "linear", min: 0, max: S.at(-1).km, grid: { display: false }, ticks: { callback: v => `${Math.round(v)} km`, maxTicksLimit: 6 } };
   const tip = items => { const x = ranked[items[0].dataIndex] || S[items[0].dataIndex]; return `${x.name} · ${x.km.toFixed(1)} km`; };
   ltCharts.push(new Chart(document.getElementById("lt-rank"), {
-    type: "line", data: { datasets: [{ data: ranked.map(x => ({ x: x.km, y: x.rank })), borderColor: "#a50f15", backgroundColor: "#a50f15",
-      borderWidth: 2, pointRadius: 3, tension: 0.15 }] },
+    type: "line", data: { datasets: [{ data: ranked.map(x => ({ x: x.km, y: x.rank })), borderColor: "#1f1d18", backgroundColor: "#1f1d18",
+      borderWidth: 2, pointRadius: 3, tension: 0.15 },
+      ...(C ? [{ data: S.filter(x => x.compare_rank).map(x => ({ x: x.km, y: x.compare_rank })), borderColor: "#e0763a", backgroundColor: "#e0763a",
+        borderWidth: 1.5, borderDash: [5, 4], pointRadius: 2, tension: 0.15 }] : [])] },
     options: { responsive: true, animation: false, interaction: { mode: "nearest", axis: "x", intersect: false },
-      plugins: { legend: { display: false }, tooltip: { callbacks: { title: tip, label: ctx => `rank ${ctx.parsed.y}` } } },
-      scales: { x: kmX, y: { reverse: true, ticks: { maxTicksLimit: 5, precision: 0 } } } },
+      plugins: { legend: { display: false }, tooltip: { callbacks: { title: tip, label: ctx => `${ctx.datasetIndex ? cFirst : "you"}: rank ${ctx.parsed.y}` } } },
+      scales: { x: kmX, y: { reverse: true, min: 1, ticks: { precision: 0, autoSkip: false },
+        afterBuildTicks: axis => {   // rank 1 at the top, then round steps (every place up to 5)
+          const top = Math.max(axis.max, 2), step = top <= 5 ? 1 : niceStep(top / 3);
+          axis.ticks = [1, ...roundTicks(step, top, step).map(t => t.value).filter(v => v > 1)].map(value => ({ value }));
+        } } } },
   }));
-  const gapSet = (k, color, label) => ({ label, data: S.filter(x => x[`gap_${k}_s`] != null).map(x => ({ x: x.km, y: x[`gap_${k}_s`] / 3600, name: x.name })),
+  // Gap in minutes, on round steps (1, 2, 5, 10, 15, 30 min, 1 h…) that always include 0; 0 drawn darker.
+  const gapSet = (k, color, label) => ({ label, data: S.filter(x => x[`gap_${k}_s`] != null).map(x => ({ x: x.km, y: x[`gap_${k}_s`] / 60, name: x.name })),
     borderColor: color, backgroundColor: color, borderWidth: 2, pointRadius: 3, tension: 0.15 });
+  const gaps = S.map(x => x.gap_compare_s).filter(v => v != null).map(v => v / 60);
+  const gLo = Math.min(0, ...gaps), gHi = Math.max(0, ...gaps);
+  const gStep = [1, 2, 5, 10, 15, 30, 60, 120, 180, 300, 600].find(st => (gHi - gLo) / st <= 2.2) || 600;   // 3–4 labels: the chart is short
+  const gMin = Math.floor(gLo / gStep) * gStep, gMax = Math.max(Math.ceil(gHi / gStep) * gStep, gMin + gStep);
+  const fmtGap = m => { if (Math.abs(m) < 1e-9) return "0"; const a = Math.abs(m), sign = m > 0 ? "+" : "−";
+    return a >= 60 ? `${sign}${Math.floor(a / 60)}:${String(Math.round(a % 60)).padStart(2, "0")}` : `${sign}${Math.round(a)} min`; };
   ltCharts.push(new Chart(document.getElementById("lt-gap"), {
-    type: "line", data: { datasets: [...(L.male ? [gapSet("male", "#3d7ebf", "1st man")] : []), ...(L.female ? [gapSet("female", "#c43fd0", "1st woman")] : [])] },
+    type: "line", data: { datasets: C ? [gapSet("compare", "#e0763a", C.name)] : [] },
     options: { responsive: true, animation: false, interaction: { mode: "nearest", axis: "x", intersect: false },
-      plugins: { tooltip: { callbacks: { title: items => `${items[0].raw.name} · ${items[0].parsed.x.toFixed(1)} km`,
-        label: ctx => `${ctx.dataset.label}: ${ctx.parsed.y >= 0 ? "+" : "−"}${fmtDuration(Math.round(Math.abs(ctx.parsed.y) * 3600))}` } } },
-      scales: { x: kmX, y: { ticks: { callback: v => `${v} h`, maxTicksLimit: 5 } } } },
+      plugins: { legend: { display: false }, tooltip: { callbacks: { title: items => `${items[0].raw.name} · ${items[0].parsed.x.toFixed(1)} km`,
+        label: ctx => `${ctx.parsed.y > 0 ? "behind" : ctx.parsed.y < 0 ? "ahead" : "level"}: ${fmtDuration(Math.round(Math.abs(ctx.parsed.y) * 60))}` } } },
+      scales: { x: kmX, y: { min: gMin, max: gMax,
+        afterBuildTicks: axis => { axis.ticks = roundTicks(gMin, gMax, gStep); },
+        ticks: { callback: v => fmtGap(v), autoSkip: false },
+        grid: { color: ctx => ctx.tick?.value === 0 ? "rgba(31,29,24,0.55)" : THEME.grid, lineWidth: ctx => ctx.tick?.value === 0 ? 1.5 : 1 } } } },
   }));
+  fillLiveTrailRanking(lt);
+}
+
+// Compare with another runner: the race's full ranking (loaded once per LiveTrail race) in the
+// picker; choosing one reads their checkpoint times and redraws the section.
+const ltRankings = {};
+async function fillLiveTrailRanking(lt) {
+  const a = detailState.activity, sel = document.getElementById("lt-cmp");
+  if (!sel) return;
+  let rows = ltRankings[lt.url];
+  if (!rows) {
+    try { const res = await fetch(`${API}/activities/${a.id}/livetrail/ranking`); rows = res.ok ? await res.json() : []; } catch (e) { rows = []; }
+    ltRankings[lt.url] = rows;
+  }
+  if (detailState.activity !== a || !document.body.contains(sel)) return;
+  const me = lt.runner ? `${lt.runner.firstName || ""} ${lt.runner.lastName || ""}`.trim().toLowerCase() : "";
+  const myRank = lt.runner?.ranking?.scratch;
+  const cur = lt.compare?.bib;
+  sel.innerHTML = `<option value="" ${cur ? "" : "selected"}>${rows.length ? "— pick a runner —" : "ranking not available"}</option>`
+    + rows.map(r => { const mine = r.name.toLowerCase() === me && (!myRank || r.rank === myRank);
+      return `<option value="${r.bib}" ${r.bib === cur ? "selected" : ""} ${mine ? "disabled" : ""}>${r.rank ?? "–"}. ${esc(r.name)}${r.race_time ? ` · ${fmtRaceTime(r.race_time)}` : ""}${mine ? " (you)" : ""}</option>`; }).join("");
+}
+
+async function compareLiveTrail(bib) {
+  const a = detailState.activity;
+  const sel = document.getElementById("lt-cmp");
+  if (sel) sel.disabled = true;
+  const res = await fetch(`${API}/activities/${a.id}/livetrail/compare${a.overall ? "?overall=true" : ""}`, {
+    method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ bib: bib ? +bib : null }) });
+  if (detailState.activity !== a) return;
+  if (!res.ok) { if (sel) sel.disabled = false; alert((await res.json().catch(() => ({}))).detail || "Could not read that runner"); return; }
+  renderLiveTrail(a, await res.json());
 }
 
 // Checkpoints as thin vertical lines on the activity's charts (named on the elevation profile)
@@ -2791,12 +3035,14 @@ const profilePlugin = {
   id: "profileBackdrop",
   draw(chart, over) {
     const id = chart.canvas.id, a = detailState.activity, pts = detailState.points;
-    if (!/^(ts-(?!elev)|sc-|dyn-)/.test(id) || !a?.terrain || a.terrain.terrain === "flat" || !pts?.length || !chart.scales.x) return;
+    if (!/^(ts-(?!elev)|sc-|dyn-|lt-)/.test(id) || !a?.terrain || a.terrain.terrain === "flat" || !pts?.length || !chart.scales.x) return;
     if (over !== id.startsWith("sc-")) return;
-    const byTime = detailState.xMode === "time" || !(pts.at(-1).distance_km > 0.05);
+    // LiveTrail charts are on the race's official distances: the watch distance scaled to them.
+    const lt = id.startsWith("lt-"), scale = lt ? detailState.ltScale || 1 : 1;
+    const byTime = !lt && (detailState.xMode === "time" || !(pts.at(-1).distance_km > 0.05));
     const xs = [], zs = [];
     for (const p of pts) {
-      const x = byTime ? p.seconds_elapsed : p.distance_km;
+      const x = byTime ? p.seconds_elapsed : p.distance_km != null ? p.distance_km * scale : null;
       if (x != null && p.elevation != null) { xs.push(x); zs.push(p.elevation); }
     }
     if (xs.length < 2) return;
@@ -3364,6 +3610,8 @@ async function showDetail(id) {
       ${a.category ? `<div class="race-row" id="race-row">${renderCategoryToggle(a)}</div>
       <div class="workout-box" id="workout-box" style="display:none;"></div>
       <div class="results-links" id="results-links"></div>` : ""}
+      <div class="shoe-row" id="shoe-row"></div>
+      <div class="shoe-row" id="route-row"></div>
       <div class="stat-grid">
         ${summaryBoxes(a)}
         ${a.terrain && a.terrain.terrain !== "flat" ? `
@@ -3459,7 +3707,7 @@ function switchTab(name) {
     showYearlyOverview();
     if (!yearlyLoaded) loadYearly();
   }
-  if (name === "profile") { loadProfile(); if (!zonesState.loaded) loadZones(); }
+  if (name === "profile") { loadProfile(); if (!zonesState.loaded) loadZones(); loadShoes(); }
   if (name === "body") renderBodyProfile();
   if (name === "body" || name === "progress") {
     bodyState.page = name;
@@ -3467,6 +3715,8 @@ function switchTab(name) {
   }
   if (name === "records" && !recordsState.data) loadRecords();
   if (name === "paces") loadPaceCalc();
+  if (name === "routes") loadRoutes();
+  if (name === "planner" && document.getElementById("planner-detail").style.display === "none") loadPlanner();
   if (name === "performance") loadPerformance();
   if (name === "races") { if (racesState.data) renderRaces(); else loadRaces(); }
   if (name === "grade") { if (gapState.data) renderGap(); else loadGap(); }
@@ -3803,6 +4053,1042 @@ function drawPaceChart() {
   });
 }
 
+/* ---------- Race planner: a course from a GPX file, aid stations, predicted time (analytics/planner.py) ---------- */
+const plannerState = { list: null, plan: null, aid: [], charts: [], map: null };
+const SECTION_COLORS = { climb: "#c0392b", descent: "#2f6aa6", flat: "#9aa5b1" };
+const hms = s => s == null ? "—" : s < 1 ? "0:00:00" : fmtRaceTime(Math.round(s));
+// Clock time at an offset from the start ("06:00" + 2 h 15 → "08:15"); the day shown once past midnight.
+function clockAt(offset_s) {
+  const p = plannerState.plan;
+  if (!p?.start_time || offset_s == null) return "";
+  const [h, m] = p.start_time.split(":").map(Number);
+  const t = h * 3600 + m * 60 + offset_s, day = Math.floor(t / 86400), r = ((t % 86400) + 86400) % 86400;
+  const hhmm = `${String(Math.floor(r / 3600)).padStart(2, "0")}:${String(Math.floor(r % 3600 / 60)).padStart(2, "0")}`;
+  if (!day) return hhmm;
+  const date = p.race_date ? new Date(new Date(p.race_date + "T00:00:00").getTime() + day * 864e5) : null;
+  return `${date ? date.toLocaleDateString(undefined, { weekday: "short" }) : `+${day}d`} ${hhmm}`;
+}
+const timeCell = s => `${hms(s)}${plannerState.plan?.start_time ? `<small class="clock">${clockAt(s)}</small>` : ""}`;
+
+async function loadPlanner() {
+  document.getElementById("planner-list").style.display = "";
+  document.getElementById("planner-detail").style.display = "none";
+  try { plannerState.list = await (await fetch(`${API}/planner/`)).json(); } catch (e) { plannerState.list = []; }
+  const list = plannerState.list;
+  document.getElementById("plan-cards").innerHTML = !list.length ? `<div class="muted-note">No plan yet: load a race's GPX above.</div>` :
+    list.map(p => { const c = p.kind === "road" ? TERRAIN_COLORS.flat : TERRAIN_COLORS.mountain;
+      return `<div class="route-card plan-card" onclick="openPlan(${p.id})">${profileSvg(p.has_gpx ? p.profile : [0, 0], c)}
+      <div class="rc-body"><div class="rc-name"><span class="plan-kind-tag" style="background:${c}">${p.kind}</span>${esc(p.name)}</div>
+        <div class="rc-meta">${p.distance_km.toFixed(1)} km · +${Math.round(p.gain).toLocaleString()} m${p.race_date ? ` · ${p.race_date}` : ""}</div>
+        <div class="rc-meta">${p.kind === "road" ? (p.has_gpx ? "with its GPX" : "no GPX: flat course") : `${p.aid} aid station${p.aid === 1 ? "" : "s"}`}</div></div></div>`; }).join("");
+}
+
+function setPlanKind(k) {
+  document.querySelectorAll("#plan-kind button").forEach(b => b.classList.toggle("on", b.dataset.k === k));
+  document.getElementById("plan-new-trail").style.display = k === "trail" ? "" : "none";
+  document.getElementById("plan-new-road").style.display = k === "road" ? "" : "none";
+  document.getElementById("plan-msg").textContent = "";
+}
+
+// Trail: the GPX is needed. Road: the distance, and a GPX if you have one (map, slopes).
+async function createPlan(kind) {
+  const msg = document.getElementById("plan-msg");
+  const file = document.getElementById(kind === "road" ? "plan-road-file" : "plan-file").files[0];
+  const body = { name: "", kind, gpx_name: file?.name || null, gpx: file ? await file.text() : null };
+  if (kind === "road") {
+    const v = document.getElementById("plan-road-dist").value;
+    body.distance_km = v === "other" ? +document.getElementById("plan-road-km").value : +v;
+    if (!body.distance_km) { msg.textContent = "Type the distance in km."; return; }
+    if (!file) body.name = `${document.getElementById("plan-road-dist").selectedOptions[0].text.replace("Other…", `${body.distance_km} km`)} race`;
+  } else if (!file) { msg.textContent = "Choose a GPX file first."; return; }
+  msg.textContent = file ? "Reading the course…" : "Predicting…";
+  const res = await fetch(`${API}/planner/`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) });
+  const d = await res.json().catch(() => ({}));
+  if (!res.ok) { msg.textContent = d.detail || "Could not read this file."; return; }
+  msg.textContent = "";
+  document.getElementById("plan-file").value = ""; document.getElementById("plan-road-file").value = "";
+  document.getElementById("plan-road-gpx").textContent = "GPX (optional)";
+  showPlan(d);
+}
+
+async function openPlan(id) {
+  switchTab("planner");
+  const box = document.getElementById("planner-detail");
+  document.getElementById("planner-list").style.display = "none";
+  box.style.display = ""; box.innerHTML = `<div class="loading">Predicting…</div>`;
+  const res = await fetch(`${API}/planner/${id}`);
+  const d = await res.json().catch(() => ({}));
+  if (!res.ok) { box.innerHTML = `<div class="error">${esc(d.detail || "Could not load the plan.")}</div>`; return; }
+  showPlan(d);
+}
+
+async function savePlan(fields) {   // returns once the plan is redrawn
+  const p = plannerState.plan;
+  const res = await fetch(`${API}/planner/${p.id}`, { method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify(fields) });
+  const d = await res.json().catch(() => ({}));
+  if (!res.ok) { alert(d.detail || "Could not save"); return; }
+  showPlan(d);
+}
+
+async function deletePlan() {
+  const p = plannerState.plan;
+  if (!confirm(`Delete the plan "${p.name}"?`)) return;
+  await fetch(`${API}/planner/${p.id}`, { method: "DELETE" });
+  loadPlanner();
+}
+
+function showPlan(d) {
+  switchTab("planner");
+  plannerState.plan = d;
+  if (d.kind === "road") { showRoadPlan(d); return; }
+  plannerState.aid = d.aid.map(a => ({ km: a.km, name: a.name, stop_min: a.stop_min }));
+  document.getElementById("planner-list").style.display = "none";
+  const box = document.getElementById("planner-detail");
+  box.style.display = "";
+  const L = d.level, B = d.base, range = L.spread ? [B.moving_s * Math.exp(-L.spread) + d.stops_s, B.moving_s * Math.exp(L.spread) + d.stops_s] : null;
+  const stat = (label, value, sub) => `<div class="stat"><div class="stat-label">${label}</div><div class="stat-value">${value}</div><div class="stat-sub">${sub}</div></div>`;
+  const counts = t => d.sections.filter(s => s.type === t);
+  const sum = (arr, k) => arr.reduce((a, s) => a + s[k], 0);
+  box.innerHTML = `
+    <span class="back" onclick="loadPlanner()">&larr; back to plans</span>
+    ${planHead(d, `${d.distance_km.toFixed(1)} km · +${Math.round(d.gain).toLocaleString()} m / −${Math.round(d.loss).toLocaleString()} m · ${Math.round(d.alt_min)}–${Math.round(d.alt_max)} m`)}
+    <div class="stat-grid" style="margin-top:12px">
+      ${stat("model prediction", hms(B.total_s), `${range ? `likely ${hms(range[0])} – ${hms(range[1])}` : ""}${d.stops_s ? `<br>incl. ${hms(d.stops_s)} at aid stations` : ""}`)}
+      ${stat("flat-equivalent pace", `${fmtPace(B.flat_pace)}<span class="rec-unit"> /km</span>`,
+        `${L.source === "yours" ? `set by you · <a href="#" onclick="savePlan({ flat_pace: 0 }); return false;">from my races</a>` : `from ${L.n_races} of your trail races, for a race this long`}
+`)}
+      ${stat("effort distance", `${d.effort_km.toFixed(1)}<span class="rec-unit"> km</span>`, `flat km the course is worth for you (slopes, ${L.fatigue_pct}% fatigue by the end)`)}
+    </div>
+    <div class="section-title">Aid stations<span class="section-sub">km, name and planned stop · times: arrival with the stops before it</span></div>
+    <div class="card" style="padding:0;overflow-x:auto" id="plan-aid"></div>
+    <div class="plan-aid-bar"><button class="pick" onclick="addAid()">+ add a station</button><button class="btn" onclick="saveAid()">Save stations</button>
+      <span class="muted-note" id="aid-msg" style="margin:0"></span></div>
+    <div class="section-title">Map</div>
+    <div class="card" style="padding:0;"><div id="plan-map" style="height:320px"></div></div>
+    ${planSliders(d)}
+    <div class="chart-bar">
+      <div class="section-title chart-title t-elev">Profile<span class="section-sub"><span style="color:${SECTION_COLORS.climb}">climbs</span> ·
+        <span style="color:${SECTION_COLORS.descent}">descents</span> · <span style="color:#7a7263">flats</span> · line: average pace</span></div>
+      <span class="seg" id="pace-mode" title="Average pace (actual, moving) of each piece">
+        ${[["legs", "aid legs"], ["sections", "terrain"], ["off", "off"]].map(([m, l]) => `<button data-m="${m}" class="${(plannerState.paceMode || "legs") === m ? "on" : ""}" onclick="setPaceMode('${m}')">${l}</button>`).join("")}</span>
+    </div>
+    <div class="card" style="margin-top:10px"><canvas id="plan-profile" height="80"></canvas></div>
+    <div class="plan-split">
+      ${["climb", "descent", "flat"].map(t => `<span><i style="background:${SECTION_COLORS[t]}"></i>${counts(t).length} ${t}${counts(t).length === 1 ? "" : "s"} ·
+        ${sum(counts(t), "km").toFixed(1)} km · ${hms(sum(counts(t), "time_s"))}</span>`).join("")}
+    </div>
+    <div class="section-title">Climbs, descents and flats<span class="section-sub">slope over 200 m: above +3% climb, below −3% descent · pieces under 400 m join their neighbours</span></div>
+    <div class="card" style="padding:0;overflow-x:auto">${planSectionsTable(d)}</div>
+    <div class="section-title">Nutrition<span class="section-sub">what to carry on each leg, from your per-hour targets</span></div>
+    <div id="plan-nutrition"></div>
+    <div class="muted-note">Prediction: your race model (the slope cost and the fatigue learned from your trail races) applied to every 25 m of the course,
+      at the flat-equivalent pace of your level for a race this long (fitted on your trail races: the longer, the slower). "Likely" spans how far your past
+      races were from that line (±${L.spread ? Math.round(L.spread * 100) : "—"}%). Not yet in it: heat, night, technical terrain, the altitude itself.</div>`;
+  const name = document.getElementById("plan-name-edit");
+  name.contentEditable = "true"; name.classList.add("editable"); name.dataset.before = name.textContent;
+  name.onkeydown = e => { if (e.key === "Enter") { e.preventDefault(); name.blur(); } else if (e.key === "Escape") { name.textContent = name.dataset.before; name.blur(); } };
+  name.onblur = () => { if (name.textContent.trim() && name.textContent.trim() !== name.dataset.before) savePlan({ name: name.textContent.trim() }); };
+  renderAidTable();
+  renderNutrition();
+  drawPlanProfile(d);
+  drawPlanMap(d);
+}
+
+// The plan's head: kind tag, name, then the course on one line and the race day / start on the next.
+function planHead(d, course) {
+  const c = d.kind === "road" ? TERRAIN_COLORS.flat : TERRAIN_COLORS.mountain;
+  return `<div class="plan-head-tag"><span class="plan-kind-tag" style="background:${c}">${d.kind}</span></div>
+    <h2 class="detail-title"><b id="plan-name-edit" title="Click to rename">${esc(d.name)}</b></h2>
+    <div class="detail-date">${course}</div>
+    <div class="detail-date"><label class="plan-date">race day <input type="date" value="${d.race_date || ""}" onchange="savePlan(this.value ? { race_date: this.value } : { clear_date: true })"></label>
+      <label class="plan-date">start <input type="time" value="${d.start_time || ""}" onchange="savePlan({ start_time: this.value || '' })"></label>
+      · <a href="#" onclick="deletePlan(); return false;">delete</a></div>`;
+}
+
+// A road plan: time from your critical speed (Paces tab), splits, the pace along the course; the
+// map and the slopes only with a GPX.
+function showRoadPlan(d) {
+  const box = document.getElementById("planner-detail");
+  document.getElementById("planner-list").style.display = "none";
+  box.style.display = "";
+  const L = d.level, B = d.base, range = L.spread ? [B.total_s * Math.exp(-L.spread), B.total_s * Math.exp(L.spread)] : null;
+  const stat = (label, value, sub) => `<div class="stat"><div class="stat-label">${label}</div><div class="stat-value">${value}</div><div class="stat-sub">${sub}</div></div>`;
+  const hill = d.has_gpx ? B.total_s - B.flat_s : 0;
+  box.innerHTML = `
+    <span class="back" onclick="loadPlanner()">&larr; back to plans</span>
+    ${planHead(d, `${+d.distance_km.toFixed(3)} km${d.has_gpx ? ` · +${Math.round(d.gain)} m / −${Math.round(d.loss)} m` : " · flat course (no GPX)"}`)}
+    <div class="stat-grid" style="margin-top:12px">
+      ${stat("model prediction", hms(B.total_s), range ? `likely ${hms(range[0])} – ${hms(range[1])}` : "")}
+      ${stat("average pace", `${fmtPace(B.pace)}<span class="rec-unit"> /km</span>`, `${(d.distance_km / B.total_s * 3600).toFixed(1)} km/h`)}
+      ${L.source === "yours" ? stat("your target pace", `${fmtPace(L.flat_pace_set)}<span class="rec-unit"> /km</span>`, `set by you · <a href="#" onclick="savePlan({ flat_pace: 0 }); return false;">from my races</a>`)
+        : stat("critical speed", `${(L.cs * 3.6).toFixed(1)}<span class="rec-unit"> km/h</span>`, `${fmtPace(1000 / L.cs / 60)}/km · D′ ${Math.round(L.dprime)} m · from ${L.n} of your road races (Paces tab)`)}
+      ${d.has_gpx ? stat("the course", `${hill >= 0 ? "+" : "−"}${fmtRaceTime(Math.round(Math.abs(hill)))}`, `vs the same distance flat (${hms(B.flat_s)}), from the slopes`) : ""}
+    </div>
+    ${d.has_gpx ? `<div class="section-title">Map</div><div class="card" style="padding:0;"><div id="plan-map" style="height:320px"></div></div>` : ""}
+    ${roadSliders(d)}
+    <div class="chart-bar">
+      <div class="section-title chart-title">Pace<span class="section-sub">each split's pace · dashed: the average${d.has_gpx ? ` · profile: <span style="color:${SECTION_COLORS.climb}">climbs</span> · <span style="color:${SECTION_COLORS.descent}">descents</span> · flats` : ""}</span></div>
+      <span class="seg" id="split-mode">${[1, 2, 5, 10].map(k => `<button class="${plannerState.roadMode !== "terrain" && d.split_km === k ? "on" : ""}" onclick="plannerState.roadMode = null; savePlan({ split_km: ${k} })">${k} km</button>`).join("")}${d.has_gpx
+        ? `<button class="${plannerState.roadMode === "terrain" ? "on" : ""}" title="Climbs, descents and flats" onclick="plannerState.roadMode = 'terrain'; showRoadPlan(plannerState.plan)">terrain</button>` : ""}</span>
+    </div>
+    <div class="card" style="margin-top:10px"><canvas id="plan-pace" height="70"></canvas></div>
+    ${d.has_gpx ? `<div class="plan-split">${["climb", "descent", "flat"].map(t => { const x = d.sections.filter(s => s.type === t);
+      return `<span><i style="background:${SECTION_COLORS[t]}"></i>${x.length} ${t}${x.length === 1 ? "" : "s"} · ${x.reduce((a, s) => a + s.km, 0).toFixed(1)} km · ${hms(x.reduce((a, s) => a + s.time_s, 0))}</span>`; }).join("")}</div>` : ""}
+    ${d.has_gpx && plannerState.roadMode === "terrain"
+      ? `<div class="section-title">Climbs, descents and flats<span class="section-sub">slope over 200 m: above +3% climb, below −3% descent · pieces under 400 m join their neighbours</span></div>
+         <div class="card" style="padding:0;overflow-x:auto">${roadTerrainTable(d)}</div>`
+      : `<div class="section-title">Splits<span class="section-sub">every ${d.split_km} km${d.start_time ? " · clock: from your start time" : ""}</span></div>
+         <div class="card" style="padding:0;overflow-x:auto">${roadSplitsTable(d)}</div>`}
+    <div class="section-title">Fueling<span class="section-sub">your goal per hour, the products you'll take, spread over the race</span></div>
+    <div id="road-fuel"></div>
+    <div class="muted-note">Prediction: your critical speed (CS ${L.cs ? (L.cs * 3.6).toFixed(1) : "—"} km/h, D′ ${L.dprime ? Math.round(L.dprime) : "—"} m) from the road races in the Paces chart:
+      (distance − D′) ÷ CS up to one hour; beyond, the time grows with your Riegel exponent (${L.k ? L.k.toFixed(3) : "1.06"}) — the line alone would be too optimistic for a half or a marathon.
+      ${d.has_gpx ? "The slopes count as in trail plans: each 25 m costs its slope's factor from your race model, at the same flat speed." : "Without a GPX the course is taken as flat."}
+      "Likely" spans how far your races land from the model (±${L.spread ? (L.spread * 100).toFixed(1) : "—"}%). Not in it: heat, wind, the crowd at the start.</div>`;
+  const name = document.getElementById("plan-name-edit");
+  name.contentEditable = "true"; name.classList.add("editable"); name.dataset.before = name.textContent;
+  name.onkeydown = e => { if (e.key === "Enter") { e.preventDefault(); name.blur(); } else if (e.key === "Escape") { name.textContent = name.dataset.before; name.blur(); } };
+  name.onblur = () => { if (name.textContent.trim() && name.textContent.trim() !== name.dataset.before) savePlan({ name: name.textContent.trim() }); };
+  drawRoadPaceChart(d);
+  renderRoadFuel();
+  if (d.has_gpx) drawPlanMap(d);
+  else if (plannerState.map) { plannerState.map.remove(); plannerState.map = null; }
+}
+
+function roadSliders(d) {
+  const L = d.level, m = d.outlook_max || 10, tick = Math.max(1, Math.round((L.spread || 0.02) * 100));
+  return `<div class="plan-sliders">
+    <div><div class="ps-head"><span>Outlook</span><b id="ps-outlook-val">${d.outlook > 0 ? "+" : ""}${Math.round(d.outlook)}%</b></div>
+      <input type="range" min="${-m}" max="${m}" step="0.5" value="${d.outlook}" list="ps-marks" oninput="planSliderMove('outlook', this.value)">
+      <datalist id="ps-marks"><option value="${-tick}"></option><option value="0"></option><option value="${tick}"></option></datalist>
+      <div class="ps-ends"><span>optimistic</span><span>your model</span><span>pessimistic</span></div>
+      <div class="ps-note">Ticks at ±${tick}%: how far your races usually land from the model</div></div>
+    <div><div class="ps-head"><span>Strategy</span><b id="ps-strategy-val">${strategyLabel(d.strategy)}</b></div>
+      <input type="range" min="-1" max="1" step="0.1" value="${d.strategy}" oninput="planSliderMove('strategy', this.value)">
+      <div class="ps-ends"><span>positive split (fast start)</span><span>even pace</span><span>negative split</span></div>
+      <div class="ps-note">Same total time · 1st half <b>${hms(d.halves.first_s)}</b> · 2nd half <b>${hms(d.halves.second_s)}</b></div></div>
+    <div class="ps-result">
+      <div><span>your time</span><b>${hms(d.total_s)}</b><small>${(t => t ? `${t > 0 ? "+" : "−"}${hms(Math.abs(t))} vs the model` : "Same as the model")(Math.round(d.total_s - d.base.total_s))}</small></div>
+      ${d.start_time ? `<div><span>finish</span><b>${clockAt(d.total_s)}</b><small>start ${d.start_time}</small></div>` : ""}
+      <div><span>average pace</span><b>${fmtPace(d.pace)}<em>/km</em></b><small>${(d.distance_km / d.total_s * 3600).toFixed(1)} km/h</small></div>
+      ${d.has_gpx ? `<div><span>average GAP</span><b>${fmtPace(d.flat_pace)}<em>/km</em></b><small>flat-equivalent</small></div>` : ""}
+      <div><span>VDOT</span><b>${vdotOf(d.distance_km * 1000, d.total_s * (d.has_gpx ? d.base.flat_s / d.base.total_s : 1)).toFixed(1)}</b><small>${d.has_gpx ? "of the flat-equivalent time" : "of this time"}</small></div>
+    </div></div>`;
+}
+
+function roadSplitsTable(d) {
+  const g = d.has_gpx;
+  return `<table class="laps plan-table"><thead><tr><th>#</th><th>km</th><th>split</th><th>pace</th>${g ? "<th>climb</th>" : ""}<th>time</th>${d.start_time ? "<th>clock</th>" : ""}</tr></thead>
+    <tbody>${d.splits.map((x, i) => `<tr><td>${i + 1}</td><td>${x.to_km.toFixed(x.to_km % 1 ? 2 : 0)}</td><td>${fmtRaceTime(Math.round(x.time_s))}</td>
+      <td><b>${fmtPace(x.pace)}</b></td>${g ? `<td>${x.gain >= 1 ? `+${Math.round(x.gain)}` : ""}${x.loss >= 1 ? ` −${Math.round(x.loss)}` : ""}</td>` : ""}
+      <td>${hms(x.at_s)}</td>${d.start_time ? `<td>${clockAt(x.at_s)}</td>` : ""}</tr>`).join("")}</tbody></table>`;
+}
+
+// The running time at a km (from the splits).
+function roadTimeAt(d, km) {
+  const sp = d.splits.find(s => km >= s.from_km && km <= s.to_km) || d.splits.at(-1);
+  return sp.at_s - sp.time_s + Math.min(1, Math.max(0, (km - sp.from_km) / sp.km)) * sp.time_s;
+}
+// …and the km at a running time.
+function roadKmAt(d, t) {
+  const sp = d.splits.find(s => t <= s.at_s) || d.splits.at(-1);
+  return sp.from_km + Math.min(1, Math.max(0, (t - (sp.at_s - sp.time_s)) / sp.time_s)) * sp.km;
+}
+
+function roadTerrainTable(d) {
+  return `<table class="laps plan-table"><thead><tr><th>#</th><th>section</th><th>km</th><th>length</th><th>climb</th><th>slope</th><th>time</th><th>pace</th><th>at</th>${d.start_time ? "<th>clock</th>" : ""}</tr></thead>
+    <tbody>${d.sections.map((x, i) => { const at = roadTimeAt(d, x.end_km), g = x.km ? (x.gain - x.loss) / (x.km * 10) : 0;
+      return `<tr><td>${i + 1}</td><td class="name"><i class="sec-dot" style="background:${SECTION_COLORS[x.type]}"></i>${cap(x.type)}</td>
+        <td>${x.start_km.toFixed(1)}–${x.end_km.toFixed(1)}</td><td>${x.km.toFixed(1)} km</td>
+        <td>${x.gain >= 1 ? `+${Math.round(x.gain)}` : ""}${x.loss >= 1 ? ` −${Math.round(x.loss)}` : ""}</td><td>${g > 0 ? "+" : ""}${g.toFixed(1)}%</td>
+        <td>${fmtRaceTime(Math.round(x.time_s))}</td><td><b>${fmtPace(x.pace)}</b></td><td>${hms(at)}</td>${d.start_time ? `<td>${clockAt(at)}</td>` : ""}</tr>`; }).join("")}</tbody></table>`;
+}
+
+// Road fueling: your goal per hour (carbs, fluid), the fuel-library products you pick, and how
+// they spread over the race: the drink covers the fluid (and its carbs count), the solids
+// (gels, bars…) make up the rest of the carbs, taken at even intervals — times and km.
+function roadFuelPlan(d, lib) {
+  const n = d.nutrition, T = n.targets, h = d.total_s / 3600;
+  const want = { carbs: T.carbs_gh * h, fluid: T.fluid_mlh * h };
+  const picked = lib.filter(f => (n.items || []).includes(f.id));
+  const drink = picked.find(f => f.type === "drink" || (f.fluid_ml > 0 && f.type !== "gel"));
+  const solids = picked.filter(f => f !== drink && f.carbs_g > 0);
+  const nDrink = drink && drink.fluid_ml ? Math.round(want.fluid / drink.fluid_ml * 2) / 2 : 0;
+  const rest = Math.max(0, want.carbs - nDrink * (drink?.carbs_g || 0));
+  const avg = solids.length ? solids.reduce((a, f) => a + f.carbs_g, 0) / solids.length : 0;
+  let nSol = avg ? Math.round(rest / avg) : 0;
+  if (avg && !nSol && rest >= avg * 0.5) nSol = 1;
+  const takes = Array.from({ length: nSol }, (_, i) => { const t = d.total_s * (i + 1) / (nSol + 1);
+    return { t, km: roadKmAt(d, t), item: solids[i % solids.length] }; });
+  const got = { carbs: nDrink * (drink?.carbs_g || 0) + takes.reduce((a, x) => a + x.item.carbs_g, 0),
+                fluid: nDrink * (drink?.fluid_ml || 0) + takes.reduce((a, x) => a + (x.item.fluid_ml || 0), 0) };
+  return { want, got, drink, nDrink, takes, picked };
+}
+
+async function renderRoadFuel() {
+  const box = document.getElementById("road-fuel");
+  if (!box) return;
+  if (!fuelLibrary) { try { fuelLibrary = await (await fetch(`${API}/planner/fuel`)).json(); } catch (e) { fuelLibrary = []; } }
+  const d = plannerState.plan, n = d.nutrition, T = n.targets, S = n.suggested, lib = fuelLibrary;
+  const P = roadFuelPlan(d, lib);
+  const counts = {};
+  P.takes.forEach(x => counts[x.item.id] = (counts[x.item.id] || 0) + 1);
+  const field = (k, label, unit, step) => `<label>${label}<span><input type="number" id="nu-${k}" value="${T[k]}" step="${step}" min="0"> ${unit}</span></label>`;
+  const perAid = P.drink && P.nDrink ? P.nDrink * P.drink.fluid_ml / Math.max(1, Math.floor(d.distance_km / 5)) : 0;
+  box.innerHTML = `
+    <div class="nu-targets">
+      ${field("carbs_gh", "carbs", "g/h", 5)}${field("fluid_mlh", "fluid", "ml/h", 50)}
+      <button class="btn" onclick="saveRoadNutrition()">Save</button>
+      ${n.custom ? `<a href="#" class="nu-reset" onclick="savePlan({ nutrition: {} }); return false;">back to the suggested values</a>`
+        : `<span class="muted-note" style="margin:0">Suggested for ${hms(d.total_s)}: ${S.carbs_gh} g/h${S.fluid_mlh ? `, ${S.fluid_mlh} ml/h` : ""}</span>`}
+    </div>
+    <div class="road-fuel-pick"><span class="rl-label">You'll take</span>
+      ${lib.length ? lib.map(f => `<button class="pick ${(n.items || []).includes(f.id) ? "on" : ""}" title="${f.carbs_g} g carbs${f.fluid_ml ? `, ${f.fluid_ml} ml` : ""} per portion" onclick="toggleRoadFuel(${f.id})">${esc(f.name)}</button>`).join("")
+        : `<span class="muted-note" style="margin:0">Your fuel library is empty: add products in a trail plan's Nutrition</span>`}</div>
+    <div class="stat-grid" style="margin-top:10px">
+      <div class="stat"><div class="stat-label">carbs</div><div class="stat-value">${fuelSquare(P.got.carbs, P.want.carbs)}${Math.round(P.got.carbs)}<span class="rec-unit"> / ${Math.round(P.want.carbs)} g</span></div>
+        <div class="stat-sub">${Object.entries(counts).map(([id, q]) => `${q} × ${esc(lib.find(f => f.id == id).name)}`).join(" · ") || (P.want.carbs ? "Pick a gel or a bar" : "None needed for a race this short")}${P.drink && P.drink.carbs_g ? `${Object.keys(counts).length ? " + " : ""}the drink's ${Math.round(P.nDrink * P.drink.carbs_g)} g` : ""}</div></div>
+      <div class="stat"><div class="stat-label">fluid</div><div class="stat-value">${fuelSquare(P.got.fluid, P.want.fluid)}${(P.got.fluid / 1000).toFixed(2)}<span class="rec-unit"> / ${(P.want.fluid / 1000).toFixed(2)} l</span></div>
+        <div class="stat-sub">${P.drink ? `${P.nDrink} × ${esc(P.drink.name)}${perAid ? ` · about ${Math.round(perAid / 10) * 10} ml at each aid station (every 5 km)` : ""}` : P.want.fluid ? "Water from the aid stations, or pick a drink" : "None needed"}</div></div>
+    </div>
+    ${P.takes.length ? `<div class="card" style="padding:0;overflow-x:auto;margin-top:8px"><table class="laps plan-table">
+      <thead><tr><th>#</th><th>take</th><th>time</th>${d.start_time ? "<th>clock</th>" : ""}<th>km</th><th>carbs so far</th></tr></thead>
+      <tbody>${P.takes.map((x, i) => `<tr><td>${i + 1}</td><td class="name">${esc(x.item.name)}</td><td>${hms(x.t)}</td>${d.start_time ? `<td>${clockAt(x.t)}</td>` : ""}
+        <td>${x.km.toFixed(1)}</td><td>${Math.round(P.takes.slice(0, i + 1).reduce((a, y) => a + y.item.carbs_g, 0))} g</td></tr>`).join("")}</tbody></table></div>` : ""}
+    <div class="fuel-legend"><span><i class="fuel-sq fuel-under"></i>under the goal (&lt; 85%)</span><span><i class="fuel-sq fuel-ok"></i>in range</span>
+      <span><i class="fuel-sq fuel-over"></i>over (&gt; 115%)</span></div>
+    <div class="muted-note">Goal × your predicted time. The drink covers the fluid (its carbs count too); gels and bars make up the rest of the carbs,
+      one portion at a time at even intervals (taken with water at the nearest aid station). Under an hour nothing is needed; up to ~1¼ h a little;
+      60 g/h to 2½ h, 75 g/h beyond, as your gut is trained.</div>`;
+}
+
+async function saveRoadNutrition() {
+  const v = k => document.getElementById(`nu-${k}`).value;
+  await savePlan({ nutrition: { carbs_gh: v("carbs_gh"), fluid_mlh: v("fluid_mlh") } });
+}
+
+async function toggleRoadFuel(id) {
+  const items = new Set(plannerState.plan.nutrition.items || []);
+  items.has(id) ? items.delete(id) : items.add(id);
+  const y = window.scrollY;
+  await savePlan({ fuel_items: [...items] });
+  window.scrollTo(0, y);
+}
+
+// Each split's pace (or each climb / descent / flat's: "terrain") as a step line, the average
+// dashed, the profile behind coloured by terrain (with a GPX). Hover: the km, its terrain, the pace there.
+function drawRoadPaceChart(d) {
+  plannerState.charts.forEach(c => c.destroy()); plannerState.charts = [];
+  const terrain = d.has_gpx && plannerState.roadMode === "terrain";
+  const pieces = terrain ? d.sections.map(s => ({ a: s.start_km, b: s.end_km, pace: s.pace, time_s: s.time_s, color: SECTION_COLORS[s.type], type: s.type }))
+    : d.splits.map(s => ({ a: s.from_km, b: s.to_km, pace: s.pace, time_s: s.time_s, at_s: s.at_s, color: "#1f1d18" }));
+  const paces = pieces.map(x => x.pace).filter(Boolean), avg = d.pace;
+  const lo = Math.min(...paces, avg), hi = Math.max(...paces, avg), r = Math.max(hi - lo, 0.15);
+  const step = r > 3 ? 1 : r > 1.5 ? 0.5 : r > 0.6 ? 0.25 : r > 0.25 ? 1 / 6 : 1 / 12;   // ticks on round paces
+  const pLo = Math.floor((lo - 0.12 * r) / step) * step, pHi = Math.ceil((hi + 0.12 * r) / step) * step;   // tight
+  const steps = [];
+  pieces.forEach(x => { if (x.pace) steps.push({ x: x.a, y: x.pace, s: x }, { x: x.b, y: x.pace, s: x }); });
+  const typeAt = km => (d.sections.find(s => km >= s.start_km && km <= s.end_km) || {}).type;
+  const altAt = km => { const p = d.profile; let i = p.findIndex(q => q[0] >= km); if (i <= 0) return p[Math.max(i, 0)]?.[1];
+    const [k0, z0] = p[i - 1], [k1, z1] = p[i]; return z0 + (z1 - z0) * (km - k0) / (k1 - k0); };
+  // A hidden line along the whole course carries the tooltip, at any km.
+  const N = 200, track = Array.from({ length: N + 1 }, (_, i) => ({ x: i / N * d.distance_km, y: avg }));
+  const datasets = [
+    { data: track, yAxisID: "y", borderWidth: 0, pointRadius: 0, pointHitRadius: 0, showLine: false },
+    { data: steps, yAxisID: "y", borderWidth: 2.5, pointRadius: 0, tension: 0, fill: false, segment: { borderColor: ctx => ctx.p0.raw.s?.color || "#1f1d18" } },
+    { data: [{ x: 0, y: avg }, { x: d.distance_km, y: avg }], yAxisID: "y", borderColor: "#7a7263", borderWidth: 1.2, borderDash: [5, 4], pointRadius: 0 },
+  ];
+  if (d.has_gpx) datasets.push({ data: d.profile.map(([x, y]) => ({ x, y })), yAxisID: "alt", borderWidth: 1.2, fill: "start", pointRadius: 0, tension: 0, order: 10,
+    segment: { borderColor: ctx => SECTION_COLORS[typeAt(ctx.p0.parsed.x)] || "#9aa5b1",
+               backgroundColor: ctx => hexToRgba(SECTION_COLORS[typeAt(ctx.p0.parsed.x)] || "#9aa5b1", 0.22) } });
+  const zs = d.profile.map(p => p[1]), zLo = d.has_gpx ? Math.min(...zs) : 0, zHi = d.has_gpx ? Math.max(...zs) : 1;
+  const aStep = niceStep(Math.max(zHi - zLo, 50) / 4), aMin = Math.floor(zLo / aStep) * aStep, aMax = Math.ceil(zHi / aStep) * aStep;   // as trail
+  const atKm = km => { const sp = d.splits.find(s => km >= s.from_km && km <= s.to_km); if (!sp) return 0;
+    return sp.at_s - sp.time_s + (km - sp.from_km) / sp.km * sp.time_s; };
+  plannerState.charts.push(new Chart(document.getElementById("plan-pace"), {
+    type: "line", data: { datasets },
+    options: { responsive: true, animation: false, interaction: { mode: "nearest", axis: "x", intersect: false },
+      onHover: (e, els, chart) => { if (d.has_gpx && e.x >= chart.chartArea.left && e.x <= chart.chartArea.right) showPlanOnMap(chart.scales.x.getValueForPixel(e.x)); },
+      plugins: { legend: { display: false }, tooltip: { displayColors: false, filter: i => i.datasetIndex === 0, callbacks: {
+        title: items => { const km = items[0].parsed.x; return `${km.toFixed(1)} km${d.has_gpx ? ` · ${Math.round(altAt(km))} m` : ""}`; },
+        label: ctx => { const km = ctx.parsed.x, lines = [];
+          if (d.has_gpx) lines.push(cap(typeAt(km) || ""));
+          const pc = pieces.find(p => km >= p.a && km <= p.b);
+          if (pc?.pace) lines.push(`average pace here: ${fmtPace(pc.pace)}/km`);
+          const t = atKm(km); lines.push(`at ${hms(t)}${d.start_time ? ` (${clockAt(t)})` : ""}`);
+          return lines.filter(Boolean); } } } },
+      scales: { x: { type: "linear", min: 0, max: d.distance_km, grid: { display: false }, ticks: { callback: v => `${Math.round(v)} km`, maxTicksLimit: 12 } },
+                y: { position: "right", reverse: true, min: pLo, max: pHi, grid: { display: !d.has_gpx },
+                     afterBuildTicks: axis => { axis.ticks = roundTicks(pLo, pHi, step * Math.ceil((pHi - pLo) / step / 4)); }, ticks: { autoSkip: false, callback: v => fmtPace(v) } },
+                alt: { axis: "y", position: "left", display: d.has_gpx, min: aMin, max: aMax,
+                       afterBuildTicks: axis => { axis.ticks = roundTicks(aMin, aMax, aStep); }, ticks: { callback: v => `${v} m` } } } },
+  }));
+}
+
+// Nutrition: per-hour targets (yours, or suggested for the race's length), the fuel you pick per leg
+// (portions of the products in your fuel library), and how that meets each leg's carbs, fluid and
+// sodium: a square per amount, blue under the target (< 85%), green in range, red over (> 115%).
+const FUEL_TYPES = ["gel", "drink", "bar", "food"];
+let fuelLibrary = null, fuelSaveTimer = null;
+const fuelStatus = (got, want) => !want ? "" : got < want * 0.85 ? "under" : got > want * 1.15 ? "over" : "ok";
+const fuelSquare = (got, want) => { const st = fuelStatus(got, want);
+  return st ? `<i class="fuel-sq fuel-${st}" title="${Math.round(got)} of ${Math.round(want)} (${Math.round(got / want * 100)}%)"></i>` : ""; };
+
+async function renderNutrition() {
+  if (!fuelLibrary) { try { fuelLibrary = await (await fetch(`${API}/planner/fuel`)).json(); } catch (e) { fuelLibrary = []; } }
+  const d = plannerState.plan, n = d.nutrition, T = n.targets, S = n.suggested;
+  plannerState.fuel = JSON.parse(JSON.stringify(n.fuel || {}));
+  const names = ["Start", ...d.aid.map((a, i) => a.name || `Aid ${i + 1}`), "Finish"];
+  const field = (k, label, unit, step) => `<label>${label}<span><input type="number" id="nu-${k}" value="${T[k]}" step="${step}" min="0"> ${unit}</span></label>`;
+  const lib = fuelLibrary;
+  document.getElementById("plan-nutrition").innerHTML = `
+    <div class="nu-targets">
+      ${field("carbs_gh", "carbs", "g/h", 5)}${field("fluid_mlh", "fluid", "ml/h", 50)}${field("sodium_mgh", "sodium", "mg/h", 50)}
+      ${field("flask_ml", "one flask", "ml", 50)}
+      <button class="btn" onclick="saveNutrition()">Save</button>
+      ${n.custom ? `<a href="#" class="nu-reset" onclick="savePlan({ nutrition: {} }); return false;">back to the suggested values</a>` : `<span class="muted-note" style="margin:0">suggested for a race of ${hms(d.total_s)}</span>`}
+    </div>
+    <details class="fuel-lib" ${lib.length ? "" : "open"}><summary>Your fuel library <small>${lib.length ? `${lib.length} product${lib.length === 1 ? "" : "s"} · all your plans` : "add your gels and drinks to pick them per leg"}</small></summary>
+      <div id="fuel-lib"></div></details>
+    <div class="card" style="padding:0;overflow-x:auto;margin-top:8px"><table class="laps plan-table nu-table">
+      <thead><tr><th>leg</th><th>time</th>${lib.map(f => `<th class="fuel-col" title="${esc(f.name)}: ${f.carbs_g} g carbs${f.fluid_ml ? `, ${f.fluid_ml} ml` : ""}${f.sodium_mg ? `, ${f.sodium_mg} mg sodium` : ""} per portion">${esc(f.name)}</th>`).join("")}
+        <th>carbs</th><th>fluid</th><th>sodium</th></tr></thead>
+      <tbody>${n.legs.map((l, i) => `<tr id="nu-leg-${i}"><td class="name">${esc(names[i])} → ${esc(names[i + 1])}<small>${(l.to_km - l.from_km).toFixed(1)} km</small></td>
+        <td>${hms(l.time_s)}</td>
+        ${lib.map(f => `<td class="fuel-col"><input type="number" min="0" step="${f.type === "drink" ? 0.5 : 1}" value="${plannerState.fuel[i]?.[f.id] || ""}" placeholder="0"
+          oninput="setFuel(${i}, ${f.id}, this.value)"></td>`).join("")}
+        <td class="nu-carbs"></td><td class="nu-fluid"></td><td class="nu-sodium"></td></tr>`).join("")}
+        <tr class="plan-total" id="nu-total"><td class="name">Whole race</td><td>${hms(d.moving_s)}</td>${lib.map(() => `<td class="fuel-col"></td>`).join("")}
+          <td class="nu-carbs"></td><td class="nu-fluid"></td><td class="nu-sodium"></td></tr></tbody></table></div>
+    <div class="fuel-legend"><span><i class="fuel-sq fuel-under"></i>under the target (&lt; 85%)</span><span><i class="fuel-sq fuel-ok"></i>in range</span>
+      <span><i class="fuel-sq fuel-over"></i>over (&gt; 115%)</span></div>
+    <div class="muted-note">Each leg's targets come from your per-hour amounts and its predicted time. Without fuel picked, the table shows what to carry:
+      all the carbs as your library's gel, the fluid as flasks (refilled at every aid station). Last row: the whole race, with each product's total. Suggested starting points (sports-nutrition guidance): carbs ${S.carbs_gh} g/h
+      for a race this long (about 30–60 g/h up to 2½ h, 60–90 g/h beyond, as your gut is trained), fluid 500–750 ml/h (more in the heat: weigh yourself
+      before and after long runs to know your sweat rate), sodium 300–600 mg/h.</div>`;
+  renderFuelLibrary();
+  updateFuelTotals();
+}
+
+// Each leg's carbs / fluid / sodium: from the fuel picked (vs the target), else the target to carry.
+function updateFuelTotals() {
+  const d = plannerState.plan, n = d.nutrition, lib = fuelLibrary || [];
+  const tot = { carbs: [0, 0], fluid: [0, 0], sodium: [0, 0] };
+  const gel = lib.find(f => f.type === "gel" && f.carbs_g > 0);   // "≈ n gels": your library's gel
+  n.legs.forEach((l, i) => {
+    const row = document.getElementById(`nu-leg-${i}`);
+    if (!row) return;
+    const picks = plannerState.fuel[i] || {}, any = Object.values(picks).some(q => q > 0);
+    const got = { carbs: 0, fluid: 0, sodium: 0 };
+    lib.forEach(f => { const q = +picks[f.id] || 0; got.carbs += q * f.carbs_g; got.fluid += q * f.fluid_ml; got.sodium += q * f.sodium_mg; });
+    const want = { carbs: l.carbs_g, fluid: l.fluid_ml, sodium: l.sodium_mg };
+    for (const k of ["carbs", "fluid", "sodium"]) { tot[k][0] += got[k]; tot[k][1] += want[k]; }
+    const unit = { carbs: "g", fluid: "ml", sodium: "mg" };
+    const gels = gel ? Math.ceil(l.carbs_g / gel.carbs_g - 0.15) : null;
+    const plain = { carbs: `<b>${l.carbs_g} g</b>${gels != null ? ` <small>≈ ${gels} × ${esc(gel.name)}</small>` : ""}`,
+                    fluid: `<b>${l.fluid_ml} ml</b>${l.flasks != null ? ` <small>≈ ${l.flasks} flask${l.flasks === 1 ? "" : "s"}</small>` : ""}`,
+                    sodium: `${l.sodium_mg} mg` };
+    for (const k of ["carbs", "fluid", "sodium"]) {
+      row.querySelector(`.nu-${k}`).innerHTML = any
+        ? `${fuelSquare(got[k], want[k])}<b>${Math.round(got[k])}</b><small> / ${want[k]} ${unit[k]}</small>` : plain[k];
+    }
+  });
+  const anyLeg = Object.values(plannerState.fuel).some(p => Object.values(p).some(q => q > 0));
+  const row = document.getElementById("nu-total"), T = n.total;
+  if (!row) return;
+  row.querySelector(".nu-carbs").innerHTML = anyLeg ? `${fuelSquare(tot.carbs[0], tot.carbs[1])}<b>${Math.round(tot.carbs[0])}</b><small> / ${tot.carbs[1]} g</small>`
+    : `<b>${T.carbs_g} g</b>${gel ? ` <small>≈ ${Math.ceil(T.carbs_g / gel.carbs_g - 0.15)} × ${esc(gel.name)}</small>` : ""}`;
+  // Each product's total portions over the race.
+  row.querySelectorAll("td.fuel-col").forEach((td, k) => {
+    const f = lib[k], q = f ? Object.values(plannerState.fuel).reduce((t, p) => t + (+p[f.id] || 0), 0) : 0;
+    td.innerHTML = q ? `<b>${+q.toFixed(1)}</b>` : "";
+  });
+  row.querySelector(".nu-fluid").innerHTML = anyLeg ? `${fuelSquare(tot.fluid[0], tot.fluid[1])}<b>${(tot.fluid[0] / 1000).toFixed(1)}</b><small> / ${(tot.fluid[1] / 1000).toFixed(1)} l</small>` : `<b>${(T.fluid_ml / 1000).toFixed(1)} l</b>`;
+  row.querySelector(".nu-sodium").innerHTML = anyLeg ? `${fuelSquare(tot.sodium[0], tot.sodium[1])}<b>${(tot.sodium[0] / 1000).toFixed(1)}</b><small> / ${(tot.sodium[1] / 1000).toFixed(1)} g</small>` : `${(T.sodium_mg / 1000).toFixed(1)} g`;
+}
+
+function setFuel(leg, id, value) {
+  const f = plannerState.fuel;
+  f[leg] = f[leg] || {};
+  if (+value > 0) f[leg][id] = +value; else delete f[leg][id];
+  updateFuelTotals();
+  clearTimeout(fuelSaveTimer);   // saved a moment after you stop typing (no redraw)
+  fuelSaveTimer = setTimeout(() => fetch(`${API}/planner/${plannerState.plan.id}`, { method: "PUT", headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ fuel: plannerState.fuel }) }).then(r => r.json()).then(d => { if (plannerState.plan?.id === d.id) plannerState.plan.nutrition = d.nutrition; }), 700);
+}
+
+// The fuel library (all plans): products with carbs, fluid and sodium per portion.
+function renderFuelLibrary() {
+  const box = document.getElementById("fuel-lib");
+  if (!box) return;
+  const rows = fuelLibrary.length ? fuelLibrary : [];
+  box.innerHTML = `<table class="laps plan-table fuel-table"><thead><tr><th>product</th><th>type</th><th>carbs (g)</th><th>fluid (ml)</th><th>sodium (mg)</th><th></th></tr></thead>
+    <tbody>${rows.map((f, i) => `<tr>
+      <td class="name"><input value="${esc(f.name)}" oninput="fuelLibrary[${i}].name = this.value" placeholder="e.g. Maurten Gel 100"></td>
+      <td><select onchange="fuelLibrary[${i}].type = this.value">${FUEL_TYPES.map(t => `<option ${t === f.type ? "selected" : ""}>${t}</option>`).join("")}</select></td>
+      ${["carbs_g", "fluid_ml", "sodium_mg"].map(k => `<td><input type="number" min="0" value="${f[k] || 0}" oninput="fuelLibrary[${i}].${k} = +this.value"></td>`).join("")}
+      <td><button class="x" title="Remove" onclick="fuelLibrary.splice(${i}, 1); renderFuelLibrary()">×</button></td></tr>`).join("")}</tbody></table>
+    <div class="plan-aid-bar"><button class="pick" onclick="fuelLibrary.push({ name: '', type: 'gel', carbs_g: 25, fluid_ml: 0, sodium_mg: 0 }); renderFuelLibrary()">+ add a product</button>
+      <button class="btn" onclick="saveFuelLibrary()">Save library</button>
+      <span class="muted-note" style="margin:0">per portion: a gel, a bottle of drink, a bar… · a drink counts for fluid too</span></div>`;
+}
+
+async function saveFuelLibrary() {
+  const res = await fetch(`${API}/planner/fuel`, { method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify(fuelLibrary) });
+  if (!res.ok) { alert("Could not save the library"); return; }
+  fuelLibrary = await res.json();
+  renderNutrition();
+}
+
+function saveNutrition() {
+  const v = k => document.getElementById(`nu-${k}`).value;
+  savePlan({ nutrition: Object.fromEntries(["carbs_gh", "fluid_mlh", "sodium_mgh", "flask_ml"].map(k => [k, v(k)])) });
+}
+
+function setPlanPace() {
+  const cur = fmtPace(plannerState.plan.base.flat_pace);
+  const v = prompt("Your flat-equivalent pace for this race (m:ss per km): the pace you'd hold on the flat at this effort.", cur);
+  if (v == null) return;
+  const sec = parseClock(v);
+  if (!sec || sec < 150 || sec > 900) { alert("Type a pace like 5:10"); return; }
+  savePlan({ flat_pace: sec / 60 });
+}
+
+function planSectionsTable(d) {
+  return `<table class="laps plan-table"><thead><tr><th>#</th><th>section</th><th>km</th><th>length</th><th>climb</th><th>slope</th><th>altitude</th><th>time</th><th>pace</th><th>at</th></tr></thead>
+    <tbody>${d.sections.map((s, i) => `<tr class="${s.longest ? "plan-longest" : ""}">
+      <td>${i + 1}</td><td class="name"><span class="zone-dot" style="background:${SECTION_COLORS[s.type]}"></span>${cap(s.type)}${s.longest ? ` <span class="plan-tag" style="background:${SECTION_COLORS[s.type]}">longest ${s.type}</span>` : ""}</td>
+      <td>${s.start_km.toFixed(1)}–${s.end_km.toFixed(1)}</td><td>${s.km.toFixed(1)} km</td>
+      <td>${s.gain >= 10 ? `+${Math.round(s.gain)}` : ""}${s.loss >= 10 ? ` −${Math.round(s.loss)}` : ""}</td>
+      <td>${s.grade > 0 ? "+" : ""}${s.grade.toFixed(1)}%</td><td>${Math.round(s.alt_start)} → ${Math.round(s.alt_end)} m</td>
+      <td><b>${hms(s.time_s)}</b></td><td>${s.pace ? fmtPace(s.pace) : "—"}</td><td>${timeCell(s.arrive_s)}</td></tr>`).join("")}</tbody></table>`;
+}
+
+function renderAidTable() {
+  const d = plannerState.plan, A = plannerState.aid;
+  const pred = km => d.aid.find(a => Math.abs(a.km - km) < 1e-6);
+  const legs = d.legs;
+  document.getElementById("plan-aid").innerHTML = `<table class="laps plan-table plan-aid-table">
+    <thead><tr><th>name</th><th>km</th><th>stop (min)</th><th>altitude</th><th>from previous</th><th>arrival</th><th>leave</th><th></th></tr></thead>
+    <tbody><tr class="plan-fixed"><td class="name"><span class="aid-pin aid-start"></span>Start</td><td>0.0</td><td></td><td>${Math.round(d.profile[0][1])} m</td><td></td><td>${timeCell(0)}</td><td></td><td></td></tr>
+      ${A.map((a, i) => { const p = pred(a.km), leg = p && legs.find(l => Math.abs(l.to_km - a.km) < 1e-6);
+        return `<tr>
+        <td class="name"><span class="aid-pin">${i + 1}</span><input value="${esc(a.name || "")}" placeholder="Aid station ${i + 1}" oninput="plannerState.aid[${i}].name = this.value"></td>
+        <td><input type="number" step="0.1" min="0" max="${d.distance_km.toFixed(1)}" value="${a.km}" style="width:72px" oninput="plannerState.aid[${i}].km = +this.value"></td>
+        <td><input type="number" step="0.5" min="0" value="${a.stop_min}" style="width:60px" oninput="plannerState.aid[${i}].stop_min = +this.value"></td>
+        <td>${p ? `${Math.round(p.alt)} m` : ""}</td>
+        <td>${leg ? `${leg.km.toFixed(1)} km · +${Math.round(leg.gain)} m · ${hms(leg.time_s)}` : "<small>save to update</small>"}</td>
+        <td><b>${p ? timeCell(p.arrive_s) : ""}</b></td><td>${p ? timeCell(p.leave_s) : ""}</td>
+        <td><button class="x" title="Remove" onclick="plannerState.aid.splice(${i}, 1); renderAidTable()">×</button></td></tr>`; }).join("")}
+      <tr class="plan-fixed"><td class="name"><span class="aid-pin aid-finish"></span>Finish</td><td>${d.distance_km.toFixed(1)}</td><td></td><td>${Math.round(d.profile.at(-1)[1])} m</td>
+        <td>${(l => `${l.km.toFixed(1)} km · +${Math.round(l.gain)} m · ${hms(l.time_s)}`)(legs.at(-1))}</td><td><b>${timeCell(d.total_s)}</b></td><td></td><td></td></tr>
+    </tbody></table>`;
+}
+
+function addAid(km) {
+  const A = plannerState.aid, d = plannerState.plan;
+  A.push({ km: km != null ? +km.toFixed(1) : +(A.length ? Math.min(d.distance_km, A.at(-1).km + 10) : Math.min(10, d.distance_km / 2)).toFixed(1), name: "", stop_min: 2 });
+  A.sort((a, b) => a.km - b.km);
+  renderAidTable();
+  document.getElementById("aid-msg").textContent = "not saved yet";
+}
+
+function saveAid() {
+  const d = plannerState.plan;
+  const bad = plannerState.aid.find(a => !(a.km > 0 && a.km < d.distance_km));
+  if (bad) { document.getElementById("aid-msg").textContent = `Each station needs a km between 0 and ${d.distance_km.toFixed(1)}.`; return; }
+  savePlan({ aid: plannerState.aid.map(a => ({ km: a.km, name: a.name || "", stop_min: a.stop_min || 0 })) });
+}
+
+function drawPlanProfile(d) {
+  plannerState.charts.forEach(c => c.destroy()); plannerState.charts = [];
+  const pts = d.profile.map(([x, y]) => ({ x, y }));
+  const typeAt = km => (d.sections.find(s => km >= s.start_km && km <= s.end_km) || {}).type;
+  const zs = d.profile.map(p => p[1]), lo = Math.min(...zs), hi = Math.max(...zs);
+  const step = niceStep(Math.max(hi - lo, 50) / 4), yMin = Math.floor(lo / step) * step, yMax = Math.ceil(hi / step) * step;
+  const altAt = km => { const p = d.profile; let i = p.findIndex(q => q[0] >= km); if (i <= 0) return p[Math.max(i, 0)][1];
+    const [k0, z0] = p[i - 1], [k1, z1] = p[i]; return z0 + (z1 - z0) * (km - k0) / (k1 - k0); };
+  // Average pace of each piece: aid-station legs, or climbs / descents / flats (the toggle).
+  const mode = plannerState.paceMode || "legs";
+  const pieces = mode === "off" ? [] : mode === "legs"
+    ? d.legs.map(l => ({ a: l.from_km, b: l.to_km, pace: l.km ? l.time_s / 60 / l.km : null, color: "#1f1d18" }))
+    : d.sections.map(s => ({ a: s.start_km, b: s.end_km, pace: s.pace, color: SECTION_COLORS[s.type] }));
+  const paces = pieces.map(p => p.pace).filter(Boolean).sort((a, b) => a - b);
+  const pMax = paces.length ? Math.min(paces.at(-1), paces[Math.floor(paces.length * 0.9)] * 1.3) : 10;
+  const pR = paces.length ? Math.max(pMax - paces[0], 0.5) : 1;   // tight scale: the differences between paces show
+  const pLo = paces.length ? Math.floor((paces[0] - 0.08 * pR) * 4) / 4 : 3, pHi = paces.length ? Math.ceil((pMax + 0.08 * pR) * 4) / 4 : 10;
+  const pStep = pHi - pLo > 2.5 ? 0.5 : 0.25;                        // ticks on round paces (every 15 or 30 s)
+  const paceData = [];
+  pieces.forEach(p => { if (p.pace) paceData.push({ x: p.a, y: Math.min(p.pace, pHi), piece: p }, { x: p.b, y: Math.min(p.pace, pHi), piece: p }); });   // joined: one step line
+  // Aid stations: numbered pins on the line, labels in a row above the chart (two rows when close).
+  const pins = {
+    id: "planPins", afterDatasetsDraw(chart) {
+      const { ctx, chartArea: a, scales: { x, y } } = chart;
+      ctx.save();
+      // Pace labels on the wider pieces.
+      if (pieces.length) {
+        const y1 = chart.scales.y1;
+        ctx.font = `600 10px ${THEME.font}`; ctx.textAlign = "center";
+        pieces.forEach(p => { if (!p.pace) return; const x0 = x.getPixelForValue(p.a), x1 = x.getPixelForValue(p.b);
+          if (x1 - x0 < 46) return;
+          ctx.fillStyle = p.color; ctx.fillText(fmtPace(p.pace), (x0 + x1) / 2, y1.getPixelForValue(Math.min(p.pace, pHi)) - 5); });
+      }
+      ctx.strokeStyle = "rgba(31,29,24,0.45)"; ctx.lineWidth = 1; ctx.setLineDash([3, 3]);
+      d.aid.forEach(s => { const px = Math.round(x.getPixelForValue(s.km)) + 0.5;
+        ctx.beginPath(); ctx.moveTo(px, y.getPixelForValue(altAt(s.km)) - 7); ctx.lineTo(px, a.top); ctx.stroke(); });
+      ctx.setLineDash([]);
+      d.aid.forEach((s, i) => {
+        const px = x.getPixelForValue(s.km), py = y.getPixelForValue(altAt(s.km));
+        ctx.fillStyle = "#e0a43a"; ctx.strokeStyle = "white"; ctx.lineWidth = 2;
+        ctx.beginPath(); ctx.arc(px, py, 7, 0, 2 * Math.PI); ctx.fill(); ctx.stroke();
+        ctx.fillStyle = "white"; ctx.font = `700 9px ${THEME.font}`; ctx.textAlign = "center"; ctx.textBaseline = "middle";
+        ctx.fillText(String(i + 1), px, py + 0.5);
+      });
+      ctx.restore();
+    },
+  };
+  const near = km => d.aid.findIndex(s => Math.abs(s.km - km) < Math.max(0.3, d.distance_km / 150));
+  plannerState.charts.push(new Chart(document.getElementById("plan-profile"), {
+    type: "line", plugins: [pins],
+    data: { datasets: [
+      { data: pts, borderWidth: 1.5, pointRadius: 0, fill: "start", tension: 0, yAxisID: "y",
+        segment: { borderColor: ctx => SECTION_COLORS[typeAt(ctx.p0.parsed.x)] || "#9aa5b1",
+                   backgroundColor: ctx => hexToRgba(SECTION_COLORS[typeAt(ctx.p0.parsed.x)] || "#9aa5b1", 0.22) } },
+      { data: paceData, yAxisID: "y1", borderWidth: 2.5, pointRadius: 0, pointHitRadius: 0, spanGaps: false, fill: false, tension: 0,
+        segment: { borderColor: ctx => ctx.p0.raw.piece?.color || "#1f1d18" } },
+    ] },
+    options: { responsive: true, animation: false, layout: { padding: { top: 4 } },
+      onHover: (e, els, chart) => { if (e.x >= chart.chartArea.left && e.x <= chart.chartArea.right) showPlanOnMap(chart.scales.x.getValueForPixel(e.x)); },
+      interaction: { mode: "nearest", axis: "x", intersect: false },
+      plugins: { legend: { display: false }, tooltip: { displayColors: false, filter: i => i.datasetIndex === 0, callbacks: {
+        title: items => `${items[0].parsed.x.toFixed(1)} km · ${Math.round(items[0].parsed.y)} m`,
+        label: ctx => { const km = ctx.parsed.x, i = near(km), lines = [cap(typeAt(km) || "")];
+          const pc = pieces.find(p => km >= p.a && km <= p.b);
+          if (pc?.pace) lines.push(`average pace here: ${fmtPace(pc.pace)}/km`);
+          if (i >= 0) { const s = d.aid[i]; lines.push(`${i + 1}. ${s.name || "Aid station"}: arrive ${hms(s.arrive_s)}${d.start_time ? ` (${clockAt(s.arrive_s)})` : ""}, stop ${s.stop_min} min`); }
+          return lines; } } } },
+      scales: { x: { type: "linear", min: 0, max: d.distance_km, grid: { display: false }, ticks: { callback: v => `${Math.round(v)} km`, maxTicksLimit: 10 } },
+                y: { min: yMin, max: yMax, afterBuildTicks: axis => { axis.ticks = roundTicks(yMin, yMax, step); }, ticks: { callback: v => `${v} m` } },
+                y1: { display: pieces.length > 0, position: "right", reverse: true, min: pLo, max: pHi, grid: { display: false },
+                      ticks: { callback: v => fmtPace(v), stepSize: pStep }, title: { display: false } } } },
+  }));
+}
+
+function setPaceMode(m) { plannerState.paceMode = m; document.querySelectorAll("#pace-mode button").forEach(b => b.classList.toggle("on", b.dataset.m === m)); drawPlanProfile(plannerState.plan); }
+
+// The two sliders: how good the day is (−20% … +20% on the time) and how you spread the effort
+// (aggressive … conservative). Saved with the plan a moment after you let go.
+let planSliderTimer = null;
+function planSliders(d) {
+  const L = d.level;
+  return `<div class="plan-sliders">
+    <div><div class="ps-head"><span>Outlook</span><b id="ps-outlook-val">${d.outlook > 0 ? "+" : ""}${Math.round(d.outlook)}%</b></div>
+      <input type="range" min="-20" max="20" step="1" value="${d.outlook}" list="ps-marks" oninput="planSliderMove('outlook', this.value)">
+      <datalist id="ps-marks">${(t => `<option value="${-t}"></option><option value="0"></option><option value="${t}"></option>`)(L.spread ? Math.round(L.spread * 100) : 7)}</datalist>
+      <div class="ps-ends"><span>optimistic</span><span>your model</span><span>pessimistic</span></div>
+      <div class="ps-note">ticks at ±${L.spread ? Math.round(L.spread * 100) : 12}%: how far your races usually land from the model</div></div>
+    <div><div class="ps-head"><span>Strategy</span><b id="ps-strategy-val">${strategyLabel(d.strategy)}</b></div>
+      <input type="range" min="-1" max="1" step="0.1" value="${d.strategy}" oninput="planSliderMove('strategy', this.value)">
+      <div class="ps-ends"><span>aggressive (fast start)</span><span>your usual</span><span>conservative (strong finish)</span></div>
+      <div class="ps-note">same total time · 1st half <b>${hms(d.halves.first_s)}</b> · 2nd half <b>${hms(d.halves.second_s)}</b></div></div>
+    <div class="ps-result">
+      <div><span>your time</span><b>${hms(d.total_s)}</b><small>${(t => t ? `${t > 0 ? "+" : "−"}${hms(Math.abs(t))} vs the model` : "Same as the model")(Math.round(d.total_s - d.base.total_s))}</small></div>
+      ${d.start_time ? `<div><span>finish</span><b>${clockAt(d.total_s)}</b><small>start ${d.start_time}</small></div>` : ""}
+      <div><span>average pace</span><b>${fmtPace(d.pace)}<em>/km</em></b><small>moving, all the course</small></div>
+      <div><span>average GAP</span><b>${fmtPace(d.flat_pace)}<em>/km</em></b><small>flat-equivalent (race model)</small></div>
+      ${Object.keys(d.scores || {}).length ? `<div class="ps-scores"><span>Estimated scores</span><div class="rtags">${[["utmb", "UTMB"], ["itra", "ITRA"], ["betrail", "Betrail"]]
+        .filter(([k]) => d.scores[k]).map(([k, l]) => { const x = d.scores[k], v = k === "betrail" ? x.value.toFixed(1) : Math.round(x.value);
+          return `<span class="rtag rtag-${k}" title="Estimated from ${x.n} of your ${l} results: score against your flat-equivalent speed and race length · usually within ±${x.error_pct}%">${l} ${v}</span>`; }).join("")}</div></div>` : ""}
+    </div>
+  </div>`;
+}
+const strategyLabel = s => Math.abs(s) < 0.05 ? (plannerState.plan?.kind === "road" ? "Even pace" : "Your usual") : s < 0 ? `Aggressive ${Math.round(-s * 100)}%` : `Conservative ${Math.round(s * 100)}%`;
+function planSliderMove(which, v) {
+  v = +v;
+  document.getElementById(`ps-${which}-val`).textContent = which === "outlook" ? `${v > 0 ? "+" : ""}${v}%` : strategyLabel(v);
+  clearTimeout(planSliderTimer);
+  planSliderTimer = setTimeout(() => { const y = window.scrollY; savePlan({ [which]: v }).then(() => window.scrollTo(0, y)); }, 450);
+}
+
+// The course point at a km (the map line is evenly spaced along the course).
+function planLineAt(km) {
+  const d = plannerState.plan, n = d.line.length - 1;
+  return d.line[Math.max(0, Math.min(n, Math.round(km / d.distance_km * n)))];
+}
+
+// Hovering the profile: a dot at that km on the map.
+function showPlanOnMap(km) {
+  const map = plannerState.map;
+  if (!map || km == null) return;
+  const ll = planLineAt(km);
+  if (!plannerState.hover) plannerState.hover = L.circleMarker(ll, { radius: 7, color: "#1f1d18", weight: 2.5, fillColor: "white", fillOpacity: 1 }).addTo(map);
+  else plannerState.hover.setLatLng(ll);
+}
+
+async function drawPlanMap(d) {
+  if (plannerState.map) { plannerState.map.remove(); plannerState.map = null; }
+  const el = document.getElementById("plan-map");
+  const token = await getMapboxToken();
+  if (!document.body.contains(el) || !d.line.length) return;
+  const mid = d.line[Math.floor(d.line.length / 2)];
+  const inFrance = mid[0] > FRANCE.minLat && mid[0] < FRANCE.maxLat && mid[1] > FRANCE.minLon && mid[1] < FRANCE.maxLon;
+  const { layers, choice } = mapLayers(token, inFrance);
+  const map = plannerState.map = L.map(el, { scrollWheelZoom: false, layers: [layers[choice]] });
+  L.control.layers(layers, null, { position: "topright" }).addTo(map);
+  map.on("click", () => map.scrollWheelZoom.enable());
+  L.polyline(d.line, { color: "white", weight: 6, opacity: 0.9 }).addTo(map);
+  const line = L.polyline(d.line, { color: "#a8542e", weight: 3.5 }).addTo(map);
+  L.circleMarker(d.line[0], { radius: 6, color: "white", weight: 2, fillColor: "#3f8f3a", fillOpacity: 1 }).bindTooltip("Start").addTo(map);
+  L.circleMarker(d.line.at(-1), { radius: 6, color: "white", weight: 2, fillColor: "#1f1d18", fillOpacity: 1 }).bindTooltip("Finish").addTo(map);
+  // Aid stations: on the line at their km.
+  const total = d.distance_km;
+  d.aid.forEach((s, n) => L.marker(planLineAt(s.km), { zIndexOffset: 500,
+      icon: L.divIcon({ className: "", html: `<span class="aid-pin aid-pin-map">${n + 1}</span>`, iconSize: [20, 20], iconAnchor: [10, 10] }) })
+    .bindTooltip(`<b>${n + 1}. ${esc(s.name || "Aid station")}</b> · ${s.km.toFixed(1)} km<br>${hms(s.arrive_s)}${d.start_time ? ` · ${clockAt(s.arrive_s)}` : ""}`).addTo(map));
+  plannerState.hover = null;
+  map.fitBounds(line.getBounds(), { padding: [20, 20] });
+}
+
+/* ---------- Routes you run regularly (analytics/routes.py) ---------- */
+const routesState = { list: null, route: null, filter: "all", sort: { key: "date", dir: -1 }, charts: [], map: null };
+const CAT_COLORS = { race: "#a50f15", workout: "#2d6b29", easy: "#2f6aa6", long: "#1f4e8c" };
+const ordinal = n => `${n}${n % 100 >= 11 && n % 100 <= 13 ? "th" : ({ 1: "st", 2: "nd", 3: "rd" }[n % 10] || "th")}`;
+
+async function loadRoutes() {
+  document.getElementById("routes-list").style.display = "";
+  document.getElementById("route-detail").style.display = "none";
+  if (!routesState.list) {
+    try { routesState.list = await (await fetch(`${API}/routes/`)).json(); } catch (e) { routesState.list = []; }
+  }
+  if (!routesState.list.length) { await detectRoutes(); return; }
+  renderRouteCards();
+}
+
+async function detectRoutes() {
+  const btn = document.getElementById("routes-detect");
+  btn.disabled = true; btn.textContent = "Reading your tracks…";
+  document.getElementById("route-cards").innerHTML = `<div class="loading">Comparing the GPS tracks of all your runs (about a minute the first time)…</div>`;
+  try { routesState.list = await (await fetch(`${API}/routes/detect`, { method: "POST" })).json(); } catch (e) { routesState.list = []; }
+  btn.disabled = false; btn.textContent = "Detect again";
+  renderRouteCards();
+}
+
+// A route's line as a small SVG (lat/lon projected, north up), green dot at the start.
+function routeSvg(line, color = "#1f1d18", w = 100, h = 64) {
+  if (!line?.length) return `<svg viewBox="0 0 ${w} ${h}"></svg>`;
+  const lat0 = line.reduce((t, p) => t + p[0], 0) / line.length, kx = Math.cos(lat0 * Math.PI / 180);
+  const xs = line.map(p => p[1] * kx), ys = line.map(p => p[0]);
+  const x0 = Math.min(...xs), x1 = Math.max(...xs), y0 = Math.min(...ys), y1 = Math.max(...ys);
+  const sc = Math.min((w - 8) / Math.max(x1 - x0, 1e-6), (h - 8) / Math.max(y1 - y0, 1e-6));
+  const ox = (w - (x1 - x0) * sc) / 2, oy = (h - (y1 - y0) * sc) / 2;
+  const pts = line.map((p, i) => `${(ox + (xs[i] - x0) * sc).toFixed(1)},${(h - oy - (ys[i] - y0) * sc).toFixed(1)}`).join(" ");
+  const [sx, sy] = pts.split(" ")[0].split(",");
+  return `<svg viewBox="0 0 ${w} ${h}"><polyline points="${pts}" fill="none" stroke="${color}" stroke-width="1.6" stroke-linejoin="round" vector-effect="non-scaling-stroke"/>
+    <circle cx="${sx}" cy="${sy}" r="2.2" fill="#3f8f3a"/></svg>`;
+}
+
+function renderRouteCards() {
+  const list = routesState.list || [];
+  document.getElementById("route-cards").innerHTML = !list.length ? `<div class="muted-note">No route run 10 times or more yet.</div>` :
+    list.map(r => `<div class="route-card" onclick="openRoute(${r.id})" style="border-top:3px solid ${TERRAIN_COLORS[r.terrain] || "#9aa5b1"}">
+      ${routeSvg(r.line, TERRAIN_COLORS[r.terrain] || "#1f1d18")}
+      <div class="rc-body">
+        <div class="rc-name">${esc(r.name)}</div>
+        <div class="rc-meta">${r.distance_km?.toFixed(1)} km · +${Math.round(r.elevation_gain || 0)} m · ${r.kind || ""}${r.terrain ? ` · <span style="color:${TERRAIN_COLORS[r.terrain]}">${r.terrain}</span>` : ""}</div>
+        <div class="rc-meta">${r.first?.slice(0, 4)}${r.last?.slice(0, 4) !== r.first?.slice(0, 4) ? `–${r.last.slice(0, 4)}` : ""}</div>
+        <div class="rc-nums">
+          <div><b>${r.runs}</b><small>runs</small></div>
+          <div style="text-align:right">${r.best ? `<b>${fmtRaceTime(r.best.duration_s)}</b><small>best · ${r.best.date.slice(0, 4)}</small>` : ""}</div>
+        </div>
+      </div></div>`).join("");
+}
+
+async function openRoute(id) {
+  switchTab("routes");
+  document.getElementById("routes-list").style.display = "none";
+  const box = document.getElementById("route-detail");
+  box.style.display = "";
+  box.innerHTML = `<div class="loading">Loading…</div>`;
+  let r;
+  try { r = await (await fetch(`${API}/routes/${id}`)).json(); } catch (e) { box.innerHTML = `<div class="error">Could not load the route.</div>`; return; }
+  routesState.route = r;
+  routesState.filter = "all";
+  const stat = (label, value, sub) => `<div class="stat"><div class="stat-label">${label}</div><div class="stat-value">${value}</div><div class="stat-sub">${sub}</div></div>`;
+  const effs = r.list.filter(x => x.efficiency).map(x => x.efficiency);
+  box.innerHTML = `
+    <span class="back" onclick="loadRoutes()">&larr; back to routes</span>
+    <h2 class="detail-title"><b id="route-name" title="Click to rename">${esc(r.name)}</b></h2>
+    <div class="detail-date">${r.kind || ""} · ${r.distance_km?.toFixed(1)} km · +${Math.round(r.elevation_gain || 0)} m · run ${r.runs} times, ${r.first} – ${r.last}
+      ${r.custom ? ` · <a href="#" onclick="renameRoute(''); return false;">automatic name</a>` : ""}</div>
+    <div class="stat-grid" style="margin-top:12px">
+      ${stat("runs", r.runs, `${r.first?.slice(0, 4)} – ${r.last?.slice(0, 4)}`)}
+      ${r.best ? stat("best time", `<a href="#" onclick="openActivity(${r.best.id}); return false;">${fmtRaceTime(r.best.duration_s)}</a>`, `${r.best.date} · ${fmtPace(r.best.pace)}/km`) : ""}
+      ${r.best_efficiency ? stat("best efficiency", `<a href="#" onclick="openActivity(${r.best_efficiency.id}); return false;">${r.best_efficiency.efficiency.toFixed(2)}</a><span class="rec-unit"> m/beat</span>`, `${r.best_efficiency.date} · average ${(effs.reduce((a, b) => a + b, 0) / effs.length).toFixed(2)}`) : ""}
+    </div>
+    <div class="section-title">Map<span class="section-sub">every run on the route · bold: the most typical one</span></div>
+    <div class="card" style="padding:0;"><div id="route-map" style="height:340px"></div></div>
+    <div class="section-title chart-title t-pace">Pace over the years<span class="section-sub">each run · colour: easy, long, workout, race · ★ best time · click a dot to open the run</span></div>
+    <div class="card"><canvas id="route-pace" height="70"></canvas></div>
+    <div class="section-title chart-title t-hr">Efficiency over the years<span class="section-sub">metres per heartbeat (distance ÷ heartbeats) · higher = fitter · line: average of the last 8 runs</span></div>
+    <div class="card"><canvas id="route-eff" height="70"></canvas></div>
+    <div class="chart-bar"><div class="section-title">Runs</div><div class="races-filters" id="route-filter"></div></div>
+    <div class="card" style="padding:0;overflow-x:auto;margin-top:8px" id="route-table"></div>
+    <div class="muted-note">Efficiency compares easy runs best (same course, so the same climbs): it rises with fitness, falls with heat and fatigue.
+      Temperature: Garmin's weather when it was fetched, else the watch's (°w, reads a few degrees warm: body heat). ↺ = the loop run the other way round.</div>`;
+  const name = document.getElementById("route-name");
+  name.contentEditable = "true"; name.classList.add("editable"); name.dataset.before = name.textContent;
+  name.onkeydown = e => { if (e.key === "Enter") { e.preventDefault(); name.blur(); } else if (e.key === "Escape") { name.textContent = name.dataset.before; name.blur(); } };
+  name.onblur = () => { if (name.textContent.trim() !== name.dataset.before) renameRoute(name.textContent.trim()); };
+  drawRouteMapAll(r);
+  drawRouteCharts(r);
+  renderRouteTable();
+}
+
+async function renameRoute(n) {
+  const r = routesState.route;
+  const res = await fetch(`${API}/routes/${r.id}/name`, { method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ name: n || null }) });
+  if (!res.ok) return;
+  routesState.list = null;
+  openRoute(r.id);
+}
+
+function openActivity(id) { switchTab("activities"); showDetail(id); }
+
+async function drawRouteMapAll(r) {
+  if (routesState.map) { routesState.map.remove(); routesState.map = null; }
+  const el = document.getElementById("route-map");
+  const token = await getMapboxToken();
+  if (!document.body.contains(el) || !r.line.length) return;
+  const mid = r.line[Math.floor(r.line.length / 2)];
+  const inFrance = mid[0] > FRANCE.minLat && mid[0] < FRANCE.maxLat && mid[1] > FRANCE.minLon && mid[1] < FRANCE.maxLon;
+  const { layers, choice } = mapLayers(token, inFrance);
+  const map = routesState.map = L.map(el, { scrollWheelZoom: false, layers: [layers[choice]] });
+  L.control.layers(layers, null, { position: "topright" }).addTo(map);
+  map.on("click", () => map.scrollWheelZoom.enable());
+  Object.values(r.lines).forEach(line => L.polyline(line, { color: "#a8542e", weight: 2, opacity: 0.18 }).addTo(map));
+  L.polyline(r.line, { color: "white", weight: 6, opacity: 0.9 }).addTo(map);
+  const bold = L.polyline(r.line, { color: "#a8542e", weight: 3.5 }).addTo(map);
+  L.circleMarker(r.line[0], { radius: 6, color: "white", weight: 2, fillColor: "#3f8f3a", fillOpacity: 1 }).bindTooltip("Start").addTo(map);
+  map.fitBounds(bold.getBounds(), { padding: [20, 20] });
+}
+
+function drawRouteCharts(r) {
+  routesState.charts.forEach(c => c.destroy()); routesState.charts = [];
+  const t = d => new Date(d + "T00:00:00").getTime();
+  const runs = r.list.filter(x => x.pace && x.pace < 12);
+  const years = [...new Set(r.list.map(x => x.date.slice(0, 4)))];
+  const xAxis = { type: "linear", min: t(r.first) - 864e5 * 20, max: t(r.last) + 864e5 * 20, grid: { display: false },
+    afterBuildTicks: axis => { axis.ticks = years.map(y => ({ value: t(`${y}-01-01`) })).filter(v => v.value >= axis.min); },
+    ticks: { callback: v => new Date(v).getFullYear() } };
+  const tip = items => { const x = items[0].raw.run; return `${x.date} · ${x.distance_km.toFixed(1)} km · ${x.category || ""}`; };
+  const color = x => CAT_COLORS[x.category] || "#9aa5b1";
+  const best = r.best?.id;
+  const open = (e, els, chart) => { const raw = els.length && chart.data.datasets[els[0].datasetIndex].data[els[0].index]; if (raw?.run) openActivity(raw.run.id); };
+  routesState.charts.push(new Chart(document.getElementById("route-pace"), {
+    type: "scatter",
+    data: { datasets: [{ data: runs.map(x => ({ x: t(x.date), y: x.pace, run: x })), pointRadius: runs.map(x => x.id === best ? 8 : 3.5),
+      pointStyle: runs.map(x => x.id === best ? "star" : "circle"), backgroundColor: runs.map(x => hexToRgba(color(x), 0.8)),
+      borderColor: runs.map(x => x.id === best ? "#d4a017" : "white"), borderWidth: runs.map(x => x.id === best ? 2 : 1) }] },
+    options: { responsive: true, animation: false, onClick: open,
+      plugins: { legend: { display: false }, tooltip: { displayColors: false, callbacks: { title: tip,
+        label: ctx => { const x = ctx.raw.run; return `${fmtRaceTime(x.duration_s)} · ${fmtPace(x.pace)}/km${x.avg_hr ? ` · ${Math.round(x.avg_hr)} bpm` : ""}`; } } } },
+      scales: { x: xAxis, y: { reverse: true, ticks: { callback: v => fmtPace(v), maxTicksLimit: 5 } } } },
+  }));
+  const effRuns = r.list.filter(x => x.efficiency);
+  const trend = effRuns.map((x, i) => { const w = effRuns.slice(Math.max(0, i - 7), i + 1); return { x: t(x.date), y: w.reduce((a, b) => a + b.efficiency, 0) / w.length }; });
+  routesState.charts.push(new Chart(document.getElementById("route-eff"), {
+    data: { datasets: [
+      { type: "line", data: trend, borderColor: "#1f1d18", borderWidth: 1.5, pointRadius: 0, pointHitRadius: 0, tension: 0.3, order: 0 },
+      { type: "scatter", data: effRuns.map(x => ({ x: t(x.date), y: x.efficiency, run: x })), pointRadius: 3.5,
+        backgroundColor: effRuns.map(x => hexToRgba(color(x), 0.8)), borderColor: "white", borderWidth: 1, order: 1 } ] },
+    options: { responsive: true, animation: false, onClick: open, interaction: { mode: "nearest", intersect: true },
+      plugins: { legend: { display: false }, tooltip: { displayColors: false, filter: i => i.datasetIndex === 1, callbacks: { title: tip,
+        label: ctx => { const x = ctx.raw.run; return `${x.efficiency.toFixed(2)} m/beat · ${fmtPace(x.pace)}/km at ${Math.round(x.avg_hr)} bpm`; } } } },
+      scales: { x: xAxis, y: { ticks: { maxTicksLimit: 5, callback: v => v.toFixed(2) } } } },
+  }));
+}
+
+function setRouteFilter(f) { routesState.filter = f; renderRouteTable(); }
+function sortRoute(key) { const s = routesState.sort; s.dir = s.key === key ? -s.dir : (key === "date" || key === "efficiency" ? -1 : 1); s.key = key; renderRouteTable(); }
+
+function renderRouteTable() {
+  const r = routesState.route, f = routesState.filter, s = routesState.sort;
+  const label = c => c === "all" ? "All" : ({ easy: "Easy run", long: "Long run", workout: "Workout", race: "Race" }[c]);
+  const cats = ["all", ...["easy", "long", "workout", "race"].filter(c => r.list.some(x => x.category === c))];
+  document.getElementById("route-filter").innerHTML = cats.map(c => `<button class="pick ${f === c ? "on" : ""}" onclick="setRouteFilter('${c}')">${label(c)}</button>`).join("");
+  const missing = s.dir > 0 ? Infinity : -Infinity;
+  const rows = r.list.filter(x => f === "all" || x.category === f).slice()
+    .sort((a, b) => { const va = a[s.key] ?? missing, vb = b[s.key] ?? missing; return (va < vb ? -1 : va > vb ? 1 : 0) * s.dir; });
+  const ranked = r.list.filter(x => x.duration_s).slice().sort((a, b) => a.duration_s - b.duration_s).map(x => x.id);
+  const th = (key, text) => `<th class="${s.key === key ? "on" : ""}" onclick="sortRoute('${key}')">${text}${s.key === key ? (s.dir > 0 ? " ↑" : " ↓") : ""}</th>`;
+  document.getElementById("route-table").innerHTML = `<table class="perf route-table">
+    <thead><tr>${th("date", "date")}${th("distance_km", "km")}${th("duration_s", "time")}${th("pace", "pace")}${th("avg_hr", "HR")}${th("efficiency", "m/beat")}${th("temp_watch", "temp")}<th>type</th></tr></thead>
+    <tbody>${rows.map(x => `<tr onclick="openActivity(${x.id})" title="Open the run">
+      <td>${x.date}${x.reversed ? ` <span title="the other way round">↺</span>` : ""}</td><td>${x.distance_km.toFixed(1)}</td>
+      <td>${fmtRaceTime(x.duration_s)}${ranked.indexOf(x.id) > -1 && ranked.indexOf(x.id) < 3 ? ` <small class="rt-rank">${ordinal(ranked.indexOf(x.id) + 1)}</small>` : ""}</td>
+      <td>${x.pace ? fmtPace(x.pace) : "—"}</td><td>${x.avg_hr ? Math.round(x.avg_hr) : "—"}</td>
+      <td><b>${x.efficiency ? x.efficiency.toFixed(2) : "—"}</b></td>
+      <td>${x.temp != null ? `${Math.round(x.temp)}°` : x.temp_watch != null ? `<span title="watch temperature">${Math.round(x.temp_watch)}°w</span>` : "—"}</td>
+      <td>${x.category ? `<span class="tag tag-${x.category}">${CATEGORY_TAGS[x.category] || x.category}</span>` : ""}</td></tr>`).join("")}</tbody></table>`;
+}
+
+// Activity page: the route the run is on.
+function renderRouteBadge(a) {
+  const el = document.getElementById("route-row");
+  if (!el) return;
+  const r = a.route;
+  el.innerHTML = r ? `<span class="rl-label">Route</span><a href="#" class="rl-route" onclick="openRoute(${r.id}); return false;">${esc(r.name)}</a>
+    <span class="muted-note" style="margin:0">${ordinal(r.nth)} time of ${r.runs}${r.reversed ? " (the other way round)" : ""}${r.time_rank ? ` · ${ordinal(r.time_rank)} fastest` : ""}${r.efficiency_vs_avg != null
+      ? ` · efficiency <b style="color:${r.efficiency_vs_avg >= 0 ? "#2d6b29" : "#a50f15"}">${r.efficiency_vs_avg > 0 ? "+" : ""}${r.efficiency_vs_avg}%</b> vs your average there` : ""}</span>` : "";
+}
+
+/* ---------- Equipment: shoes (Profile), and the pair on each run (activity page) ---------- */
+const shoesState = { list: null, editing: null };
+const SHOE_SURFACES = ["road", "cross", "trail"], SHOE_USES = ["easy", "workout", "race"];
+const SHOE_USE_LABEL = { easy: "Easy run", workout: "Workout", race: "Race" };
+const shoeUse = a => ["workout", "race"].includes(a.category?.category) ? a.category.category : "easy";   // long runs: easy shoes
+const useLabel = u => SHOE_USE_LABEL[u] || cap(u);
+const shoeName = s => `${s.brand} ${s.model}${s.version ? ` ${s.version}` : ""}${s.pair ? ` #${s.pair}` : ""}`;
+const cap = t => t ? t[0].toUpperCase() + t.slice(1) : "";
+
+async function fetchShoes() {
+  try { shoesState.list = await (await fetch(`${API}/shoes/`)).json(); } catch (e) { shoesState.list = shoesState.list || []; }
+  return shoesState.list;
+}
+async function loadShoes() { await fetchShoes(); renderShoes(); }
+
+function renderShoes() {
+  const list = shoesState.list || [], active = list.filter(s => !s.retired), retired = list.filter(s => s.retired);
+  const row = s => `<tr>
+      <td class="name"><b>${esc(s.brand)}</b></td><td class="name">${esc(s.model)}</td><td>${esc(s.version || "")}</td><td>${s.pair ? `#${s.pair}` : ""}</td>
+      <td>${cap(s.surface)}</td><td>${useLabel(s.use)}</td>
+      ${s.retired ? `<td>${s.since || ""}</td><td>${s.retired}</td>` : `<td><button class="star ${s.is_default ? "on" : ""}" title="${s.is_default ? `Default pair for ${s.surface} ${useLabel(s.use).toLowerCase()}s` : `Make it the default for ${s.surface} ${useLabel(s.use).toLowerCase()}s`}" onclick="toggleDefaultShoe(${s.id})">${s.is_default ? "★" : "☆"}</button></td><td>${s.since || ""}</td>`}
+      <td>${shoeWear(s)}</td>
+      <td class="acts">${s.retired
+        ? `<button class="txt" title="Back in use" onclick="retireShoe(${s.id}, false)">Put back</button>`
+        : `<button title="Edit" onclick="editShoe(${s.id})">✎</button><button class="txt" title="Retire this pair today" onclick="retireShoe(${s.id}, true)">Retire</button>`}<button title="Delete" onclick="deleteShoe(${s.id})">×</button></td></tr>`;
+  const head = rest => `<thead><tr><th>brand</th><th>model</th><th>version</th><th title="2 = your second pair of the same shoe">pair</th><th>surface</th><th>use</th>${rest}<th title="Km on the pair / its expected life">km / life</th><th></th></tr></thead>`;
+  document.getElementById("shoes-table").innerHTML = (!active.length
+    ? `<div class="muted-note" style="margin:12px 14px">No shoes in use: add a pair below.</div>`
+    : `<table class="laps shoes-table">${head(`<th title="The pair put on runs of this surface and use">default</th><th>since</th>`)}<tbody>${active.map(row).join("")}</tbody></table>`);
+  const box = document.getElementById("shoes-retired");
+  box.style.display = retired.length ? "" : "none";
+  box.querySelector(".card").innerHTML = `<table class="laps shoes-table">${head(`<th>since</th><th>retired</th>`)}<tbody>${retired.map(row).join("")}</tbody></table>`;
+  renderShoeForm();
+}
+
+// Km on the pair against its life (yours, or the usual for its use): a small bar, green under 70%,
+// amber to 90%, red beyond.
+function shoeWear(s) {
+  const life = s.life_km, f = life ? s.km / life : 0;
+  const color = f >= 0.9 ? "#a50f15" : f >= 0.7 ? "#e0a43a" : "#2d6b29";
+  return `<div class="shoe-wear" title="${Math.round(f * 100)}% of ${Math.round(life)} km${s.max_km ? "" : " (the usual for this use: set your own with ✎)"} · ${s.runs} run${s.runs === 1 ? "" : "s"}">
+    <span><b>${Math.round(s.km).toLocaleString()}</b><small> / ${Math.round(life).toLocaleString()} km</small></span>
+    <i><b style="width:${Math.min(100, f * 100).toFixed(0)}%;background:${color}"></b></i></div>`;
+}
+
+async function retireShoe(id, retire) {
+  if (await sendShoe("POST", `${API}/shoes/${id}/${retire ? "retire" : "unretire"}`)) renderShoes();
+}
+
+function renderShoeForm() {
+  const s = (shoesState.list || []).find(x => x.id === shoesState.editing) || { surface: "road", use: "easy" };
+  const opt = (vals, cur, label = cap) => vals.map(v => `<option value="${v}" ${v === cur ? "selected" : ""}>${label(v)}</option>`).join("");
+  document.getElementById("shoe-form").innerHTML = `
+    <span class="rl-label">${shoesState.editing ? "Edit" : "Add a pair"}</span>
+    <input id="sh-brand" placeholder="Brand" value="${esc(s.brand || "")}" size="10">
+    <input id="sh-model" placeholder="Model" value="${esc(s.model || "")}" size="12">
+    <input id="sh-version" placeholder="Version" value="${esc(s.version || "")}" size="6">
+    <input id="sh-pair" type="number" min="1" max="20" placeholder="Pair #" value="${s.pair || ""}" title="2 = your second pair of the same shoe" style="width:80px">
+    <select id="sh-surface">${opt(SHOE_SURFACES, s.surface)}</select>
+    <select id="sh-use">${opt(SHOE_USES, s.use, useLabel)}</select>
+    <label class="sh-check"><input type="checkbox" id="sh-default" ${s.is_default ? "checked" : ""}> default</label>
+    <label class="sh-date">since <input type="date" id="sh-since" value="${s.since || ""}"></label>
+    <input id="sh-max" type="number" min="50" max="3000" step="50" placeholder="Max km" value="${s.max_km || ""}" title="Its expected life (empty: ${"400 race, 600 workout, 700 easy"})" style="width:90px">
+    <button class="btn" onclick="saveShoe()">${shoesState.editing ? "Save" : "Add"}</button>
+    ${shoesState.editing ? `<button class="pick" onclick="shoesState.editing = null; renderShoeForm()">Cancel</button>` : ""}
+    <span class="muted-note" id="sh-msg" style="margin:0"></span>`;
+}
+
+async function sendShoe(method, url, body) {
+  const res = await fetch(url, { method, headers: { "Content-Type": "application/json" }, body: body ? JSON.stringify(body) : undefined });
+  if (!res.ok) { const m = document.getElementById("sh-msg"); if (m) m.textContent = (await res.json().catch(() => ({}))).detail || "Could not save"; return false; }
+  shoesState.list = await res.json();
+  return true;
+}
+
+async function saveShoe() {
+  const v = id => document.getElementById(id).value.trim();
+  const body = { brand: v("sh-brand"), model: v("sh-model"), version: v("sh-version") || null, pair: +v("sh-pair") || null,
+                 surface: v("sh-surface"), use: v("sh-use"), is_default: document.getElementById("sh-default").checked,
+                 since: v("sh-since") || null, max_km: +v("sh-max") || null };
+  const id = shoesState.editing;
+  if (await sendShoe(id ? "PUT" : "POST", `${API}/shoes/${id || ""}`, body)) { shoesState.editing = null; renderShoes(); }
+}
+
+function editShoe(id) { shoesState.editing = id; renderShoeForm(); document.getElementById("sh-brand").focus(); }
+
+async function toggleDefaultShoe(id) {
+  const s = shoesState.list.find(x => x.id === id);
+  if (await sendShoe("PUT", `${API}/shoes/${id}`, { ...s, is_default: !s.is_default })) renderShoes();
+}
+
+async function deleteShoe(id) {
+  const s = shoesState.list.find(x => x.id === id);
+  if (!confirm(`Delete ${shoeName(s)}? Runs you put it on go back to the default pair.`)) return;
+  if (await sendShoe("DELETE", `${API}/shoes/${id}`)) renderShoes();
+}
+
+// Activity page: the pair this run was in — the one you picked, else the default for its surface
+// (track and treadmill count as road) and use (race, else training) in use that day.
+function defaultShoeFor(a, use = shoeUse(a)) {
+  const surface = ["cross", "trail"].includes(a.terrain?.surface) ? a.terrain.surface : "road";
+  const fits = (shoesState.list || []).filter(s => s.is_default && s.surface === surface && s.use === use
+    && (!s.since || s.since <= a.date) && (!s.retired || a.date <= s.retired));
+  const key = s => `${s.since || "0000"}|${s.retired ? 1 : 0}`;
+  return fits.sort((x, y) => key(y) < key(x) ? -1 : key(y) > key(x) ? 1 : 0)[0];
+}
+
+async function renderShoeRow(a) {
+  const el = document.getElementById("shoe-row");
+  if (!el) return;
+  if (!/run/.test(a.activity_type || "")) { el.innerHTML = ""; return; }
+  if (!shoesState.list) await fetchShoes();
+  if (detailState.activity !== a) return;
+  const list = shoesState.list || [];
+  if (!list.length) { el.innerHTML = ""; return; }
+  const surface = ["cross", "trail"].includes(a.terrain?.surface) ? a.terrain.surface : "road";
+  // One select per pair: the whole run, or on a workout with a warm-up / cool-down, the work and the easy km around it.
+  const select = (part, cur, use, label) => {
+    const manualId = cur?.source === "manual" ? cur.shoe.id : null, def = defaultShoeFor(a, use);
+    const choices = list.filter(s => !s.retired || s.id === manualId || (s.since || "") <= a.date && a.date <= s.retired);
+    return `${label ? `<span class="shoe-pair"><span class="shoe-part">${label}</span>` : ""}<select onchange="setActivityShoe(${a.id}, this.value, '${part}')">
+      <option value="" ${manualId ? "" : "selected"}>${def ? `Default · ${esc(shoeName(def))}` : `None (no default for ${surface} ${useLabel(use).toLowerCase()}s)`}</option>
+      ${choices.map(s => `<option value="${s.id}" ${s.id === manualId ? "selected" : ""}>${esc(shoeName(s))} · ${s.surface} ${useLabel(s.use).toLowerCase()}</option>`).join("")}
+    </select>${label ? "</span>" : ""}`;
+  };
+  const sh = a.shoe;
+  if (sh?.easy !== undefined && sh.km) {
+    el.innerHTML = `<span class="rl-label">Shoes</span>
+      ${select("easy", sh.easy, "easy", `Warm-up & cool-down <b>${sh.km.easy.toFixed(1)} km</b>`)}
+      ${select("work", sh.shoe ? sh : null, shoeUse(a), `Work <b>${sh.km.work.toFixed(1)} km</b>`)}`;
+    return;
+  }
+  const manualId = sh?.source === "manual" ? sh.shoe.id : null, def = defaultShoeFor(a), use = shoeUse(a);
+  el.innerHTML = `<span class="rl-label">Shoes</span>${select("work", sh, use)}
+    <span class="muted-note" style="margin:0">${manualId ? "picked by you" : def ? `default for ${surface} ${useLabel(use).toLowerCase()}s` : `add one in Profile → Equipment`}</span>`;
+}
+
+async function setActivityShoe(id, value, part = "work") {
+  const res = await fetch(`${API}/activities/${id}/shoe`, { method: "PUT", headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ shoe_id: value ? +value : null, part }) });
+  if (!res.ok) return;
+  const a = detailState.activity;
+  a.shoe = await res.json();
+  shoesState.list = null;   // km per pair changed
+  renderShoeRow(a);
+}
+
 /* ---------- Profile: birth date, height, weight, sex (Garmin, or yours) ---------- */
 const PROFILE_FIELDS = [
   { key: "birth_date", label: "Birth date", type: "date" },
@@ -3925,7 +5211,6 @@ function resultBadge(x) {
 }
 
 async function loadRaces() {
-  fetch(`${API}/races/indexes`).then(r => r.json()).then(renderIndexes).catch(() => {});
   try { racesState.data = await (await fetch(`${API}/races/`)).json(); }
   catch (e) { document.getElementById("races-cards").innerHTML = `<div class="error">Could not load races.</div>`; return; }
   renderRaces();

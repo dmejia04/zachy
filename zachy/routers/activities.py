@@ -19,6 +19,8 @@ from zachy.analytics.terrain import SURFACES, classify, looks_like_cross, place_
 from zachy.analytics.effort import activity_effort
 from zachy.analytics.race_results import official_for, results_by_activity
 from zachy.analytics.weather import activity_weather
+from zachy.analytics.routes import activity_route
+from zachy.analytics.shoes import shoe_for
 from zachy.analytics.workouts import cached_workout
 from zachy.models import FitFile
 from pydantic import BaseModel
@@ -155,14 +157,24 @@ def get_activity_detail(
         "timeseries_source": source,
         "timeseries_points": total,
         "peaks": peaks,
-        "terrain": activity_terrain(db, activity),
+        "terrain": (terrain := activity_terrain(db, activity)),
         "category": (category := activity_category(db, activity)),
         "place": place_from_name(activity.name),
         "official": official_for(results_by_activity(db).get(activity.id)),
         "gap": adjusted_paces(db, activity) if source == "fit" else None,
         # Workout structure (cached), so the page header can say "Track intervals · 12 × 400 m…".
-        "workout": cached_workout(db, activity) if category and category["category"] == "workout" else None,
+        "workout": (workout := _with_split(db, activity, cached_workout(db, activity)) if category and category["category"] == "workout" else None),
+        "shoe": shoe_for(db, activity, (terrain or {}).get("surface"), category and category["category"], split=(workout or {}).get("split")),
+        "route": activity_route(db, activity.id),
     }
+
+
+def _with_split(db: Session, activity: Activity, workout: dict | None) -> dict | None:
+    """A workout with its warm-up / work / cool-down parts."""
+    if workout:
+        from zachy.analytics.workouts import cached_split
+        return {**workout, "split": cached_split(db, activity, workout)}
+    return workout
 
 
 @router.get("/{activity_id}/workout")
@@ -174,7 +186,7 @@ def get_workout(activity_id: int, db: Session = Depends(get_db)):
     fit = db.get(FitFile, activity_id) if activity else None
     if not fit or fit.status != "ok":
         raise HTTPException(status_code=404, detail="No FIT file for this activity")
-    return cached_workout(db, activity)
+    return _with_split(db, activity, cached_workout(db, activity))
 
 
 def activity_category(db: Session, activity: Activity) -> dict | None:
@@ -228,6 +240,30 @@ def set_workout_title(activity_id: int, body: WorkoutTitleIn, db: Session = Depe
     db.merge(override)
     db.commit()
     return cached_workout(db, activity)
+
+
+class ShoeIn(BaseModel):
+    shoe_id: int | None   # the pair you ran in; null = the default pair again
+    part: str = "work"    # split workout: "work", or "easy" (warm-up and cool-down)
+
+
+@router.put("/{activity_id}/shoe")
+def set_shoe(activity_id: int, body: ShoeIn, db: Session = Depends(get_db)):
+    """Pick the shoes for one run (null = the default for its surface and use)."""
+    activity = db.query(Activity).filter(Activity.id == activity_id).first()
+    if not activity:
+        raise HTTPException(status_code=404, detail="Activity not found")
+    override = db.get(ActivityOverride, activity_id) or ActivityOverride(activity_id=activity_id)
+    if body.part == "easy":
+        override.shoe_easy_id = body.shoe_id
+    else:
+        override.shoe_id = body.shoe_id
+    db.merge(override)
+    db.commit()
+    terrain, category = activity_terrain(db, activity), activity_category(db, activity)
+    cat = category and category["category"]
+    workout = _with_split(db, activity, cached_workout(db, activity)) if cat == "workout" else None
+    return shoe_for(db, activity, (terrain or {}).get("surface"), cat, split=(workout or {}).get("split"))
 
 
 class SurfaceIn(BaseModel):
@@ -364,6 +400,36 @@ def get_livetrail(activity_id: int, overall: bool = False, db: Session = Depends
     """Checkpoint sections from the linked LiveTrail page (null when none). A stage race: this
     activity's stage, or overall=true for every stage."""
     from zachy.analytics.livetrail import livetrail
+    return livetrail(db, activity_id, overall)
+
+
+@router.get("/{activity_id}/livetrail/ranking")
+def get_livetrail_ranking(activity_id: int, db: Session = Depends(get_db)):
+    """Every runner of the linked LiveTrail race (to pick one to compare with)."""
+    from zachy.analytics.livetrail import race_ranking
+    try:
+        out = race_ranking(db, activity_id)
+    except Exception as e:
+        raise HTTPException(status_code=502, detail=f"Could not read the ranking ({e.__class__.__name__})")
+    if out is None:
+        raise HTTPException(status_code=404, detail="No LiveTrail link on this race")
+    return out
+
+
+class CompareIn(BaseModel):
+    bib: int | None   # the runner to compare with; null = stop comparing
+
+
+@router.put("/{activity_id}/livetrail/compare")
+def put_livetrail_compare(activity_id: int, body: CompareIn, overall: bool = False, db: Session = Depends(get_db)):
+    """Compare your race with another runner's checkpoint times; returns the sections again."""
+    from zachy.analytics.livetrail import livetrail, set_compare
+    try:
+        set_compare(db, activity_id, body.bib)
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+    except Exception as e:
+        raise HTTPException(status_code=502, detail=f"Could not read the runner's page ({e.__class__.__name__})")
     return livetrail(db, activity_id, overall)
 
 

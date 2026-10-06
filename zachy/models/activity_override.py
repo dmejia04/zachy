@@ -11,3 +11,5 @@ class ActivityOverride(Base):
     category    = Column(String, nullable=True)   # "race" | "workout" | "long" | "easy" | None = automatic
     workout_type    = Column(String, nullable=True)   # your workout title ("Fartlek"); None = the guess
     workout_summary = Column(String, nullable=True)   # and its description ("6 × 3 min hills")
+    shoe_id         = Column(Integer, nullable=True)  # the pair you ran in (None = the default pair); on a split workout: the work
+    shoe_easy_id    = Column(Integer, nullable=True)  # split workout: the pair for the warm-up and cool-down (None = easy default)
