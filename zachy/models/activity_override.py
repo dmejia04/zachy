@@ -1,4 +1,4 @@
-from sqlalchemy import Column, ForeignKey, Integer, String
+from sqlalchemy import Column, Float, ForeignKey, Integer, String
 from zachy.database import Base
 
 
@@ -13,3 +13,5 @@ class ActivityOverride(Base):
     workout_summary = Column(String, nullable=True)   # and its description ("6 × 3 min hills")
     shoe_id         = Column(Integer, nullable=True)  # the pair you ran in (None = the default pair); on a split workout: the work
     shoe_easy_id    = Column(Integer, nullable=True)  # split workout: the pair for the warm-up and cool-down (None = easy default)
+    shoe2_id        = Column(Integer, nullable=True)  # shoes changed during the run: the second pair…
+    shoe2_from_km   = Column(Float, nullable=True)    # …from this km on

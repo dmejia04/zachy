@@ -70,9 +70,15 @@ def shoe_for(db: Session, activity: Activity, surface: str | None, category: str
         return {"shoe": as_dict(s), "source": "default"} if s else None
     main = pick(o.shoe_id if o else None, category)
     easy = _easy_km(split) if category == "workout" else 0
+    total = activity.distance_km or 0
+    if o and o.shoe2_id and o.shoe2_from_km and not easy:   # changed shoes during the run
+        s2 = next((s for s in shoes if s.id == o.shoe2_id), None)
+        if s2:
+            at = min(max(o.shoe2_from_km, 0.0), total)
+            return {**(main or {"shoe": None, "source": None}), "change": {"shoe": as_dict(s2), "from_km": at},
+                    "km": {"first": round(at, 2), "second": round(total - at, 2)}}
     if not easy:
         return main
-    total = activity.distance_km or 0
     return {**(main or {"shoe": None, "source": None}), "easy": pick(o.shoe_easy_id if o else None, "easy"),
             "km": {"work": round(max(0.0, total - easy), 2), "easy": round(easy, 2)}}
 
@@ -87,7 +93,7 @@ def shoes_with_km(db: Session) -> list[dict]:
     totals = {s.id: [0.0, 0] for s in shoes}
     if shoes:
         overrides = {o.activity_id: o for o in db.query(ActivityOverride)}
-        manual = [i for i, o in overrides.items() if o.shoe_id or o.shoe_easy_id]
+        manual = [i for i, o in overrides.items() if o.shoe_id or o.shoe_easy_id or o.shoe2_id]
         first = min((s.since for s in shoes if s.since), default=None)
         q = db.query(Activity).filter(Activity.activity_type.in_(RUNNING))
         if first and not any(not s.since for s in shoes if s.is_default):
@@ -103,6 +109,9 @@ def shoes_with_km(db: Session) -> list[dict]:
             easy = _easy_km(split)
             work_id = (o.shoe_id if o and o.shoe_id else None) or getattr(default_shoe(shoes, a.date, surface, category), "id", None)
             uses = [(work_id, (a.distance_km or 0) - easy)]
+            if not easy and o and o.shoe2_id and o.shoe2_from_km:   # changed shoes during the run
+                at = min(max(o.shoe2_from_km, 0.0), a.distance_km or 0)
+                uses = [(work_id, at), (o.shoe2_id, (a.distance_km or 0) - at)]
             if easy:
                 easy_id = (o.shoe_easy_id if o and o.shoe_easy_id else None) or getattr(default_shoe(shoes, a.date, surface, "easy"), "id", None)
                 uses.append((easy_id, easy))

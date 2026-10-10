@@ -296,8 +296,18 @@
   .shoe-wear i { display: block; height: 4px; border-radius: 2px; background: #ebe8e1; margin-top: 3px; overflow: hidden; }
   .shoe-wear i b { display: block; height: 100%; border-radius: 2px; }
   .plan-head-tag { margin-top: 8px; }
-  .shoe-pair { display: inline-flex; flex-wrap: wrap; align-items: center; gap: 6px; margin-right: 10px; }
+  .thr-grid { grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); }
+  .score-tip { cursor: help; border-bottom: 1px dotted currentColor; }
+  .wk-sim { font-size: 13px; margin: 2px 0 6px; }
+  .kde-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-top: 10px; }
+  @media (max-width: 640px) { .kde-grid { grid-template-columns: 1fr; } }
+  .temp-legend { display: flex; align-items: center; gap: 6px; font-size: 11px; color: var(--muted); margin: 4px 0 6px; }
+  .temp-legend i { display: block; width: 160px; height: 8px; border-radius: 4px; }
+  .temp-legend .tl-none { margin-left: 10px; display: inline-flex; align-items: center; gap: 4px; }
+  .temp-legend .tl-none b { width: 8px; height: 8px; border-radius: 50%; background: #b9b2a4; display: inline-block; }
+  .shoe-pair { display: inline-flex; flex-wrap: wrap; align-items: center; gap: 6px; margin-right: 14px; }
   .shoe-part { font-size: 12.5px; color: var(--muted); }
+  .shoe-km { width: 70px; font: inherit; font-size: 13px; padding: 4px 8px; border: 1px solid var(--line); border-radius: 999px; }
   .shoe-part b { color: var(--ink); font-weight: 600; }
   .wk-parts { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 6px; }
   .wk-part { flex: 1 1 150px; border-left: 3px solid; padding: 2px 0 2px 10px; display: flex; flex-direction: column; }
@@ -775,6 +785,7 @@
     <button class="tab" data-tab="paces" onclick="switchTab('paces')">Paces</button>
     <button class="tab" data-tab="planner" onclick="switchTab('planner')">Planner</button>
     <button class="tab" data-tab="routes" onclick="switchTab('routes')">Routes</button>
+    <button class="tab" data-tab="sessions" onclick="switchTab('sessions')">Sessions</button>
     <button class="tab" data-tab="records" onclick="switchTab('records')">Records</button>
     <button class="tab" data-tab="grade" onclick="switchTab('grade')">Grade</button>
     <button class="tab" data-tab="progress" onclick="switchTab('progress')">Progress</button>
@@ -866,6 +877,12 @@
       <div class="section-title" style="margin-top:24px;">Cumulative progress through the year</div>
       <div class="card"><canvas id="monthly-cumulative-chart" height="110"></canvas></div>
 
+      <div class="section-title" style="margin-top:24px;">Your runs' average heart rate and pace<span class="section-sub">how they spread over the year (density of runs of 2 km+) · add years above to compare</span></div>
+      <div class="kde-grid">
+        <div class="card"><div class="stat-label">average heart rate</div><canvas id="kde-hr" height="150"></canvas></div>
+        <div class="card"><div class="stat-label">average pace</div><canvas id="kde-pace" height="150"></canvas></div>
+      </div>
+
       <div id="compare-summary" style="display:none;">
         <div class="section-title" style="margin-top:24px;" id="compare-summary-title"></div>
         <div class="card"><table class="compare" id="compare-table"></table></div>
@@ -938,6 +955,14 @@
       <div class="route-cards" id="route-cards"><div class="loading">Loading…</div></div>
     </div>
     <div id="route-detail" style="display:none"></div>
+  </div>
+
+  <div id="panel-sessions" class="panel">
+    <div id="sessions-list">
+      <div class="section-title" style="margin-top:0;">Sessions you repeat<span class="section-sub">your interval sessions grouped by their reps (10 × 400 m and 12 × 400 m together) · from the laps</span></div>
+      <div class="route-cards" id="session-cards"><div class="loading">Loading…</div></div>
+    </div>
+    <div id="session-detail" style="display:none"></div>
   </div>
 
   <div id="panel-records" class="panel">
@@ -2397,7 +2422,9 @@ async function showWorkout() {
       <span style="color:${CAT_COLORS[p.category]}">${ROLE[p.role]} · ${p.category === "easy" ? "Easy" : "Workout"}</span>
       <b>${p.km.toFixed(1)}<small> km</small></b>
       <small>${fmtRaceTime(p.time_s)}${p.pace ? ` · ${fmtPace(p.pace)}/km` : ""}${p.role === "work" ? " · reps and recoveries" : p.off_track_km >= 0.2 ? ` · ${p.off_track_km.toFixed(1)} km off the track` : ""}</small></div>`).join("")}</div>` : "";
-  box.innerHTML = `${parts || (extras ? `<div class="wk-extra">${extras}</div>` : "")}<div class="wk-src">${src}${sp ? ` · split from the laps${w.split.on_track ? " and the GPS" : ""} (warm-up and cool-down: moving time)` : ""}</div>`;
+  const sim = w.similar ? `<div class="wk-sim">${esc(w.similar.label)}: ${ordinal(w.similar.rank)} fastest of ${w.similar.count} sessions · execution score
+    <b style="color:${scoreColor(w.similar.score)}">${w.similar.score}</b> · <a href="#" onclick="sessionsState.list = null; switchTab('sessions'); loadSessions('${w.similar.key}'); return false;">see them all</a></div>` : "";
+  box.innerHTML = `${parts || (extras ? `<div class="wk-extra">${extras}</div>` : "")}${sim}<div class="wk-src">${src}${sp ? ` · split from the laps${w.split.on_track ? " and the GPS" : ""} (warm-up and cool-down: moving time)` : ""}</div>`;
 }
 
 // Your own workout title and description, when the guess doesn't fit (unstructured sessions):
@@ -3067,6 +3094,54 @@ const profilePlugin = {
 };
 Chart.register(profilePlugin);
 
+// Activity charts: drag across a chart to zoom on that stretch (x only); the charts of the same
+// group (time series, splits, dynamics, LiveTrail) follow. Double-click: back to the whole run.
+const ZOOM_GROUP = id => (id.match(/^(ts|sc|dyn|lt)-/) || [])[1];
+const xZoomPlugin = {
+  id: "xZoom",
+  afterInit(chart) {
+    const cv = chart.canvas, group = ZOOM_GROUP(cv.id || "");
+    if (!group || chart.scales?.x?.type === "category") return;
+    const st = chart.$zoom = { a: null, b: null };
+    const xAt = e => { const r = cv.getBoundingClientRect(); return e.clientX - r.left; };
+    const inArea = x => x >= chart.chartArea.left && x <= chart.chartArea.right;
+    cv.addEventListener("mousedown", e => { const x = xAt(e); if (inArea(x)) { st.a = st.b = x; e.preventDefault(); } });
+    cv.addEventListener("mousemove", e => { if (st.a == null) return; st.b = Math.max(chart.chartArea.left, Math.min(chart.chartArea.right, xAt(e))); chart.draw(); });
+    const end = () => {
+      if (st.a == null) return;
+      const [p0, p1] = [st.a, st.b].sort((u, v) => u - v);
+      st.a = st.b = null;
+      if (p1 - p0 < 8) { chart.draw(); return; }
+      zoomGroup(group, chart.scales.x.getValueForPixel(p0), chart.scales.x.getValueForPixel(p1));
+    };
+    cv.addEventListener("mouseup", end);
+    cv.addEventListener("mouseleave", end);
+    cv.addEventListener("dblclick", () => zoomGroup(group, null, null));
+  },
+  afterDraw(chart) {
+    const st = chart.$zoom;
+    if (!st || st.a == null || st.a === st.b) return;
+    const { ctx, chartArea: c } = chart;
+    ctx.save(); ctx.fillStyle = "rgba(31,29,24,0.10)"; ctx.strokeStyle = "rgba(31,29,24,0.4)";
+    const x0 = Math.min(st.a, st.b), w = Math.abs(st.b - st.a);
+    ctx.fillRect(x0, c.top, w, c.bottom - c.top); ctx.strokeRect(x0 + 0.5, c.top, w, c.bottom - c.top);
+    ctx.restore();
+  },
+};
+Chart.register(xZoomPlugin);
+
+function zoomGroup(group, min, max) {
+  Object.values(Chart.instances).forEach(c => {
+    if (ZOOM_GROUP(c.canvas.id || "") !== group || !c.options.scales?.x) return;
+    const x = c.options.scales.x;
+    if (!c.$full) c.$full = { min: x.min, max: x.max };
+    x.min = min == null ? c.$full.min : min;
+    x.max = max == null ? c.$full.max : max;
+    c.update("none");
+  });
+  document.querySelectorAll(`.zoom-hint[data-g="${group}"]`).forEach(el => el.classList.toggle("on", min != null));
+}
+
 let checkpointLayer = null;
 function drawCheckpointMarkers() {
   for (const c of Chart.instances ? Object.values(Chart.instances) : []) if (/^ts-/.test(c.canvas?.id)) c.draw();
@@ -3343,8 +3418,9 @@ function drawTimeseriesCharts() {
       maxTicksLimit: 8, maxRotation: 0,
       callback: mode === "distance" ? v => `${Number(v.toFixed(1))} km` : v => fmtHM(v),
     },
-    ...(mode === "time" ? { afterBuildTicks: axis => {
-      axis.ticks = roundTicks(0, xMax, TIME_STEPS.find(s => xMax / s <= 7) || 86400);
+    ...(mode === "time" ? { afterBuildTicks: axis => {   // round steps over what's shown (zoom included)
+      const span = axis.max - axis.min;
+      axis.ticks = roundTicks(axis.min, axis.max, [60, 120, ...TIME_STEPS].find(s => span / s <= 7) || 86400);
     } } : {}),
   };
   // Tooltip title shows both: "10.73 km · 1:02:15"
@@ -3573,6 +3649,7 @@ function chartsMarkup(hilly, extras = true) {
       </div>
       </div>
       <div class="muted-note" id="ts-source"></div>
+      <div class="muted-note">Drag across a chart to zoom on that stretch (all the charts follow) · double-click to see the whole run again.</div>
 `;
 }
 
@@ -3699,6 +3776,7 @@ let yearlyLoaded = false;
 let yearlyCharts = [];
 
 function switchTab(name) {
+  if (name !== "profile" && typeof shoesState !== "undefined") shoesState.pendingFor = null;   // left without adding the pair
   document.querySelectorAll(".tab").forEach(t =>
     t.classList.toggle("active", t.dataset.tab === name));
   document.querySelectorAll(".panel").forEach(p =>
@@ -3716,6 +3794,7 @@ function switchTab(name) {
   if (name === "records" && !recordsState.data) loadRecords();
   if (name === "paces") loadPaceCalc();
   if (name === "routes") loadRoutes();
+  if (name === "sessions") loadSessions();
   if (name === "planner" && document.getElementById("planner-detail").style.display === "none") loadPlanner();
   if (name === "performance") loadPerformance();
   if (name === "races") { if (racesState.data) renderRaces(); else loadRaces(); }
@@ -3772,6 +3851,7 @@ async function loadPaceCalc() {
   ]);
   racesState.data ||= races;
   pcState.sel = sel;
+  if (!pcState.thr) fetch(`${API}/reports/thresholds`).then(r => r.json()).then(t => { pcState.thr = t; renderPinnedRaces(); drawPaceChart(); }).catch(() => {});
   const timeEl = document.getElementById("pc-time");
   if (!timeEl.value) {
     // Start from your best recent road race: the highest VDOT of the last 12 months on a flat
@@ -3852,11 +3932,7 @@ function renderPinnedRaces() {
       <select id="pc-add-race">${options.map(x => `<option value="${x.id}">${x.date} · ${esc(x.name)} · ${label(x)}${x.flat ? "" : " (hilly)"}</option>`).join("")}</select>
       <button class="btn" onclick="addChartRace()" ${options.length ? "" : "disabled"}>Add</button>
     </div>
-    <div class="pc-cs">${cs ? `<b>Critical speed ${(cs.cs * 3.6).toFixed(1)} km/h</b> · ${fmtPace(1000 / cs.cs / 60)}/km ·
-      D′ ${Math.round(cs.dprime)} m · from ${cs.n} races
-      <span class="muted">· distance = CS × time + D′, fitted on the races in the chart lasting 2–90 min (struck through: not used — a marathon falls below the line,
-      fuel and fatigue).${cs.shortest > 30 * 60 ? " A race of 3K–5K would sharpen it." : ""} CS sits between threshold and VO2max (~30–40 min race effort); D′ is the distance you can run above it.</span>`
-      : `<span class="muted">Critical speed: needs two races or more of 2–90 min, at different distances, in the chart.</span>`}</div>
+    ${thresholdsBox()}
     ${enduranceProfile(races, cs)}`;
 }
 
@@ -3867,6 +3943,30 @@ function renderPinnedRaces() {
 //   oriented, ≥ 1.08 speed-oriented; and between each pair of distances, to see where it drops.
 // - The marathon as a share of the critical speed: recreational ~80–88%, good amateurs ~88–93%,
 //   elites up to ~96% (Smyth & Muniz-Pumares 2020).
+// Thresholds from your runs (analytics/thresholds.py): aerobic, anaerobic, vVO2max — pace and heart rate.
+const THR_COLORS = { aet: "#2d6b29", ant: "#e0a43a", cs: "#3d7ebf", vvo2: "#a50f15" };
+function thresholdsBox() {
+  const t = pcState.thr;
+  if (!t) return `<div class="section-title">Thresholds<span class="section-sub">reading your runs…</span></div>`;
+  const pace = v => v ? `${fmtPace(1000 / v / 60)}<span class="rec-unit"> /km</span>` : "—";
+  const kmh = v => v ? `${(v * 3.6).toFixed(1)} km/h` : "";
+  const box = (k, label, value, sub) => `<div class="stat"><div class="stat-label" style="color:${THR_COLORS[k]}">${label}</div><div class="stat-value">${value}</div><div class="stat-sub">${sub}</div></div>`;
+  const V = t.vvo2max, M = V.measured, cs = pcState.cs;
+  return `<div class="section-title">Thresholds<span class="section-sub">estimated from your own runs · drawn on the chart</span></div>
+    <div class="stat-grid thr-grid">
+      ${box("aet", "aerobic threshold (AeT, LT1)", pace(t.aet.speed), `<b>${t.aet.hr ?? "—"} bpm</b> · ${kmh(t.aet.speed)}<br>Heart rate: ${t.aet.source === "drift"
+        ? `the drift test on ${t.aet.n} steady easy runs of 1–2½ h (where the pace-to-HR ratio drifts 5% between halves)` : esc(t.aet.source || "—")} · pace: your HR–speed line on flat runs`)}
+      ${box("ant", "anaerobic threshold (AnT, LT2)", pace(t.ant.speed), `<b>${t.ant.hr ?? "—"} bpm</b> · ${kmh(t.ant.speed)}<br>Pace: ${esc(t.ant.source)} · heart rate: the last 20 min of
+        ${t.ant.races.length} flat race${t.ant.races.length === 1 ? "" : "s"} of 30–75 min (Friel)`)}
+      ${box("cs", "critical speed (CS)", cs ? pace(cs.cs) : "—", cs ? `<b>D′ ${Math.round(cs.dprime)} m</b> · ${kmh(cs.cs)}<br>From ${cs.n} race${cs.n === 1 ? "" : "s"} of 2–90 min in the chart:
+        distance = CS × time + D′ (struck through above: not used)${cs.shortest > 30 * 60 ? ". A 3K–5K race would sharpen it" : ""}` : "Needs two races or more of 2–90 min, at different distances, in the chart")}
+      ${box("vvo2", "vVO2max", pace(V.model), `${kmh(V.model)} · Daniels, from your best VDOT (${V.vdot ?? "—"})${M ? `<br>Best 6 min measured: <b>${fmtPace(1000 / M.speed / 60)}/km</b> (${M.date}) — a 6-min all-out test would pin it` : ""}`)}
+    </div>
+    <div class="muted-note">From the easiest to the hardest: below AeT the effort can last for hours; AnT is about your one-hour race pace; the critical speed sits just above it
+      in theory (~30–40 min race effort: above it fatigue builds until you stop, D′ is the distance you can run above it); vVO2max is the speed of ~6 min all out.
+      ${cs && t.ant.speed && cs.cs < t.ant.speed ? `<b>Here CS reads slower than AnT:</b> its fit only has races of ${Math.round(cs.shortest / 60)} min or more, which pulls CS down and D′ up — a 3K–5K race would set it right.` : ""}</div>`;
+}
+
 function enduranceProfile(races, cs) {
   if (races.length < 2 || new Set(races.map(r => r.d)).size < 2) return "";
   const name = x => (PC_STANDARD.find(([d]) => d === x.d) || [0, distLabel(x.d)])[1];
@@ -4010,13 +4110,21 @@ function drawPaceChart() {
   const cs = pcState.cs;
   const csCurve = cs ? curve.filter(p => p.x * 1000 > cs.dprime * 4).map(p => ({ x: p.x, y: cs.cs * (p.x * 1000) / (p.x * 1000 - cs.dprime) * 3.6 })) : [];
   const csLine = cs ? [{ x: 0, y: cs.cs * 3.6 }, { x: 43, y: cs.cs * 3.6 }] : [];
-  const ys = [...curve.map(p => p.y), ...dots.map(p => p.y), ...csCurve.map(p => p.y)];
+  const T = pcState.thr, thr = T ? [["aet", "AeT", T.aet.speed], ["ant", "AnT", T.ant.speed], ["vvo2", "vVO2max", T.vvo2max.model]].filter(x => x[2]) : [];
+  const ys = [...curve.map(p => p.y), ...dots.map(p => p.y), ...csCurve.map(p => p.y), ...thr.map(x => x[2] * 3.6)];
   // Each dot named with its distance on the chart.
   const labels = {
     id: "pcLabels", afterDatasetsDraw(chart) {
       const { ctx, chartArea: a, scales: { y } } = chart, meta = chart.getDatasetMeta(3);
       ctx.save(); ctx.font = `11px ${THEME.font}`; ctx.fillStyle = THEME.muted; ctx.textAlign = "center";
       meta.data.forEach((pt, i) => { const p = dots[i]; ctx.fillText((PC_STANDARD.find(([d]) => d === p.r.d) || [0, distLabel(p.r.d)])[1], pt.x, pt.y - 10); });
+      thr.forEach(([k, name, v]) => {   // thresholds: a line each, named at the right
+        const py = y.getPixelForValue(v * 3.6);
+        ctx.strokeStyle = hexToRgba(THR_COLORS[k], 0.7); ctx.lineWidth = 1.2; ctx.setLineDash([2, 3]);
+        ctx.beginPath(); ctx.moveTo(a.left, py); ctx.lineTo(a.right, py); ctx.stroke(); ctx.setLineDash([]);
+        ctx.fillStyle = THR_COLORS[k]; ctx.textAlign = "right"; ctx.font = `600 11px ${THEME.font}`;
+        ctx.fillText(`${name} ${fmtPace(1000 / v / 60)}/km`, a.right - 4, py - 4); ctx.font = `11px ${THEME.font}`;
+      });
       if (cs) {   // the critical speed, written on its line
         ctx.fillStyle = "#3d7ebf"; ctx.textAlign = "left";
         ctx.fillText(`critical speed ${(cs.cs * 3.6).toFixed(1)} km/h`, a.left + 6, y.getPixelForValue(cs.cs * 3.6) + 14);
@@ -4749,6 +4857,114 @@ async function drawPlanMap(d) {
   map.fitBounds(line.getBounds(), { padding: [20, 20] });
 }
 
+/* ---------- Sessions you repeat (analytics/similar_workouts.py) ---------- */
+const sessionsState = { list: null, key: null, sort: { key: "date", dir: -1 }, chart: null };
+const scoreColor = v => v >= 75 ? "#2d6b29" : v >= 50 ? "#e0a43a" : "#a50f15";
+
+async function loadSessions(key) {
+  document.getElementById("sessions-list").style.display = key ? "none" : "";
+  document.getElementById("session-detail").style.display = key ? "" : "none";
+  if (!sessionsState.list) {
+    try { sessionsState.list = await (await fetch(`${API}/sessions/`)).json(); } catch (e) { sessionsState.list = []; }
+  }
+  if (key) { openSession(key); return; }
+  const list = sessionsState.list;
+  document.getElementById("session-cards").innerHTML = !list.length ? `<div class="muted-note">No session repeated yet.</div>` :
+    list.map(g => { const last = g.sessions.at(-1), best = g.sessions.find(x => x.id === g.fastest);
+      return `<div class="route-card" onclick="openSession('${g.key}')" style="border-top:3px solid ${CAT_COLORS.workout}">
+      <div class="rc-body"><div class="rc-name">${esc(g.label)}</div>
+        <div class="rc-meta">${g.first.slice(0, 4)}${g.last.slice(0, 4) !== g.first.slice(0, 4) ? `–${g.last.slice(0, 4)}` : ""} · last ${last.reps} × ${last.date}</div>
+        <div class="rc-nums"><div><b>${g.count}</b><small>sessions</small></div>
+          <div style="text-align:right"><b>${fmtPace(best.rep_pace.avg)}</b><small>fastest reps · ${best.date.slice(0, 4)}</small></div></div>
+      </div></div>`; }).join("");
+}
+
+function openSession(key) {
+  switchTab("sessions");
+  const g = (sessionsState.list || []).find(x => x.key === key);
+  if (!g) { loadSessions(); return; }
+  sessionsState.key = key;
+  document.getElementById("sessions-list").style.display = "none";
+  const box = document.getElementById("session-detail");
+  box.style.display = "";
+  const ss = g.sessions, avg = k => ss.reduce((a, x) => a + x[k], 0) / ss.length;
+  const best = ss.find(x => x.id === g.best), fast = ss.find(x => x.id === g.fastest);
+  const stat = (label, value, sub) => `<div class="stat"><div class="stat-label">${label}</div><div class="stat-value">${value}</div><div class="stat-sub">${sub}</div></div>`;
+  box.innerHTML = `
+    <span class="back" onclick="loadSessions()">&larr; back to sessions</span>
+    <h2 class="detail-title"><b>${esc(g.label)}</b></h2>
+    <div class="detail-date">${g.count} sessions · ${g.first} – ${g.last}</div>
+    <div class="stat-grid" style="margin-top:12px">
+      ${stat("fastest reps", `<a href="#" onclick="openActivity(${fast.id}); return false;">${fmtPace(fast.rep_pace.avg)}</a><span class="rec-unit"> /km</span>`, `${fast.date} · ${fast.reps} reps`)}
+      ${stat("best execution", `<a href="#" onclick="openActivity(${best.id}); return false;">${best.score}</a>`, `${best.date} · spread ${best.spread_pct}% · finish ${best.finish_pct > 0 ? "+" : ""}${best.finish_pct}%`)}
+      ${stat("average score", Math.round(avg("score")), `of ${ss.length} sessions`)}
+    </div>
+    <div class="section-title chart-title t-pace">Rep pace over time<span class="section-sub">each session's average rep pace · bar: fastest to slowest rep · colour: the execution score · click to open</span></div>
+    <div class="card"><canvas id="session-chart" height="70"></canvas></div>
+    <div class="section-title">Sessions<span class="section-sub">click a column to sort, a row to open the run · score: 60% regularity (spread of the reps' pace), 40% finishing strong (last third vs first)</span></div>
+    <div class="card" style="padding:0;overflow-x:auto" id="session-table"></div>`;
+  renderSessionTable();
+  drawSessionChart(g);
+}
+
+function sortSessions(k) { const s = sessionsState.sort; s.dir = s.key === k ? -s.dir : (k === "date" || k === "score" ? -1 : 1); s.key = k; renderSessionTable(); }
+
+function renderSessionTable() {
+  const g = sessionsState.list.find(x => x.key === sessionsState.key), s = sessionsState.sort;
+  const val = { date: x => x.date, reps: x => x.reps, pace: x => x.rep_pace.avg, hr: x => x.hr?.avg ?? 0, score: x => x.score, spread: x => x.spread_pct,
+                temp: x => x.temp ?? x.temp_watch ?? -99 };
+  const rows = g.sessions.slice().sort((a, b) => (val[s.key](a) < val[s.key](b) ? -1 : val[s.key](a) > val[s.key](b) ? 1 : 0) * s.dir);
+  const th = (k, label) => `<th class="${s.key === k ? "on" : ""}" onclick="sortSessions('${k}')">${label}${s.key === k ? (s.dir < 0 ? " ↓" : " ↑") : ""}</th>`;
+  const byDist = g.by === "distance";
+  document.getElementById("session-table").innerHTML = `<table class="perf route-table"><thead><tr>${th("date", "date")}${th("reps", "reps")}<th>recovery</th>
+      <th>${byDist ? "rep time (min – max)" : "rep pace (min – max)"}</th>${th("pace", "avg pace")}${th("hr", "HR (min – max)")}${th("temp", "temp")}${th("spread", "spread")}<th>finish</th>${th("score", "score")}</tr></thead>
+    <tbody>${rows.map(x => `<tr onclick="openActivity(${x.id})" title="Open the run"><td>${x.date}${x.on_track ? ' <small class="muted">track</small>' : ""}</td>
+      <td>${x.reps} × ${byDist ? distLabel(x.unit) : fmtRep(x.unit)}</td><td>${x.rest || "—"}</td>
+      <td>${byDist ? `${fmtRep(x.rep_time.min)} – ${fmtRep(x.rep_time.max)} <small>(${fmtRep(x.rep_time.avg)})</small>` : `${fmtPace(x.rep_pace.min)} – ${fmtPace(x.rep_pace.max)}`}</td>
+      <td><b>${fmtPace(x.rep_pace.avg)}</b></td>
+      <td>${x.hr ? `${Math.round(x.hr.avg)} <small>(${Math.round(x.hr.min)} – ${Math.round(x.hr.max)})</small>` : "—"}</td>
+      <td>${x.temp != null ? `${Math.round(x.temp)}°` : x.temp_watch != null ? `<span title="watch temperature (reads warm: body heat)">${Math.round(x.temp_watch)}°w</span>` : "—"}</td>
+      <td>${x.spread_pct}%</td><td style="color:${x.finish_pct >= 0 ? "#2d6b29" : "#a50f15"}">${x.finish_pct > 0 ? "+" : ""}${x.finish_pct}%</td>
+      <td><b class="score-tip" style="color:${scoreColor(x.score)}" title="${esc(scoreWhy(x))}">${x.score}</b></td></tr>`).join("")}</tbody></table>`;
+}
+
+// Why a session scored what it did: its regularity and its finish, in a sentence each.
+function scoreWhy(x) {
+  const p = x.score_parts || {}, sp = x.spread_pct, f = x.finish_pct;
+  const reg = sp <= 1.5 ? "very even reps" : sp <= 3 ? "fairly even reps" : sp <= 5 ? "uneven reps" : "very uneven reps";
+  const fin = f >= 1 ? `the last third ${f}% faster than the first: finished strong` : f <= -1 ? `the last third ${-f}% slower than the first: faded` : "the last third about as fast as the first: steady";
+  return `Score ${x.score} = 60% regularity ${p.regularity ?? "—"} + 40% finish ${p.finish ?? "—"}\n· Regularity: ${reg} (their pace varies ${sp}%; 0% = 100, 8% or more = 0)\n· Finish: ${fin} (2% faster = 100, even = 50, 2% slower = 0)`;
+}
+
+function drawSessionChart(g) {
+  if (sessionsState.chart) sessionsState.chart.destroy();
+  const t = d => new Date(d + "T00:00:00").getTime(), ss = g.sessions;
+  const years = [...new Set(ss.map(x => x.date.slice(0, 4)))];
+  const bars = { id: "repRange", beforeDatasetsDraw(chart) {
+    const { ctx, scales: { x, y } } = chart;
+    ctx.save(); ctx.lineWidth = 2;
+    ss.forEach(s => { const px = x.getPixelForValue(t(s.date)); ctx.strokeStyle = hexToRgba(scoreColor(s.score), 0.35);
+      ctx.beginPath(); ctx.moveTo(px, y.getPixelForValue(s.rep_pace.min)); ctx.lineTo(px, y.getPixelForValue(s.rep_pace.max)); ctx.stroke(); });
+    ctx.restore(); } };
+  const all = ss.flatMap(s => [s.rep_pace.min, s.rep_pace.max]), lo = Math.min(...all), hi = Math.max(...all), r = Math.max(hi - lo, 0.2);
+  const step = r > 3 ? 1 : r > 1.5 ? 0.5 : r > 0.6 ? 0.25 : r > 0.25 ? 1 / 6 : 1 / 12;
+  const yLo = Math.floor((lo - 0.08 * r) / step) * step, yHi = Math.ceil((hi + 0.08 * r) / step) * step;
+  sessionsState.chart = new Chart(document.getElementById("session-chart"), {
+    type: "scatter", plugins: [bars],
+    data: { datasets: [{ data: ss.map(s => ({ x: t(s.date), y: s.rep_pace.avg, s })), pointRadius: 5, backgroundColor: ss.map(s => scoreColor(s.score)), borderColor: "white", borderWidth: 1 }] },
+    options: { responsive: true, animation: false,
+      onClick: (e, els, chart) => { if (els.length) openActivity(chart.data.datasets[0].data[els[0].index].s.id); },
+      plugins: { legend: { display: false }, tooltip: { displayColors: false, callbacks: {
+        title: items => { const s = items[0].raw.s; return `${s.date} · ${s.reps} × ${g.by === "distance" ? distLabel(s.unit) : fmtRep(s.unit)}${s.rest ? ` r ${s.rest}` : ""}`; },
+        label: ctx => { const s = ctx.raw.s; return [`${fmtPace(s.rep_pace.avg)}/km (${fmtPace(s.rep_pace.min)} – ${fmtPace(s.rep_pace.max)})${s.hr ? ` · ${Math.round(s.hr.avg)} bpm` : ""}`, `score ${s.score} · spread ${s.spread_pct}% · finish ${s.finish_pct > 0 ? "+" : ""}${s.finish_pct}%`]; } } } },
+      scales: { x: { type: "linear", min: t(g.first) - 864e5 * 30, max: t(g.last) + 864e5 * 30, grid: { display: false },
+                     afterBuildTicks: axis => { axis.ticks = years.map(y => ({ value: t(`${y}-01-01`) })).filter(v => v.value >= axis.min); },
+                     ticks: { callback: v => new Date(v).getFullYear() } },
+                y: { reverse: true, min: yLo, max: yHi, afterBuildTicks: axis => { axis.ticks = roundTicks(yLo, yHi, step * Math.ceil((yHi - yLo) / step / 4)); },
+                     ticks: { autoSkip: false, callback: v => fmtPace(v) } } } },
+  });
+}
+
 /* ---------- Routes you run regularly (analytics/routes.py) ---------- */
 const routesState = { list: null, route: null, filter: "all", sort: { key: "date", dir: -1 }, charts: [], map: null };
 const CAT_COLORS = { race: "#a50f15", workout: "#2d6b29", easy: "#2f6aa6", long: "#1f4e8c" };
@@ -4827,9 +5043,10 @@ async function openRoute(id) {
     </div>
     <div class="section-title">Map<span class="section-sub">every run on the route · bold: the most typical one</span></div>
     <div class="card" style="padding:0;"><div id="route-map" style="height:340px"></div></div>
-    <div class="section-title chart-title t-pace">Pace over the years<span class="section-sub">each run · colour: easy, long, workout, race · ★ best time · click a dot to open the run</span></div>
+    <div class="section-title chart-title t-pace">Pace over the years<span class="section-sub">each run · colour: the temperature · ★ best time · click a dot to open the run</span></div>
+    ${tempLegend()}
     <div class="card"><canvas id="route-pace" height="70"></canvas></div>
-    <div class="section-title chart-title t-hr">Efficiency over the years<span class="section-sub">metres per heartbeat (distance ÷ heartbeats) · higher = fitter · line: average of the last 8 runs</span></div>
+    <div class="section-title chart-title t-hr">Efficiency over the years<span class="section-sub">metres per heartbeat (distance ÷ heartbeats) · higher = fitter · colour: the temperature · line: average of the last 8 runs</span></div>
     <div class="card"><canvas id="route-eff" height="70"></canvas></div>
     <div class="chart-bar"><div class="section-title">Runs</div><div class="races-filters" id="route-filter"></div></div>
     <div class="card" style="padding:0;overflow-x:auto;margin-top:8px" id="route-table"></div>
@@ -4872,6 +5089,24 @@ async function drawRouteMapAll(r) {
   map.fitBounds(bold.getBounds(), { padding: [20, 20] });
 }
 
+// Temperature colour scale: cold blue → mild sand → hot red (grey: unknown).
+const TEMP_STOPS = [[-5, "#2c5aa0"], [5, "#6fa8dc"], [12, "#bdbb94"], [18, "#f2b134"], [25, "#e0662b"], [32, "#a50f15"]];
+function tempColor(t) {
+  if (t == null) return "#b9b2a4";
+  const st = TEMP_STOPS, i = st.findIndex(([v]) => t <= v);
+  if (i === 0) return st[0][1];
+  if (i < 0) return st.at(-1)[1];
+  const [v0, c0] = st[i - 1], [v1, c1] = st[i], f = (t - v0) / (v1 - v0);
+  const rgb = c => [1, 3, 5].map(k => parseInt(c.slice(k, k + 2), 16));
+  const [a, b] = [rgb(c0), rgb(c1)];
+  return "#" + a.map((x, k) => Math.round(x + (b[k] - x) * f).toString(16).padStart(2, "0")).join("");
+}
+function tempLegend() {
+  const st = TEMP_STOPS, lo = st[0][0], hi = st.at(-1)[0];
+  return `<div class="temp-legend"><span>${lo}°C</span><i style="background:linear-gradient(90deg, ${st.map(([v, c]) => `${c} ${((v - lo) / (hi - lo) * 100).toFixed(0)}%`).join(", ")})"></i><span>${hi}°C+</span>
+    <span class="tl-none"><b></b>unknown</span></div>`;
+}
+
 function drawRouteCharts(r) {
   routesState.charts.forEach(c => c.destroy()); routesState.charts = [];
   const t = d => new Date(d + "T00:00:00").getTime();
@@ -4881,7 +5116,7 @@ function drawRouteCharts(r) {
     afterBuildTicks: axis => { axis.ticks = years.map(y => ({ value: t(`${y}-01-01`) })).filter(v => v.value >= axis.min); },
     ticks: { callback: v => new Date(v).getFullYear() } };
   const tip = items => { const x = items[0].raw.run; return `${x.date} · ${x.distance_km.toFixed(1)} km · ${x.category || ""}`; };
-  const color = x => CAT_COLORS[x.category] || "#9aa5b1";
+  const color = x => tempColor(x.temp ?? x.temp_watch);
   const best = r.best?.id;
   const open = (e, els, chart) => { const raw = els.length && chart.data.datasets[els[0].datasetIndex].data[els[0].index]; if (raw?.run) openActivity(raw.run.id); };
   routesState.charts.push(new Chart(document.getElementById("route-pace"), {
@@ -4891,7 +5126,7 @@ function drawRouteCharts(r) {
       borderColor: runs.map(x => x.id === best ? "#d4a017" : "white"), borderWidth: runs.map(x => x.id === best ? 2 : 1) }] },
     options: { responsive: true, animation: false, onClick: open,
       plugins: { legend: { display: false }, tooltip: { displayColors: false, callbacks: { title: tip,
-        label: ctx => { const x = ctx.raw.run; return `${fmtRaceTime(x.duration_s)} · ${fmtPace(x.pace)}/km${x.avg_hr ? ` · ${Math.round(x.avg_hr)} bpm` : ""}`; } } } },
+        label: ctx => { const x = ctx.raw.run, tc = x.temp ?? x.temp_watch; return `${fmtRaceTime(x.duration_s)} · ${fmtPace(x.pace)}/km${x.avg_hr ? ` · ${Math.round(x.avg_hr)} bpm` : ""}${tc != null ? ` · ${Math.round(tc)}°C` : ""}`; } } } },
       scales: { x: xAxis, y: { reverse: true, ticks: { callback: v => fmtPace(v), maxTicksLimit: 5 } } } },
   }));
   const effRuns = r.list.filter(x => x.efficiency);
@@ -4903,7 +5138,7 @@ function drawRouteCharts(r) {
         backgroundColor: effRuns.map(x => hexToRgba(color(x), 0.8)), borderColor: "white", borderWidth: 1, order: 1 } ] },
     options: { responsive: true, animation: false, onClick: open, interaction: { mode: "nearest", intersect: true },
       plugins: { legend: { display: false }, tooltip: { displayColors: false, filter: i => i.datasetIndex === 1, callbacks: { title: tip,
-        label: ctx => { const x = ctx.raw.run; return `${x.efficiency.toFixed(2)} m/beat · ${fmtPace(x.pace)}/km at ${Math.round(x.avg_hr)} bpm`; } } } },
+        label: ctx => { const x = ctx.raw.run, tc = x.temp ?? x.temp_watch; return `${x.efficiency.toFixed(2)} m/beat · ${fmtPace(x.pace)}/km at ${Math.round(x.avg_hr)} bpm${tc != null ? ` · ${Math.round(tc)}°C` : ""}`; } } } },
       scales: { x: xAxis, y: { ticks: { maxTicksLimit: 5, callback: v => v.toFixed(2) } } } },
   }));
 }
@@ -5023,7 +5258,19 @@ async function saveShoe() {
                  surface: v("sh-surface"), use: v("sh-use"), is_default: document.getElementById("sh-default").checked,
                  since: v("sh-since") || null, max_km: +v("sh-max") || null };
   const id = shoesState.editing;
-  if (await sendShoe(id ? "PUT" : "POST", `${API}/shoes/${id || ""}`, body)) { shoesState.editing = null; renderShoes(); }
+  if (await sendShoe(id ? "PUT" : "POST", `${API}/shoes/${id || ""}`, body)) {
+    shoesState.editing = null;
+    const back = !id && shoesState.pendingFor;
+    shoesState.pendingFor = null;
+    if (back) {   // came from a run: put the new pair on it and go back there
+      const added = shoesState.list.find(s => !back.before.includes(s.id));
+      if (added) await fetch(`${API}/activities/${back.id}/shoe`, { method: "PUT", headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ shoe_id: added.id, part: back.part }) });
+      showDetail(back.id);
+      return;
+    }
+    renderShoes();
+  }
 }
 
 function editShoe(id) { shoesState.editing = id; renderShoeForm(); document.getElementById("sh-brand").focus(); }
@@ -5062,10 +5309,11 @@ async function renderShoeRow(a) {
   const select = (part, cur, use, label) => {
     const manualId = cur?.source === "manual" ? cur.shoe.id : null, def = defaultShoeFor(a, use);
     const choices = list.filter(s => !s.retired || s.id === manualId || (s.since || "") <= a.date && a.date <= s.retired);
-    return `${label ? `<span class="shoe-pair"><span class="shoe-part">${label}</span>` : ""}<select onchange="setActivityShoe(${a.id}, this.value, '${part}')">
+    return `${label ? `<span class="shoe-pair">` : ""}<select onchange="setActivityShoe(${a.id}, this.value, '${part}', '${surface}', '${use}')">
       <option value="" ${manualId ? "" : "selected"}>${def ? `Default · ${esc(shoeName(def))}` : `None (no default for ${surface} ${useLabel(use).toLowerCase()}s)`}</option>
       ${choices.map(s => `<option value="${s.id}" ${s.id === manualId ? "selected" : ""}>${esc(shoeName(s))} · ${s.surface} ${useLabel(s.use).toLowerCase()}</option>`).join("")}
-    </select>${label ? "</span>" : ""}`;
+      <option value="new">+ Add a new pair…</option>
+    </select>${label ? `<span class="shoe-part">${label}</span></span>` : ""}`;
   };
   const sh = a.shoe;
   if (sh?.easy !== undefined && sh.km) {
@@ -5075,11 +5323,47 @@ async function renderShoeRow(a) {
     return;
   }
   const manualId = sh?.source === "manual" ? sh.shoe.id : null, def = defaultShoeFor(a), use = shoeUse(a);
-  el.innerHTML = `<span class="rl-label">Shoes</span>${select("work", sh, use)}
-    <span class="muted-note" style="margin:0">${manualId ? "picked by you" : def ? `default for ${surface} ${useLabel(use).toLowerCase()}s` : `add one in Profile → Equipment`}</span>`;
+  // Shoes changed during the run (a race, a long run): the second pair from a km on.
+  const pairs = list.filter(s => !s.retired || (s.since || "") <= a.date && a.date <= s.retired || s.id === sh?.change?.shoe.id);
+  const opts = cur => pairs.map(s => `<option value="${s.id}" ${s.id === cur ? "selected" : ""}>${esc(shoeName(s))} · ${s.surface} ${useLabel(s.use).toLowerCase()}</option>`).join("");
+  const change = sh?.change
+    ? `<span class="shoe-pair"><span class="shoe-part">→ changed at</span><input type="number" class="shoe-km" id="shoe2-km" min="0.1" step="0.1" value="${sh.change.from_km}" onchange="saveShoeChange(${a.id})"><span class="shoe-part">km to</span>
+        <select id="shoe2-id" onchange="saveShoeChange(${a.id})">${opts(sh.change.shoe.id)}</select>
+        <button class="txt" title="No change of shoes" onclick="saveShoeChange(${a.id}, true)">×</button></span>
+       <span class="muted-note" style="margin:0">${sh.km.first.toFixed(1)} km + ${sh.km.second.toFixed(1)} km</span>`
+    : `<button class="pick" id="shoe2-add" onclick="this.style.display='none'; document.getElementById('shoe2-new').style.display=''">+ Changed shoes during the run</button>
+       <span class="shoe-pair" id="shoe2-new" style="display:none"><span class="shoe-part">at</span><input type="number" class="shoe-km" id="shoe2-km" min="0.1" step="0.1" placeholder="km">
+        <span class="shoe-part">km to</span><select id="shoe2-id">${opts(null)}</select><button class="btn" onclick="saveShoeChange(${a.id})">Save</button></span>`;
+  el.innerHTML = `<span class="rl-label">Shoes</span>${select("work", sh?.shoe ? sh : null, use)}
+    ${sh?.change ? "" : `<span class="muted-note" style="margin:0">${manualId ? "picked by you" : def ? `default for ${surface} ${useLabel(use).toLowerCase()}s` : `pick one, or + add a new pair`}</span>`}
+    ${change}<span class="muted-note" id="shoe2-msg" style="margin:0"></span>`;
 }
 
-async function setActivityShoe(id, value, part = "work") {
+async function saveShoeChange(id, remove = false) {
+  const km = +document.getElementById("shoe2-km")?.value, sid = +document.getElementById("shoe2-id")?.value;
+  const res = await fetch(`${API}/activities/${id}/shoe`, { method: "PUT", headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(remove ? { part: "second", shoe_id: null } : { part: "second", shoe_id: sid || null, from_km: km || null }) });
+  const d = await res.json().catch(() => ({}));
+  if (!res.ok) { document.getElementById("shoe2-msg").textContent = d.detail || "Could not save"; return; }
+  const a = detailState.activity;
+  a.shoe = d;
+  shoesState.list = null;   // km per pair changed
+  renderShoeRow(a);
+}
+
+async function setActivityShoe(id, value, part = "work", surface = "road", use = "easy") {
+  if (value === "new") {   // to Profile → Equipment, the form ready for this run's surface and use; back here once added
+    shoesState.pendingFor = { id, part, before: (shoesState.list || []).map(s => s.id) };
+    shoesState.editing = null;
+    switchTab("profile");
+    await loadShoes();
+    document.getElementById("sh-surface").value = surface;
+    document.getElementById("sh-use").value = use;
+    document.getElementById("sh-msg").textContent = "Added to the run you came from once saved.";
+    document.getElementById("shoe-form").scrollIntoView({ block: "center" });
+    document.getElementById("sh-brand").focus();
+    return;
+  }
   const res = await fetch(`${API}/activities/${id}/shoe`, { method: "PUT", headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ shoe_id: value ? +value : null, part }) });
   if (!res.ok) return;
@@ -5946,10 +6230,66 @@ async function renderMonthly() {
   });
 
   renderCompareSummary(years, cumulativeByYear, rowsByYear, metric);
+  drawYearKde(years);
 }
 
 // Table: each year's total at the same point in the year as the main year, and the gap to it.
 // If the main year is the current (partial) year, every year is cut at the current month.
+// Density (Gaussian kernel, Silverman's bandwidth) of the runs' average HR and pace, one curve per
+// year in the year's colour; dashed: each year's median.
+let kdeCharts = [];
+const kdeCache = {};
+function kde(values, xs) {
+  const n = values.length;
+  if (n < 3) return xs.map(() => null);
+  const m = values.reduce((a, b) => a + b, 0) / n, sd = Math.sqrt(values.reduce((a, b) => a + (b - m) ** 2, 0) / (n - 1));
+  const q = v => v.slice().sort((a, b) => a - b), sv = q(values), iqr = sv[Math.floor(n * 0.75)] - sv[Math.floor(n * 0.25)];
+  const h = 0.9 * Math.min(sd, iqr / 1.34 || sd) * n ** -0.2 || 1;
+  return xs.map(x => values.reduce((a, v) => a + Math.exp(-0.5 * ((x - v) / h) ** 2), 0) / (n * h * Math.sqrt(2 * Math.PI)));
+}
+async function drawYearKde(years) {
+  const need = years.filter(y => !kdeCache[y]);
+  if (need.length) {
+    try { Object.assign(kdeCache, await (await fetch(`${API}/reports/averages?years=${need.join(",")}`)).json()); } catch (e) { return; }
+  }
+  if (monthlyState.year !== years[0]) return;
+  kdeCharts.forEach(c => c.destroy()); kdeCharts = [];
+  const median = v => { const s = v.slice().sort((a, b) => a - b); return s.length ? s[Math.floor(s.length / 2)] : null; };
+  const one = (id, key, fmt, unit) => {
+    const all = years.flatMap(y => kdeCache[y]?.[key] || []);
+    if (!all.length) return;
+    const sorted = all.slice().sort((a, b) => a - b);
+    const lo = sorted[Math.floor(sorted.length * 0.01)], hi = sorted[Math.floor(sorted.length * 0.99)];
+    const pad = (hi - lo) * 0.15, x0 = lo - pad, x1 = hi + pad;
+    const xs = Array.from({ length: 120 }, (_, i) => x0 + (x1 - x0) * i / 119);
+    const datasets = [];
+    years.forEach(y => {
+      const v = kdeCache[y]?.[key] || [], c = y === years[0] && years.length === 1 ? THEME.moss : colorForYear(y);
+      const ys = kde(v, xs);
+      datasets.push({ label: String(y), data: xs.map((x, i) => ({ x, y: ys[i] })), borderColor: c, backgroundColor: hexToRgba(c, years.length > 1 ? 0.08 : 0.18),
+        fill: "origin", borderWidth: 2, pointRadius: 0, tension: 0.3, med: median(v), n: v.length });
+    });
+    const medians = { id: "kdeMed", afterDatasetsDraw(chart) {
+      const { ctx, chartArea: a, scales: { x } } = chart;
+      ctx.save(); ctx.setLineDash([4, 3]); ctx.lineWidth = 1.2;
+      chart.data.datasets.forEach(ds => { if (ds.med == null) return; const px = x.getPixelForValue(ds.med);
+        ctx.strokeStyle = ds.borderColor; ctx.beginPath(); ctx.moveTo(px, a.top); ctx.lineTo(px, a.bottom); ctx.stroke(); });
+      ctx.restore(); } };
+    kdeCharts.push(new Chart(document.getElementById(id), {
+      type: "line", data: { datasets }, plugins: [medians],
+      options: { responsive: true, animation: false, interaction: { mode: "nearest", axis: "x", intersect: false },
+        plugins: { legend: { display: years.length > 1, labels: { boxWidth: 12, font: { size: 11 } } },
+          tooltip: { displayColors: true, callbacks: { title: items => `${fmt(items[0].parsed.x)}${unit}`,
+            label: ctx => `${ctx.dataset.label}: median ${fmt(ctx.dataset.med)}${unit} · ${ctx.dataset.n} runs` } } },
+        scales: { x: { type: "linear", min: x0, max: x1, grid: { display: false }, ticks: { callback: v => fmt(v) },
+                       afterBuildTicks: axis => { axis.ticks = roundTicks(x0, x1, niceStep((x1 - x0) / 6)); } },
+                  y: { display: false, beginAtZero: true } } },
+    }));
+  };
+  one("kde-hr", "hr", v => Math.round(v), " bpm");
+  one("kde-pace", "pace", v => fmtPace(v), "/km");
+}
+
 function renderCompareSummary(years, cumulativeByYear, rowsByYear, metric) {
   const wrap = document.getElementById("compare-summary");
   const { year } = monthlyState;

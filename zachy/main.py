@@ -3,7 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from zachy.config import settings
 from zachy.database import Base, add_missing_columns, engine
 from zachy.models import Activity, Lap, Timeseries, BodyMetric, SyncRun
-from zachy.routers import activities, app_config, body, gap, records, reports, body_metrics, profile, planner, races_page, routes, shoes, sync, wellness, zones
+from zachy.routers import activities, app_config, body, gap, records, reports, body_metrics, profile, planner, races_page, routes, sessions, shoes, sync, wellness, zones
 
 Base.metadata.create_all(bind=engine)
 add_missing_columns()
@@ -31,6 +31,7 @@ app.include_router(profile.router, prefix="/profile", tags=["profile"])
 app.include_router(races_page.router, prefix="/races", tags=["races"])
 app.include_router(shoes.router, prefix="/shoes", tags=["shoes"])
 app.include_router(routes.router, prefix="/routes", tags=["routes"])
+app.include_router(sessions.router, prefix="/sessions", tags=["sessions"])
 app.include_router(planner.router, prefix="/planner", tags=["planner"])
 
 

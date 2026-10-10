@@ -53,3 +53,26 @@ def get_overview(db: Session = Depends(get_db)):
             "latest": df["date"].max().date().isoformat(),
         },
     }
+
+@router.get("/averages")
+def get_run_averages(years: str, db: Session = Depends(get_db)):
+    """Per year, each run's average heart rate and pace (min/km) — for their distributions.
+    Runs of 2 km+, at a running pace (2:30–10:00/km)."""
+    df = get_running_activities_df(db)
+    wanted = {int(y) for y in years.split(",") if y.strip().isdigit()}
+    out = {}
+    for y in sorted(wanted):
+        d = df[(df["date"].map(lambda x: x.year) == y) & (df["distance_km"] >= 2)]
+        pace = d["duration_s"] / 60 / d["distance_km"]
+        ok = pace.between(2.5, 10)
+        d, pace = d[ok], pace[ok]
+        out[y] = {"pace": [round(float(v), 3) for v in pace],
+                  "hr": [round(float(v), 1) for v in d["avg_hr"].dropna()], "runs": int(len(d))}
+    return out
+
+
+@router.get("/thresholds")
+def get_thresholds(db: Session = Depends(get_db)):
+    """Your aerobic and anaerobic thresholds (pace, heart rate) and vVO2max (analytics/thresholds.py)."""
+    from zachy.analytics.thresholds import thresholds
+    return thresholds(db)

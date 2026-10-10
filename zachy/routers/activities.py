@@ -172,8 +172,9 @@ def get_activity_detail(
 def _with_split(db: Session, activity: Activity, workout: dict | None) -> dict | None:
     """A workout with its warm-up / work / cool-down parts."""
     if workout:
+        from zachy.analytics.similar_workouts import similar_to
         from zachy.analytics.workouts import cached_split
-        return {**workout, "split": cached_split(db, activity, workout)}
+        return {**workout, "split": cached_split(db, activity, workout), "similar": similar_to(db, activity.id)}
     return workout
 
 
@@ -244,7 +245,8 @@ def set_workout_title(activity_id: int, body: WorkoutTitleIn, db: Session = Depe
 
 class ShoeIn(BaseModel):
     shoe_id: int | None   # the pair you ran in; null = the default pair again
-    part: str = "work"    # split workout: "work", or "easy" (warm-up and cool-down)
+    part: str = "work"    # split workout: "work", or "easy" (warm-up and cool-down); "second": shoes changed during the run
+    from_km: float | None = None   # part "second": from this km on (shoe_id null = no change)
 
 
 @router.put("/{activity_id}/shoe")
@@ -254,7 +256,11 @@ def set_shoe(activity_id: int, body: ShoeIn, db: Session = Depends(get_db)):
     if not activity:
         raise HTTPException(status_code=404, detail="Activity not found")
     override = db.get(ActivityOverride, activity_id) or ActivityOverride(activity_id=activity_id)
-    if body.part == "easy":
+    if body.part == "second":
+        if body.shoe_id and not (body.from_km and 0 < body.from_km < (activity.distance_km or 0)):
+            raise HTTPException(status_code=422, detail="The km where you changed shoes, within the run")
+        override.shoe2_id, override.shoe2_from_km = (body.shoe_id, body.from_km) if body.shoe_id else (None, None)
+    elif body.part == "easy":
         override.shoe_easy_id = body.shoe_id
     else:
         override.shoe_id = body.shoe_id
